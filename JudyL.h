@@ -1,54 +1,55 @@
 #ifndef _JUDYL_INCLUDED
 #define _JUDYL_INCLUDED
 
-// ****************************************************************************
-//          JUDYL -- SMALL/LARGE AND/OR CLUSTERED/SPARSE ARRAYS
-//
-//                                    -by-
-//
-//                             Douglas L. Baskins
-//                             doug@sourcejudy.com
-//
-// Judy arrays are designed to be used instead of arrays.  The performance
-// suggests the reason why Judy arrays are thought of as arrays, instead of
-// trees.  They are remarkably memory efficient at all populations.
-// Implemented as a hybrid digital tree (but really a state machine, see
-// below), Judy arrays feature fast insert/retrievals, fast near neighbor
-// searching, and contain a population tree for extremely fast ordinal related
-// retrievals.
-//
-// CONVENTIONS:
-//
-// - The comments here refer to 32-bit [64-bit] systems.
-//
-// - BranchL, LeafL refer to linear branches and leaves (small populations),
-//   except LeafL does not actually appear as such; rather, Leaf1..3 [Leaf1..7]
-//   is used to represent leaf Index sizes, and LeafW refers to a Leaf with
-//   full (Long) word Indexes, which is also a type of linear leaf.  Note that
-//   root-level LeafW (Leaf4 [Leaf8]) leaves are called LEAFW.
-//
-// - BranchB, LeafB1 refer to bitmap branches and leaves (intermediate
-//   populations).
-//
-// - BranchU refers to uncompressed branches.  An uncompressed branch has 256
-//   JPs, some of which could be null.  Note:  All leaves are compressed (and
-//   sorted), or else an expanse is full (FullPopu), so there is no LeafU
-//   equivalent to BranchU.
-//
-// - "Popu" is short for "Population".
-// - "Pop1" refers to actual population (base 1).
-// - "Pop0" refers to Pop1 - 1 (base 0), the way populations are stored in data
-//   structures.
-//
-// - Branches and Leaves are both named by the number of bytes in their Pop0
-//   field.  In the case of Leaves, the same number applies to the Index sizes.
-//
-// - The representation of many numbers as hex is a relatively safe and
-//   portable way to get desired bitpatterns as unsigned longs.
-//
-// - Some preprocessors cant handle single apostrophe characters within
-//   #ifndef code, so here, delete all instead.
-//
+/**          
+ * JUDYL -- SMALL/LARGE AND/OR CLUSTERED/SPARSE ARRAYS
+ *
+ *                                    -by-
+ *
+ *                             Douglas L. Baskins
+ *                             doug@sourcejudy.com
+ *
+ * Judy arrays are designed to be used instead of arrays.  The performance
+ * suggests the reason why Judy arrays are thought of as arrays, instead of
+ * trees.  They are remarkably memory efficient at all populations.
+ * Implemented as a hybrid digital tree (but really a state machine, see
+ * below), Judy arrays feature fast insert/retrievals, fast near neighbor
+ * searching, and contain a population tree for extremely fast ordinal related
+ * retrievals.
+ *
+ * CONVENTIONS:
+ *
+ * - The comments here refer to 32-bit [64-bit] systems.
+ *
+ * - BranchL, LeafL refer to linear branches and leaves (small populations),
+ *   except LeafL does not actually appear as such; rather, Leaf1..3 [Leaf1..7]
+ *   is used to represent leaf Index sizes, and LeafW refers to a Leaf with
+ *   full (Long) word Indexes, which is also a type of linear leaf.  Note that
+ *   root-level LeafW (Leaf4 [Leaf8]) leaves are called LEAFW.
+ *
+ * - BranchB, LeafB1 refer to bitmap branches and leaves (intermediate
+ *   populations).
+ *
+ * - BranchU refers to uncompressed branches.  An uncompressed branch has 256
+ *   JPs, some of which could be null.  Note:  All leaves are compressed (and
+ *   sorted), or else an expanse is full (FullPopu), so there is no LeafU
+ *   equivalent to BranchU.
+ *
+ * - "Popu" is short for "Population".
+ * - "Pop1" refers to actual population (base 1).
+ * - "Pop0" refers to Pop1 - 1 (base 0), the way populations are stored in data
+ *   structures.
+ *
+ * - Branches and Leaves are both named by the number of bytes in their Pop0
+ *   field.  In the case of Leaves, the same number applies to the Index sizes.
+ *
+ * - The representation of many numbers as hex is a relatively safe and
+ *   portable way to get desired bitpatterns as unsigned longs.
+ *
+ * - Some preprocessors cant handle single apostrophe characters within
+ *   #ifndef code, so here, delete all instead.
+ */
+
 #include "JudyPrivate.h"	// includes Judy.h in turn.
 #include "JudyPrivateBranch.h"	// support for branches.
 #include <assert.h>
@@ -135,12 +136,10 @@ typedef enum {			// uint8_t -- but C does not support this type of enum.
 #define cJL_LEAF1_MAXWORDS               (32)	// max Leaf1 size in words.
 // Note:  cJL_LEAF1_MAXPOP1 is chosen such that the index portion is less than
 // 32 bytes -- the number of bytes the index takes in a bitmap leaf.
-#define cJL_LEAF1_MAXPOP1 \
-   ((cJL_LEAF1_MAXWORDS * cJL_BYTESPERWORD)/(1 + cJL_BYTESPERWORD))
-#define cJL_LEAF2_MAXPOP1       (J_L_MAXB / (2 + cJL_BYTESPERWORD))
-#define cJL_LEAF3_MAXPOP1       (J_L_MAXB / (3 + cJL_BYTESPERWORD))
-#define cJL_LEAFW_MAXPOP1 \
-           ((J_L_MAXB - cJL_BYTESPERWORD) / (2 * cJL_BYTESPERWORD))
+#define cJL_LEAF1_MAXPOP1 ((cJL_LEAF1_MAXWORDS * cJL_BYTESPERWORD)/(1 + cJL_BYTESPERWORD))
+#define cJL_LEAF2_MAXPOP1 (J_L_MAXB / (2 + cJL_BYTESPERWORD))
+#define cJL_LEAF3_MAXPOP1 (J_L_MAXB / (3 + cJL_BYTESPERWORD))
+#define cJL_LEAFW_MAXPOP1 ((J_L_MAXB - cJL_BYTESPERWORD) / (2 * cJL_BYTESPERWORD))
 // MAXIMUM POPULATIONS OF IMMEDIATE JPs:
 // These specify the maximum Population of immediate JPs with various Index
 // Sizes (== sizes of remaining undecoded Index bits).  Since the JP Types enum
@@ -157,12 +156,12 @@ typedef enum {			// uint8_t -- but C does not support this type of enum.
 #define JL_JLB_BITMAP(Pjlb, Subexp)  ((Pjlb)->jLlb_jLlbs[Subexp].jLlbs_Bitmap)
 #define JL_JLB_PVALUE(Pjlb, Subexp)  ((Pjlb)->jLlb_jLlbs[Subexp].jLlbs_PValue)
 
-typedef struct J__UDYL_LEAF_BITMAP_SUBEXPANSE {
+typedef struct JUDYL_LEAF_BITMAP_SUBEXPANSE {
 	BITMAPL_t jLlbs_Bitmap;
 	Pjv_t jLlbs_PValue;
 } jLlbs_t;
 
-typedef struct J__UDYL_LEAF_BITMAP {
+typedef struct JUDYL_LEAF_BITMAP {
 	jLlbs_t jLlb_jLlbs[cJL_NUMSUBEXPL];
 } jlb_t, *Pjlb_t;
 
@@ -223,11 +222,11 @@ extern const uint8_t jL_LeafWOffset[cJL_LEAFW_MAXPOP1 + 1];
 #define JL_LEAF3VALUEAREA(Pjv,Pop1)  (((PWord_t)(Pjv)) + jL_Leaf3Offset[Pop1])
 #define JL_LEAFWVALUEAREA(Pjv,Pop1)  (((PWord_t)(Pjv)) + jL_LeafWOffset[Pop1])
 
-#define JL_LEAF1POPTOWORDS(Pop1)        (jL_Leaf1PopToWords[Pop1])
-#define JL_LEAF2POPTOWORDS(Pop1)        (jL_Leaf2PopToWords[Pop1])
-#define JL_LEAF3POPTOWORDS(Pop1)        (jL_Leaf3PopToWords[Pop1])
-#define JL_LEAFWPOPTOWORDS(Pop1)        (jL_LeafWPopToWords[Pop1])
-#define JL_LEAFVPOPTOWORDS(Pop1)        (jL_LeafVPopToWords[Pop1])
+#define JL_LEAF1POPTOWORDS(Pop1) (jL_Leaf1PopToWords[Pop1])
+#define JL_LEAF2POPTOWORDS(Pop1) (jL_Leaf2PopToWords[Pop1])
+#define JL_LEAF3POPTOWORDS(Pop1) (jL_Leaf3PopToWords[Pop1])
+#define JL_LEAFWPOPTOWORDS(Pop1) (jL_LeafWPopToWords[Pop1])
+#define JL_LEAFVPOPTOWORDS(Pop1) (jL_LeafVPopToWords[Pop1])
 
 Pjpm_t judyLAllocJLPM(void);	// constant size.
 Pjbl_t judyLAllocJBL(Pjpm_t);	// constant size.

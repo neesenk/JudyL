@@ -65,7 +65,7 @@ int JudyLInsArray(PPvoid_t PPArray, Word_t Count, const Word_t *const PIndex,
 	Pjlw_t Pjlwindex;	// first index in root-level leaf.
 	int offset;		// in PIndex.
 
-	if (!PPvoid_t || !PIndex || !PValue) {
+	if (!PPArray || !PIndex || !PValue) {
 		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPPARRAY);
 		return (JERRI);
 	}
