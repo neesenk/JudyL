@@ -46,9 +46,8 @@ int main(void)
 	int num = 0;
 	clock_t beg = 0;
 	double count = 0;
-	Pvoid_t root = NULL;
+	void *root = NULL;
 	int j = 0;
-	JError_t e;
 	printf("array size %d\n", arrlen);
 
 	srand(0);
@@ -62,7 +61,7 @@ int main(void)
 	num = 0;
 	start_counter();
 	for (i=0; i<arrlen; i++) {
-		PPvoid_t ret = JudyLIns(&root, buff[i], &e);
+		void **ret = JudyLIns(&root, buff[i]);
 		if (ret == (void **)-1) 
 			abort();
 		if (*ret == NULL)
@@ -79,10 +78,10 @@ int main(void)
 	beg = clock();
 	for (j = 0; j < 10000000; j += arrlen)
 	for (i=0; i<arrlen; i +=4) {
-		JudyLGet(root, buff[i], &e);
-		JudyLGet(root, buff[i + 1], &e);
-		JudyLGet(root, buff[i + 2], &e);
-		JudyLGet(root, buff[i + 3], &e);
+		JudyLGet(root, buff[i]);
+		JudyLGet(root, buff[i + 1]);
+		JudyLGet(root, buff[i + 2]);
+		JudyLGet(root, buff[i + 3]);
 	}
 	count += get_counter();
 	printf("clock %d\n", (int)(clock() - beg));
@@ -96,10 +95,10 @@ int main(void)
 	beg = clock();
 	for (j = 0; j < 10000000; j += arrlen)
 	for (i=0; i<arrlen; i +=4) {
-		JudyLGet(root, buff[idx], &e);
-		JudyLGet(root, buff[idx], &e);
-		JudyLGet(root, buff[idx], &e);
-		JudyLGet(root, buff[idx], &e);
+		JudyLGet(root, buff[idx]);
+		JudyLGet(root, buff[idx]);
+		JudyLGet(root, buff[idx]);
+		JudyLGet(root, buff[idx]);
 	}
 	count += get_counter();
 	printf("clock %d\n", (int)(clock() - beg));
@@ -109,7 +108,7 @@ int main(void)
 	count = 0;
 	start_counter();
 	for (i=0; i<arrlen; i++) {
-		JudyLDel(&root, buff[i], &e);
+		JudyLDel(&root, buff[i]);
 	}
 	count += get_counter();
 	printf("delete count %lf\n", count);

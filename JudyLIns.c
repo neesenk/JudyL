@@ -1,26 +1,24 @@
 #include "JudyL.h"
 
-extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t, Pvoid_t);
-extern int judyCreateBranchU(Pjp_t, Pvoid_t);
-extern int judyCascade1(Pjp_t, Pvoid_t);
-extern int judyCascade2(Pjp_t, Pvoid_t);
-extern int judyCascade3(Pjp_t, Pvoid_t);
-extern int judyCascadeL(Pjp_t, Pvoid_t);
+extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t , void *);
+extern int judyCreateBranchU(Pjp_t, void *);
+extern int judyCascade1(Pjp_t, void *);
+extern int judyCascade2(Pjp_t, void *);
+extern int judyCascade3(Pjp_t, void *);
+extern int judyCascadeL(Pjp_t, void *);
 extern int judyInsertBranch(Pjp_t Pjp, Word_t Index, Word_t Btype, Pjpm_t);
 
 #define JL_CHECK_IF_OUTLIER(Pjp, Index, cLevel, Pjpm)                   \
         if (JL_DCDNOTMATCHINDEX(Index, Pjp, cLevel))                    \
-            return(judyInsertBranch(Pjp, Index, cLevel, Pjpm))
+            return (judyInsertBranch(Pjp, Index, cLevel, Pjpm))
 
-#define JL_CHECK_IF_EXISTS(Offset,Pjv,Pjpm)             \
-        {                                               \
-            if ((Offset) >= 0)                          \
-            {                                           \
+#define JL_CHECK_IF_EXISTS(Offset,Pjv,Pjpm) do {        \
+        if ((Offset) >= 0) {				\
                 (Pjpm)->jpm_PValue = (Pjv) + (Offset);  \
-                return(0);                              \
-            }                                           \
-            (Offset) = ~(Offset);                       \
-        }
+                return 0;                              \
+        }						\
+        (Offset) = ~(Offset);				\
+} while (0)
 
 static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 {
@@ -37,7 +35,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		assert((Pjp->jp_Addr) == 0);
 		JL_JPSETADT(Pjp, 0, Index, JL_JPTYPE(Pjp) + cJL_JPIMMED_1_01 - cJL_JPNULL1);
 		Pjpm->jpm_PValue = (Pjv_t) (&(Pjp->jp_Addr));
-		return (1);
+		return 1;
 #define JL_BRANCH_OUTLIER(DIGIT,POP1,cLEVEL,PJP,INDEX,PJPM)  \
         JL_CHECK_IF_OUTLIER(PJP, INDEX, cLEVEL, PJPM);       \
         (DIGIT) = JL_DIGITATSTATE(INDEX, cLEVEL);            \
@@ -66,8 +64,8 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			goto ConvertBranchLtoU;
 		numJPs = Pjbl->jbl_NumJPs;
 		if ((numJPs == 0) || (numJPs > cJL_BRANCHLMAXJPS)) {
-			JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-			return (-1);
+			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+			return -1;
 		}
 		offset = judySearchLeaf1((Pjll_t) (Pjbl->jbl_Expanse), numJPs, digit);
 		if (offset >= 0) {
@@ -84,18 +82,18 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			++(Pjbl->jbl_NumJPs);
 			// value area is first word of new Immed 01 JP:
 			Pjpm->jpm_PValue = (Pjv_t) ((Pjbl->jbl_jp) + offset);
-			return (1);
+			return 1;
 		}
 
 		assert((numJPs) <= cJL_BRANCHLMAXJPS);
 		if (judyCreateBranchB(Pjp, Pjbl->jbl_jp, Pjbl->jbl_Expanse, numJPs, Pjpm) == -1)
-			return (-1);
+			return -1;
 		Pjp->jp_Type += cJL_JPBRANCH_B - cJL_JPBRANCH_L;
 		judyLFreeJBL(PjblRaw, Pjpm);	// free old BranchL.
 		goto ContinueInsWalk;
 	      ConvertBranchLtoU:
-		if ((PjbuRaw = judyLAllocJBU(Pjpm)) == (Pjbu_t) NULL)
-			return (-1);
+		if ((PjbuRaw = judyLAllocJBU(Pjpm)) == NULL)
+			return -1;
 		Pjbu = P_JBU(PjbuRaw);
 
 		JL_JPSETADT(&newJP, 0, 0, JL_JPTYPE(Pjp) - cJL_JPBRANCH_L2 + cJL_JPNULL1);
@@ -109,7 +107,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			Pjbu->jbu_jp[offset] = *Pjp1;
 		}
 		judyLFreeJBL(PjblRaw, Pjpm);
-		Pjp->jp_Addr = (Word_t) PjbuRaw;
+		Pjp->jp_Addr = (Word_t ) PjbuRaw;
 		Pjp->jp_Type += cJL_JPBRANCH_U - cJL_JPBRANCH_L;
 		Pjpm->jpm_LastUPop0 = Pjpm->jpm_Pop0;
 		goto ContinueInsWalk;
@@ -139,7 +137,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			if (Pjpm->jpm_Pop0 > JL_BRANCHB_MAX_POP) {
 				if (exppop1 > JL_BRANCHB_MIN_POP) {
 					if (judyCreateBranchU(Pjp, Pjpm) == -1)
-						return (-1);
+						return -1;
 					Pjpm->jpm_LastUPop0 = Pjpm->jpm_Pop0;
 					goto ContinueInsWalk;
 				}
@@ -160,7 +158,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		Pjp2 = P_JP(Pjp2Raw);
 
 		bitmask = JL_BITPOSMASKB(digit);
-		offset = judyCountBitsB(bitmap & (bitmask - 1));
+		offset = judyCountBits(bitmap & (bitmask - 1));
 		if (bitmap & bitmask) {
 			Pjp = Pjp2 + offset;
 			break;
@@ -169,7 +167,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		JL_JPSETADT(&newJP, 0, Index, JL_JPTYPE(Pjp) + cJL_JPIMMED_1_01 - cJL_JPBRANCH_B2);
 		Pjp2Raw = JL_JBB_PJP(Pjbb, subexp);
 		Pjp2 = P_JP(Pjp2Raw);
-		numJPs = judyCountBitsB(bitmap);
+		numJPs = judyCountBits(bitmap);
 
 		if (JL_BRANCHBJPGROWINPLACE(numJPs)) {
 			assert(numJPs > 0);
@@ -179,14 +177,14 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			Pjp_t PjpnewRaw;
 			Pjp_t Pjpnew;
 			if ((PjpnewRaw = judyLAllocJBBJP(numJPs + 1, Pjpm)) == 0)
-				return (-1);
+				return -1;
 			Pjpnew = P_JP(PjpnewRaw);
 			if (numJPs) {
 				JL_INSERTCOPY(Pjpnew, Pjp2, numJPs, offset, newJP);
 				judyLFreeJBBJP(Pjp2Raw, numJPs, Pjpm);
 				Pjpm->jpm_PValue = (Pjv_t) (Pjpnew + offset);
 			} else {
-				assert(JL_JBB_PJP(Pjbb, subexp) == (Pjp_t) NULL);
+				assert(JL_JBB_PJP(Pjbb, subexp) == NULL);
 				Pjp = Pjpnew;
 				*Pjp = newJP;
 				Pjpm->jpm_PValue = (Pjv_t) (&(Pjp->jp_Addr));
@@ -195,7 +193,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		}
 
 		JL_JBB_BITMAP(Pjbb, subexp) |= bitmask;
-		return (1);
+		return 1;
 	}
 #define JL_GETSUBEXP(PSubExp,Pjbu,Digit)	// null.
 #define JL_JBU_PJP_SUBEXP(Pjp,PSubExp,Index,Level)              \
@@ -249,30 +247,29 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
         offset = Search(Pleaf, exppop1, Index);                         \
         JL_CHECK_IF_EXISTS(offset, Pjv, Pjpm);                          \
                                                                         \
-        if (GrowInPlace(exppop1))       /* add to current leaf */       \
-        {                                                               \
+        if (GrowInPlace(exppop1)) {      /* add to current leaf */      \
             InsertInPlace(Pleaf, exppop1, offset, Index);               \
             JL_LEAFGROWVALUEADD(Pjv, exppop1, offset);                  \
-            return(1);                                                  \
+            return 1;                                                  \
         }                                                               \
                                                                         \
-        if (exppop1 < (MaxPop1))        /* grow to new leaf */          \
-        {                                                               \
+        if (exppop1 < (MaxPop1)) {        /* grow to new leaf */        \
             Pjll_t PjllnewRaw;                                          \
             Type   Pleafnew;                                            \
-            if ((PjllnewRaw = Alloc(exppop1 + 1, Pjpm)) == 0) return(-1); \
+            if ((PjllnewRaw = Alloc(exppop1 + 1, Pjpm)) == 0)		\
+		    return -1;						\
             Pleafnew = (Type) P_JLL(PjllnewRaw);                        \
             InsertCopy(Pleafnew, Pleaf, exppop1, offset, Index);        \
             JL_LEAFGROWVALUENEW(ValueArea, Pjv, exppop1, offset);       \
             Free(PjllRaw, exppop1, Pjpm);                               \
-            (Pjp->jp_Addr) = (Word_t) PjllnewRaw;                       \
-            return(1);                                                  \
+            (Pjp->jp_Addr) = (Word_t ) PjllnewRaw;                     \
+            return 1;                                                  \
         }                                                               \
         assert(exppop1 == (MaxPop1))
 
-#define JL_LEAFCASCADE(MaxPop1,Cascade,Free)            \
-        if (Cascade(Pjp, Pjpm) == -1) return(-1);       \
-        Free(PjllRaw, MaxPop1, Pjpm);                   \
+#define JL_LEAFCASCADE(MaxPop1,Cascade,Free)				\
+        if (Cascade(Pjp, Pjpm) == -1) return -1;			\
+        Free(PjllRaw, MaxPop1, Pjpm);					\
         goto ContinueInsWalk
 
 #define JL_LEAFSET(cIS,Type,MaxPop1,Search,GrowInPlace,InsertInPlace,   \
@@ -320,23 +317,23 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		PjvRaw = JL_JLB_PVALUE(Pjlb, subexp);	// corresponding values.
 		Pjv = P_JV(PjvRaw);	// corresponding values.
 		bitmask = JL_BITPOSMASKL(digit);	// mask for Index.
-		offset = judyCountBitsL(bitmap & (bitmask - 1));	// of Index.
+		offset = judyCountBits(bitmap & (bitmask - 1));	// of Index.
 		if (bitmap & bitmask) {
 			assert(Pjv);
 			Pjpm->jpm_PValue = Pjv + offset;	// existing value.
-			return (0);
+			return 0;
 		}
-		exppop1 = judyCountBitsL(bitmap);
+		exppop1 = judyCountBits(bitmap);
 
 		if (JL_LEAFVGROWINPLACE(exppop1)) {
 			JL_INSERTINPLACE(Pjv, exppop1, offset, 0);
 			JL_JLB_BITMAP(Pjlb, subexp) |= bitmask;	// set Indexs bit.
 			Pjpm->jpm_PValue = Pjv + offset;	// new value area.
-			return (1);
+			return 1;
 		}
 
-		if ((PjvnewRaw = judyLAllocJV(exppop1 + 1, Pjpm)) == (Pjv_t) NULL)
-			return (-1);
+		if ((PjvnewRaw = judyLAllocJV(exppop1 + 1, Pjpm)) == NULL)
+			return -1;
 		Pjvnew = P_JV(PjvnewRaw);
 
 		if (exppop1) {
@@ -351,7 +348,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 
 		JL_JLB_BITMAP(Pjlb, subexp) |= bitmask;
 		JL_JLB_PVALUE(Pjlb, subexp) = PjvnewRaw;
-		return (1);
+		return 1;
 	}
 // This is some of the most complex code in Judy considering Judy1 versus JudyL
 // and 32-bit versus 64-bit variations.  The following comments attempt to make
@@ -367,7 +364,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 // TBD:  This can be confusing because Doug didnt use data structures for it.
 // Instead he often directly accesses Pjp for the first word and jp_DcdPopO for
 // the second word.  It would be nice to use data structs, starting with
-// jp_1Index and jp_LIndex where possible.
+// jp_LIndex where possible.
 // Maximum Immed JP types for Judy1/JudyL, depending on Index Size (cIS):
 //          32-bit  64-bit
 //    bytes:  7/ 3   15/ 7   (Judy1/JudyL)
@@ -412,139 +409,124 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 // For JudyL, Pjv (start of value area) and oldValue are also in the context;
 // leave Pjv set to the value area for Index.
 #define JL_IMMSET_01_COPY_EVEN(cIS,CopyWord)    \
-        if (oldIndex < Index)                   \
-        {                                       \
+        if (oldIndex < Index) {                 \
             Pjll[0] = oldIndex;                 \
             Pjv [0] = oldValue;                 \
             Pjll[1] = Index;                    \
             ++Pjv;                              \
-        }                                       \
-        else                                    \
-        {                                       \
+        } else {                                \
             Pjll[0] = Index;                    \
             Pjll[1] = oldIndex;                 \
             Pjv [1] = oldValue;                 \
         }
 
 #define JL_IMMSET_01_COPY_ODD(cIS,CopyWord)     \
-        if (oldIndex < Index)                   \
-        {                                       \
+        if (oldIndex < Index) {                 \
             CopyWord(Pjll + 0,     oldIndex);   \
             CopyWord(Pjll + (cIS), Index);      \
             Pjv[0] = oldValue;                  \
             ++Pjv;                              \
-        }                                       \
-        else                                    \
-        {                                       \
+        } else {                                \
             CopyWord(Pjll + 0,    Index);       \
             CopyWord(Pjll + (cIS), oldIndex);   \
             Pjv[1] = oldValue;                  \
         }
 
-#define JL_IMMSET_01_COPY(cIS,LeafType,NewJPType,Copy,CopyWord) \
-        {                                                       \
-            LeafType Pjll;                                      \
-            Word_t   oldIndex = JL_JPDCDPOP0(Pjp);              \
-            Word_t   oldValue;                                  \
-            Pjv_t    PjvRaw;                                    \
-            Pjv_t    Pjv;                                       \
-                                                                \
-            Index = JL_TRIMTODCDSIZE(Index);                    \
-                                                                \
-            if (oldIndex == Index)                              \
-            {                                                   \
-                Pjpm->jpm_PValue = (Pjv_t) Pjp;                 \
-                return(0);                                      \
-            }                                                   \
-                                                                \
-            if ((PjvRaw = judyLAllocJV(2, Pjpm)) == (Pjv_t) NULL) \
-                return(-1);                                     \
-            Pjv = P_JV(PjvRaw);                                 \
-                                                                \
-            oldValue       = Pjp->jp_Addr;                      \
-            (Pjp->jp_Addr) = (Word_t) PjvRaw;                   \
-            Pjll           = (LeafType) (Pjp->jp_LIndex);       \
-                                                                \
-            Copy(cIS,CopyWord);                                 \
-                                                                \
-            Pjp->jp_Type   = (NewJPType);                       \
-            *Pjv             = 0;                               \
-            Pjpm->jpm_PValue = Pjv;                             \
-            return(1);                                          \
-        }
+#define JL_IMMSET_01_COPY(cIS,LeafType,NewJPType,Copy,CopyWord)	\
+{								\
+	LeafType Pjll;						\
+	Word_t oldIndex = JL_JPDCDPOP0(Pjp);		\
+	Word_t oldValue;					\
+	Pjv_t    PjvRaw;					\
+	Pjv_t    Pjv;						\
+								\
+	Index = JL_TRIMTODCDSIZE(Index);			\
+								\
+	if (oldIndex == Index) {				\
+		Pjpm->jpm_PValue = (Pjv_t) Pjp;                 \
+		return 0;                                      \
+	}							\
+								\
+	if ((PjvRaw = judyLAllocJV(2, Pjpm)) == NULL)	\
+		return -1;                                     \
+	Pjv = P_JV(PjvRaw);					\
+								\
+	oldValue       = Pjp->jp_Addr;				\
+	(Pjp->jp_Addr) = (Word_t ) PjvRaw;			\
+	Pjll           = (LeafType) (Pjp->jp_LIndex);		\
+								\
+	Copy(cIS,CopyWord);					\
+								\
+	Pjp->jp_Type   = (NewJPType);				\
+	*Pjv             = 0;					\
+	Pjpm->jpm_PValue = Pjv;					\
+	return 1;						\
+}
 
 #define JL_IMMSET_01_CASCADE(cIS,LeafType,NewJPType,ValueArea,  \
                              Copy,CopyWord,Alloc)               \
-        {                                                       \
-            Word_t   D_P0;                                      \
-            LeafType PjllRaw;                                   \
-            LeafType Pjll;                                      \
-            Word_t   oldIndex = JL_JPDCDPOP0(Pjp);              \
-            Word_t   oldValue;                                  \
-            Pjv_t    Pjv;                                       \
-                                                                \
-            Index = JL_TRIMTODCDSIZE(Index);                    \
-                                                                \
-            if (oldIndex == Index)                              \
-            {                                                   \
-                Pjpm->jpm_PValue = (Pjv_t) (&(Pjp->jp_Addr));   \
-                return(0);                                      \
-            }                                                   \
-                                                                \
-            if ((PjllRaw = (LeafType) Alloc(2, Pjpm)) == (LeafType) NULL) \
-                return(-1);                                     \
-            Pjll = (LeafType) P_JLL(PjllRaw);                   \
-            Pjv  = ValueArea(Pjll, 2);                          \
-                                                                \
-            oldValue = Pjp->jp_Addr;                            \
-                                                                \
-            Copy(cIS,CopyWord);                                 \
-                                                                \
-            *Pjv = 0;                                           \
-            Pjpm->jpm_PValue  = Pjv;                            \
-            D_P0 = Index & cJL_DCDMASK(cIS); /* pop0 = 0 */     \
-            JL_JPSETADT(Pjp, (Word_t)PjllRaw, D_P0, NewJPType); \
-                                                                \
-            return(1);                                          \
-        }
+{								\
+    Word_t D_P0;						\
+    LeafType PjllRaw;						\
+    LeafType Pjll;						\
+    Word_t oldIndex = JL_JPDCDPOP0(Pjp);			\
+    Word_t oldValue;					\
+    Pjv_t    Pjv;						\
+    Index = JL_TRIMTODCDSIZE(Index);				\
+    if (oldIndex == Index) {					\
+	Pjpm->jpm_PValue = (Pjv_t) (&(Pjp->jp_Addr));		\
+	return 0;						\
+    }								\
+								\
+    if ((PjllRaw = (LeafType) Alloc(2, Pjpm)) == NULL)		\
+	return -1;						\
+    Pjll = (LeafType) P_JLL(PjllRaw);				\
+    Pjv  = ValueArea(Pjll, 2);					\
+    oldValue = Pjp->jp_Addr;					\
+    Copy(cIS,CopyWord);						\
+    *Pjv = 0;							\
+    Pjpm->jpm_PValue  = Pjv;					\
+    D_P0 = Index & cJL_DCDMASK(cIS); /* pop0 = 0 */		\
+    JL_JPSETADT(Pjp, (Word_t )PjllRaw, D_P0, NewJPType);	\
+    return 1;							\
+}
 
 #define JL_IMMSETINPLACE(cIS,LeafType,BaseJPType_02,Search,InsertInPlace) \
-        {                                                                 \
-            LeafType Pleaf;                                               \
-            int      offset;                                              \
-            Pjv_t    PjvRaw;                                              \
-            Pjv_t    Pjv;                                                 \
-            Pjv_t    PjvnewRaw;                                           \
-            Pjv_t    Pjvnew;                                              \
-                                                                          \
-            exppop1 = JL_JPTYPE(Pjp) - (BaseJPType_02) + 2;               \
-            offset  = Search((Pjll_t) (Pjp->jp_LIndex), exppop1, Index);  \
-            PjvRaw  = (Pjv_t) (Pjp->jp_Addr);                             \
-            Pjv     = P_JV(PjvRaw);                                       \
-                                                                          \
-            JL_CHECK_IF_EXISTS(offset, Pjv, Pjpm);                        \
-                                                                          \
-            if ((PjvnewRaw = judyLAllocJV(exppop1 + 1, Pjpm))           \
-             == (Pjv_t) NULL) return(-1);                                 \
-            Pjvnew = P_JV(PjvnewRaw);                                     \
-                                                                          \
-            Pleaf = (LeafType) (Pjp->jp_LIndex);                          \
-                                                                          \
-            InsertInPlace(Pleaf, exppop1, offset, Index);                 \
-            /* see TBD above about this: */                               \
-            JL_INSERTCOPY(Pjvnew, Pjv, exppop1, offset, 0);               \
-            judyLFreeJV(PjvRaw, exppop1, Pjpm);                         \
-            Pjp->jp_Addr     = (Word_t) PjvnewRaw;                        \
-            Pjpm->jpm_PValue = Pjvnew + offset;                           \
-                                                                          \
-            ++(Pjp->jp_Type);                                             \
-            return(1);                                                    \
-        }
+{                                                                 \
+    LeafType Pleaf;                                               \
+    int      offset;                                              \
+    Pjv_t    PjvRaw;                                              \
+    Pjv_t    Pjv;                                                 \
+    Pjv_t    PjvnewRaw;                                           \
+    Pjv_t    Pjvnew;                                              \
+								  \
+    exppop1 = JL_JPTYPE(Pjp) - (BaseJPType_02) + 2;               \
+    offset  = Search((Pjll_t) (Pjp->jp_LIndex), exppop1, Index);  \
+    PjvRaw  = (Pjv_t) (Pjp->jp_Addr);                             \
+    Pjv     = P_JV(PjvRaw);                                       \
+								  \
+    JL_CHECK_IF_EXISTS(offset, Pjv, Pjpm);                        \
+								  \
+    if ((PjvnewRaw = judyLAllocJV(exppop1 + 1, Pjpm)) == NULL)    \
+	     return -1;					  \
+    Pjvnew = P_JV(PjvnewRaw);                                     \
+								  \
+    Pleaf = (LeafType) (Pjp->jp_LIndex);                          \
+								  \
+    InsertInPlace(Pleaf, exppop1, offset, Index);                 \
+    /* see TBD above about this: */                               \
+    JL_INSERTCOPY(Pjvnew, Pjv, exppop1, offset, 0);               \
+    judyLFreeJV(PjvRaw, exppop1, Pjpm);				  \
+    Pjp->jp_Addr     = (Word_t ) PjvnewRaw;                      \
+    Pjpm->jpm_PValue = Pjvnew + offset;                           \
+    ++(Pjp->jp_Type);                                             \
+    return 1;                                                    \
+}
 
 #define JL_IMMSETCASCADE(cIS,OldPop1,LeafType,NewJPType,                \
                          ValueArea,Search,InsertCopy,Alloc)             \
         {                                                               \
-            Word_t   D_P0;                                      \
+            Word_t D_P0;                                      \
             Pjll_t PjllRaw;                                             \
             Pjll_t Pjll;                                                \
             int    offset;                                              \
@@ -558,7 +540,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
             JL_CHECK_IF_EXISTS(offset, Pjv, Pjpm);                      \
                                                                         \
             if ((PjllRaw = Alloc((OldPop1) + 1, Pjpm)) == 0)            \
-                return(-1);                                             \
+                return -1;                                             \
             Pjll = P_JLL(PjllRaw);                                      \
             InsertCopy((LeafType) Pjll, (LeafType) (Pjp->jp_LIndex),    \
                        OldPop1, offset, Index);                         \
@@ -569,8 +551,8 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
             Pjpm->jpm_PValue = Pjvnew + offset;                         \
                                                                         \
             D_P0 = (Index & cJL_DCDMASK(cIS)) + (OldPop1) - 1;          \
-            JL_JPSETADT(Pjp, (Word_t)PjllRaw, D_P0, NewJPType);         \
-            return(1);                                                  \
+            JL_JPSETADT(Pjp, (Word_t )PjllRaw, D_P0, NewJPType);         \
+            return 1;                                                  \
         }
 #define JL_IMMSET_01(     cIS, LeafType, NewJPType) \
         JL_IMMSET_01_COPY(cIS, LeafType, NewJPType, JL_IMMSET_01_COPY_EVEN, \
@@ -608,8 +590,8 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 	// (3_01 => [ 3_02 => [ 3_03..05 => ]] LeafL)
 #undef OLDPOP1
 	default:
-		JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-		return (-1);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return -1;
 	}			// switch on JP type
 	retcode = judyInsWalk(Pjp, Index, Pjpm);
 
@@ -620,10 +602,10 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 		DcdP0 = JL_JPDCDPOP0(Pjp) + 1;
 		JL_JPSETADT(Pjp, JP.jp_Addr, DcdP0, JL_JPTYPE(&JP));
 	}
-	return (retcode);
+	return retcode;
 }
 
-PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
+void **JudyLIns(void **PPArray, uint32_t Index)
 {
 	Pjv_t Pjv;		// value area in old leaf.
 	Pjv_t Pjvnew;		// value area in new leaf.
@@ -631,13 +613,13 @@ PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
 	int offset;		// position in which to store new Index.
 	Pjlw_t Pjlw;
 
-	if (PPArray == (PPvoid_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPPARRAY);
-		return (PPJERR);
+	if (PPArray == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
+		return PPJERR;
 	}
-	Pjlw = P_JLW(*PPArray);
 
-	if (Pjlw == (Pjlw_t) NULL) {
+	Pjlw = P_JLW(*PPArray);
+	if (Pjlw == NULL) {
 		Pjlw_t Pjlwnew;
 
 		Pjlwnew = judyLAllocJLW(1);
@@ -646,9 +628,9 @@ PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
 		Pjlwnew[0] = 1 - 1;
 		Pjlwnew[1] = Index;
 
-		*PPArray = (Pvoid_t) Pjlwnew;
+		*PPArray = (void *) Pjlwnew;
 		Pjlwnew[2] = 0;	
-		return ((PPvoid_t) (Pjlwnew + 2));
+		return (void **)(Pjlwnew + 2);
 	}
 
 	if (JL_LEAFW_POP0(*PPArray) < cJL_LEAFW_MAXPOP1) {
@@ -662,7 +644,7 @@ PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
 		offset = judySearchLeafW(Pjlw + 1, pop1, Index);
 
 		if (offset >= 0)
-			return ((PPvoid_t) (Pjv + offset));
+			return (void **)(Pjv + offset);
 		offset = ~offset;
 
 		if (JL_LEAFWGROWINPLACE(pop1)) {
@@ -671,7 +653,7 @@ PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
 			JL_INSERTINPLACE(Pjlw + 1, pop1, offset, Index);
 			JL_INSERTINPLACE(Pjv, pop1, offset, 0);
 
-			return ((PPvoid_t) (Pjv + offset));
+			return (void **)(Pjv + offset);
 		}
 
 		if (pop1 < cJL_LEAFW_MAXPOP1) {
@@ -684,38 +666,35 @@ PPvoid_t JudyLIns(PPvoid_t PPArray, Word_t Index, PJError_t PJError)
 			Pjvnew = JL_LEAFWVALUEAREA(Pjlwnew, pop1 + 1);
 			JL_INSERTCOPY(Pjvnew, Pjv, pop1, offset, 0);
 			judyLFreeJLW(Pjlw, pop1, NULL);
-			*PPArray = (Pvoid_t) Pjlwnew;
-			return ((PPvoid_t) (Pjvnew + offset));
+			*PPArray = (void *) Pjlwnew;
+			return (void **)(Pjvnew + offset);
 		}
 		assert(pop1 == cJL_LEAFW_MAXPOP1);
 
 		Pjpm = judyLAllocJPM();
 		JL_CHECKALLOC(Pjpm_t, Pjpm, PPJERR);
 
-		(Pjpm->jpm_Pop0) = cJL_LEAFW_MAXPOP1 - 1;
-		(Pjpm->jpm_JP.jp_Addr) = (Word_t) Pjlw;
+		Pjpm->jpm_Pop0 = cJL_LEAFW_MAXPOP1 - 1;
+		Pjpm->jpm_JP.jp_Addr = (Word_t ) Pjlw;
 
-		if (judyCascadeL(&(Pjpm->jpm_JP), Pjpm) == -1) {
-			JL_COPY_ERRNO(PJError, Pjpm);
-			return (PPJERR);
-		}
+		if (judyCascadeL(&Pjpm->jpm_JP, Pjpm) == -1)
+			return PPJERR;
+
 		judyLFreeJLW(Pjlw, cJL_LEAFW_MAXPOP1, NULL);
-		*PPArray = (Pvoid_t) Pjpm;
+		*PPArray = (void *)Pjpm;
 	}
 	{
 		int retcode;
 		Pjpm = P_JPM(*PPArray);
-		retcode = judyInsWalk(&(Pjpm->jpm_JP), Index, Pjpm);
-		if (retcode == -1) {
-			JL_COPY_ERRNO(PJError, Pjpm);
-			return (PPJERR);
-		}
+		retcode = judyInsWalk(&Pjpm->jpm_JP, Index, Pjpm);
+		if (retcode == -1)
+			return PPJERR;
 		if (retcode == 1)
 			++(Pjpm->jpm_Pop0);	// incr total array popu.
 		assert(((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_L)
 		       || ((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_B)
 		       || ((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_U));
-		assert(Pjpm->jpm_PValue != (Pjv_t) NULL);
-		return ((PPvoid_t) Pjpm->jpm_PValue);
+		assert(Pjpm->jpm_PValue != NULL);
+		return ((void **) Pjpm->jpm_PValue);
 	}
 }

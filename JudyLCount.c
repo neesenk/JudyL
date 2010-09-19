@@ -1,45 +1,40 @@
 #include "JudyL.h"
 
 #define cJL_LEAFW       cJL_JPIMMED_CAP
-#define	C_JERR 0
-static Word_t judy1LCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjpm);
+static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjpm);
 static int judyCountLeafB1(const Pjll_t Pjll, const Word_t Pop1, const Word_t Index);
 Word_t judyLJPPop1(const Pjp_t Pjp);
 
-Word_t JudyLCount(Pcvoid_t PArray, Word_t Index1, Word_t Index2, PJError_t PJError)
+uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 {
 	jLpm_t fakejpm;		// local temporary for small arrays.
 	Pjpm_t Pjpm;		// top JPM or local temporary for error info.
-	jp_t fakejp;		// constructed for calling judy1LCountSM().
-	Pjp_t Pjp;		// JP to pass to judy1LCountSM().
+	jp_t fakejp;		// constructed for calling judyLCountSM().
+	Pjp_t Pjp;		// JP to pass to judyLCountSM().
 	Word_t pop1;		// total for the array.
 	Word_t pop1above1;	// indexes at or above Index1, inclusive.
 	Word_t pop1above2;	// indexes at or above Index2, exclusive.
 	int retcode;		// from Judy*First() calls.
-	PPvoid_t PPvalue;	// from JudyLFirst() calls.
+	void **PPvalue;	// from JudyLFirst() calls.
 
-	if ((PArray == (Pvoid_t) NULL) || (Index1 > Index2)) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NONE);
-		return (C_JERR);
-	}
+	if ((PArray == NULL) || (Index1 > Index2))
+		return 0;
 
 	if (Index1 == Index2) {
-		PPvalue = JudyLGet(PArray, Index1, PJError);
+		PPvalue = JudyLGet(PArray, Index1);
 		if (PPvalue == PPJERR)
-			return (C_JERR);	// pass through error.
+			return 0;	// pass through error.
 
-		if (PPvalue == (PPvoid_t) NULL) {	// Index is not set.
-			JL_SET_ERRNO(PJError, JL_ERRNO_NONE);
-			return (C_JERR);
-		}
-		return (1);
+		if (PPvalue == NULL) // Index is not set.
+			return 0;
+		return 1;
 	}
 
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
 		Pjlw_t Pjlw = P_JLW(PArray);
 		Pjpm = &fakejpm;
 		Pjp = &fakejp;
-		Pjp->jp_Addr = (Word_t) Pjlw;
+		Pjp->jp_Addr = (Word_t ) Pjlw;
 		Pjp->jp_Type = cJL_LEAFW;
 		Pjpm->jpm_Pop0 = Pjlw[0];
 		pop1 = Pjpm->jpm_Pop0 + 1;
@@ -54,44 +49,39 @@ Word_t JudyLCount(Pcvoid_t PArray, Word_t Index1, Word_t Index2, PJError_t PJErr
 	if (Index1 == 0) {	// shortcut, pop1above1 is entire population:
 		pop1above1 = pop1;
 	} else {		// find first valid Index above Index1, if any:
-		if ((PPvalue = JudyLFirst(PArray, &Index1, PJError)) == PPJERR)
-			return (C_JERR);	// pass through error.
+		if ((PPvalue = JudyLFirst(PArray, &Index1)) == PPJERR)
+			return 0;
 
-		retcode = (PPvalue != (PPvoid_t) NULL);	// found a next Index.
-		if (retcode == 0) {
-			JL_SET_ERRNO(PJError, JL_ERRNO_NONE);
-			return (C_JERR);
-		}
-		if ((pop1above1 = judy1LCountSM(Pjp, Index1, Pjpm)) == C_JERR) {
-			JL_COPY_ERRNO(PJError, Pjpm);	// pass through error.
-			return (C_JERR);
-		}
+		retcode = (PPvalue != NULL);	// found a next Index.
+		if (retcode == 0)
+			return 0;
+		if ((pop1above1 = judyLCountSM(Pjp, Index1, Pjpm)) == 0)
+			return 0;
 	}
 
 	assert(pop1above1);
 	if (Index2++ == cJL_ALLONES)
-		return (pop1above1);
-	if ((PPvalue = JudyLFirst(PArray, &Index2, PJError)) == PPJERR)
-		return (C_JERR);
-	retcode = (PPvalue != (PPvoid_t) NULL);	
+		return pop1above1;
+	if ((PPvalue = JudyLFirst(PArray, &Index2)) == PPJERR)
+		return 0;
+	retcode = (PPvalue != NULL);	
 	if (retcode == 0)
-		return (pop1above1);
-	if ((pop1above2 = judy1LCountSM(Pjp, Index2, Pjpm)) == C_JERR) {
-		JL_COPY_ERRNO(PJError, Pjpm);
-		return (C_JERR);
-	}
+		return pop1above1;
+	if ((pop1above2 = judyLCountSM(Pjp, Index2, Pjpm)) == 0)
+		return 0;
 
-	if (pop1above1 == pop1above2) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NONE);
-		return (C_JERR);
-	}
+	if (pop1above1 == pop1above2)
+		return 0;
 
-	return (pop1above1 - pop1above2);
+	return pop1above1 - pop1above2;
 }
 
-static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
-			    const Word_t Index,	// count at or above this Index.
-			    const Pjpm_t Pjpm)	// for returning error info.
+/**
+ * @Pjp		top of Judy (sub)SM.
+ * @Index	count at or above this Index.
+ * @Pjpm	for returning error info.
+ */
+static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjpm)
 {
 	Pjbl_t Pjbl;		// Pjp->jp_Addr masked and cast to types:
 	Pjbb_t Pjbb;
@@ -141,8 +131,8 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 
 		while (digit < (Pjbl->jbl_Expanse[--jpnum])) {	// still ABOVE digit.
 			if ((pop1 = judyLJPPop1((Pjbl->jbl_jp) + jpnum)) == cJL_ALLONES) {
-				JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-				return (C_JERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return 0;
 			}
 
 			pop1above += pop1;
@@ -150,12 +140,12 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 		}
 
 		assert(digit == (Pjbl->jbl_Expanse[jpnum]));	// should find digit.
-		pop1 = judy1LCountSM((Pjbl->jbl_jp) + jpnum, Index, Pjpm);
-		if (pop1 == C_JERR)
-			return (C_JERR);	// pass error up.
+		pop1 = judyLCountSM((Pjbl->jbl_jp) + jpnum, Index, Pjpm);
+		if (pop1 == 0)
+			return 0;	// pass error up.
 
 		assert(pop1above + pop1);
-		return (pop1above + pop1);
+		return pop1above + pop1;
 	case cJL_JPBRANCH_B2:
 		CHECKDCD(Pjp, 2);
 		PREPB(Pjp, 2, BranchB);
@@ -189,14 +179,14 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 ((((jpcount) * cJL_WORDSPERJP) + cJL_WORDSPERCL - 1) / cJL_WORDSPERCL)
 
 		for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
-			jpcount = judyCountBitsB(JL_JBB_BITMAP(Pjbb, subexp));
+			jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp));
 			if (subexp < findsub)
 				clbelow += CLPERJPS(jpcount);
 			else if (subexp > findsub)
 				clabove += CLPERJPS(jpcount);
 			else {
 				Word_t clfind;	// cache line containing Index (digit).
-				clfind = CLPERJPS(judyCountBitsB(JL_JBB_BITMAP(Pjbb, subexp) &
+				clfind = CLPERJPS(judyCountBits(JL_JBB_BITMAP(Pjbb, subexp) &
 					      lowermask));
 
 				assert(clfind > 0);	// digit itself should have 1 CL.
@@ -208,18 +198,18 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 		if (clbelow < clabove) {
 			pop1above = pop1;	// subtract JPs at/below Index.
 			for (subexp = 0; subexp <= findsub; ++subexp) {
-				jpcount = judyCountBitsB((subexp < findsub) ?
+				jpcount = judyCountBits((subexp < findsub) ?
 							 JL_JBB_BITMAP(Pjbb, subexp) :
 							 JL_JBB_BITMAP(Pjbb, subexp) &
 							 lowermask);
 				assert((subexp < findsub) || jpcount);
-				assert(jpcount || (BMPJP0(subexp) == (Pjp_t) NULL));
-				assert((!jpcount) || (BMPJP0(subexp) != (Pjp_t) NULL));
+				assert(jpcount || (BMPJP0(subexp) == NULL));
+				assert((!jpcount) || (BMPJP0(subexp) != NULL));
 
 				for (jpnum = 0; jpnum < jpcount; ++jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-						return (C_JERR);
+						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						return 0;
 					}
 					pop1above -= pop1;
 				}
@@ -230,31 +220,31 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 			pop1above = 0;	// add JPs above Index.
 			jpcountbf = 0;	// until subexp == findsub.
 			for (subexp = cJL_NUMSUBEXPB - 1; subexp >= findsub; --subexp) {
-				jpcount = judyCountBitsB(JL_JBB_BITMAP(Pjbb, subexp));
+				jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp));
 				// should always find findbit:
 				assert((subexp > findsub) || jpcount);
 				if (!jpcount)
 					continue;	// empty subexpanse, save time.
 				if (subexp == findsub)
-					jpcountbf = judyCountBitsB(JL_JBB_BITMAP (Pjbb, subexp) & lowermask);
+					jpcountbf = judyCountBits(JL_JBB_BITMAP (Pjbb, subexp) & lowermask);
 				assert((subexp > findsub) || jpcountbf);
 				assert(jpcount >= jpcountbf);	// proper relationship.
-				assert(BMPJP0(subexp) != (Pjp_t) NULL);
+				assert(BMPJP0(subexp) != NULL);
 				for (jpnum = jpcount - 1; jpnum >= jpcountbf; --jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-						return (C_JERR);
+						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						return 0;
 					}
 					pop1above += pop1;
 				}
 			}
 		}
 
-		pop1 = judy1LCountSM(BMPJP(findsub, jpnum), Index, Pjpm);
-		if (pop1 == C_JERR)
-			return (C_JERR);	// pass error up.
+		pop1 = judyLCountSM(BMPJP(findsub, jpnum), Index, Pjpm);
+		if (pop1 == 0)
+			return 0;	// pass error up.
 		assert(pop1above + pop1);
-		return (pop1above + pop1);
+		return pop1above + pop1;
 	}
 	case cJL_JPBRANCH_U2:
 		CHECKDCD(Pjp, 2);
@@ -273,8 +263,8 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 					continue;
 
 				if ((pop1 = judyLJPPop1(Pjbu->jbu_jp + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-					return (C_JERR);
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					return 0;
 				}
 				pop1above -= pop1;
 			}
@@ -287,19 +277,19 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 					continue;
 
 				if ((pop1 = judyLJPPop1(Pjbu->jbu_jp + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-					return (C_JERR);
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					return 0;
 				}
 
 				pop1above += pop1;
 			}
 		}
 
-		if ((pop1 = judy1LCountSM(Pjbu->jbu_jp + digit, Index, Pjpm)) == C_JERR)
-			return (C_JERR);
+		if ((pop1 = judyLCountSM(Pjbu->jbu_jp + digit, Index, Pjpm)) == 0)
+			return 0;
 
 		assert(pop1above + pop1);
-		return (pop1above + pop1);
+		return pop1above + pop1;
 
 #define	LEAFLABOVE(Func)				\
 	Pjll = P_JLL(Pjp->jp_Addr);			\
@@ -312,10 +302,10 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 	offset = Func(Pjll, Pop1, Index);	\
 	assert(offset >= 0);			\
 	assert(offset < (Pop1));		\
-	return((Pop1) - offset)
+	return ((Pop1) - offset)
 #define	IMMABOVE_01						\
 	assert((JL_JPDCDPOP0(Pjp)) == JL_TRIMTODCDSIZE(Index));	\
-	return(1)
+	return 1
 	case cJL_JPLEAF1: LEAFLABOVE(judySearchLeaf1);
 	case cJL_JPLEAF2: LEAFLABOVE(judySearchLeaf2);
 	case cJL_JPLEAF3: LEAFLABOVE(judySearchLeaf3);
@@ -326,14 +316,16 @@ static Word_t judy1LCountSM(const Pjp_t Pjp,	// top of Judy (sub)SM.
 	case cJL_JPIMMED_1_02: IMMABOVE(judySearchLeaf1, 2);
 	case cJL_JPIMMED_1_03: IMMABOVE(judySearchLeaf1, 3);
 	default:
-		JL_SET_ERRNO_NONNULL(Pjpm, JL_ERRNO_CORRUPT);
-		return (C_JERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return 0;
 	}
 }
 
-static int judyCountLeafB1(const Pjll_t Pjll,	// bitmap leaf, as Pjll_t for consistency.
-			   const Word_t Pop1,	// Population of whole leaf.
-			   const Word_t Index)	// to which to count.
+/**
+ * @Pjll	bitmap leaf, as Pjll_t for consistency.
+ * @Pop1	Population of whole leaf.
+ * @Index	to which to count. */
+static int judyCountLeafB1(const Pjll_t Pjll, const Word_t Pop1, const Word_t Index)
 {
 	Pjlb_t Pjlb = (Pjlb_t) Pjll;	// to proper type.
 	Word_t digit = Index & cJL_MASKATSTATE(1);
@@ -347,24 +339,24 @@ static int judyCountLeafB1(const Pjll_t Pjll,	// bitmap leaf, as Pjll_t for cons
 
 		for (subexp = 0; subexp < findsub; ++subexp) {
 			count += ((JL_JLB_BITMAP(Pjlb, subexp) == cJL_FULLBITMAPL) ?
-				  cJL_BITSPERSUBEXPL : judyCountBitsL(JL_JLB_BITMAP(Pjlb, subexp)));
+				  cJL_BITSPERSUBEXPL : judyCountBits(JL_JLB_BITMAP(Pjlb, subexp)));
 		}
 
-		count += judyCountBitsL(JL_JLB_BITMAP(Pjlb, findsub)
+		count += judyCountBits(JL_JLB_BITMAP(Pjlb, findsub)
 					& JL_MASKLOWERINC(JL_BITPOSMASKL(findbit)));
 		assert(count >= 1);
-		return (count - 1);	// convert to base-0 offset.
+		return count - 1;	// convert to base-0 offset.
 	}
 	count = Pop1;		// base-1 for now.
 	for (subexp = cJL_NUMSUBEXPL - 1; subexp > findsub; --subexp) {
 		count -= ((JL_JLB_BITMAP(Pjlb, subexp) == cJL_FULLBITMAPL) ?
-			  cJL_BITSPERSUBEXPL : judyCountBitsL(JL_JLB_BITMAP(Pjlb, subexp)));
+			  cJL_BITSPERSUBEXPL : judyCountBits(JL_JLB_BITMAP(Pjlb, subexp)));
 	}
 
-	count -= judyCountBitsL(JL_JLB_BITMAP(Pjlb, findsub)
+	count -= judyCountBits(JL_JLB_BITMAP(Pjlb, findsub)
 				&JL_MASKHIGHERINC(JL_BITPOSMASKL(findbit)));
 	assert(count >= 0);	// should find Index itself.
-	return (count);		// is already a base-0 offset.
+	return count;		// is already a base-0 offset.
 }
 
 Word_t judyLJPPop1(const Pjp_t Pjp)
@@ -386,12 +378,12 @@ Word_t judyLJPPop1(const Pjp_t Pjp)
 	case cJL_JPIMMED_1_01:
 	case cJL_JPIMMED_2_01:
 	case cJL_JPIMMED_3_01:
-		return (1);
+		return 1;
 	case cJL_JPIMMED_1_02:
-		return (2);
+		return 2;
 	case cJL_JPIMMED_1_03:
-		return (3);
+		return 3;
 	default:
-		return (cJL_ALLONES);
+		return cJL_ALLONES;
 	}
 }

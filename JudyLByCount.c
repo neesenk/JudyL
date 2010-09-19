@@ -2,7 +2,7 @@
 
 extern Word_t judyLJPPop1(const Pjp_t Pjp);
 
-PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t PJError)
+void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 {
 	Word_t Count0;		// Count, base-0, to match pop0.
 	Word_t state;		// current state in SM.
@@ -17,11 +17,11 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 	Pjp_t Pjp;		// current JP in branch.
 	Pjll_t Pjll;		// current Judy linear leaf.
 
-	if (PArray == (Pvoid_t) NULL)
-		JL_RET_NOTFOUND;
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);
-		return (PPJERR);
+	if (PArray == NULL)
+		return NULL;
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		return PPJERR;
 	}
 
 	Count0 = Count - 1;
@@ -31,13 +31,13 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
 		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
 		if (Count0 > Pjlw[0])
-			JL_RET_NOTFOUND;	// too high.
+			return NULL;
 		*PIndex = Pjlw[Count];	// Index, base 1.
-		JL_RET_FOUND_LEAFW(Pjlw, Pjlw[0] + 1, Count0);
+		return (void **)(JL_LEAFWVALUEAREA(Pjlw, Pjlw[0] + 1) + Count0);
 	} else {
 		Pjpm_t Pjpm = P_JPM(PArray);
 		if (Count0 > (Pjpm->jpm_Pop0))
-			JL_RET_NOTFOUND;	// too high.
+			return NULL;
 		Pjp = &(Pjpm->jpm_JP);
 		pop1 = (Pjpm->jpm_Pop0) + 1;
 	}
@@ -78,8 +78,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 		Pjbl = P_JBL(Pjp->jp_Addr);
 		for (jpnum = 0; jpnum < (Pjbl->jbl_NumJPs); ++jpnum) {
 			if ((pop1 = judyLJPPop1((Pjbl->jbl_jp) + jpnum)) == cJL_ALLONES) {
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 			assert(pop1 != 0);
 
@@ -92,8 +92,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 			pop1lower += pop1;	// add this JPs pop1.
 		}
 
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);	// should never get here.
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// should never get here.
+		return PPJERR;
 	}
 	case cJL_JPBRANCH_B2:
 		PREPB_DCD(Pjp, 2, BranchB);
@@ -116,15 +116,15 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 }
 		if (LOWERHALF(Count0, pop1lower, pop1)) {
 			for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
-				if ((jpcount = judyCountBitsB(JL_JBB_BITMAP(Pjbb, subexp)))
-				    && (BMPJP0(subexp) == (Pjp_t) NULL)) {
-					JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);	// null ptr.
-					return (PPJERR);
+				if ((jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp)))
+				    && (BMPJP0(subexp) == NULL)) {
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// null ptr.
+					return PPJERR;
 				}
 				for (jpnum = 0; jpnum < jpcount; ++jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-						return (PPJERR);
+						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						return PPJERR;
 					}
 					assert(pop1 != 0);
 
@@ -137,15 +137,15 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 		} else {
 			pop1lower += pop1;	// add whole branch to start.
 			for (subexp = cJL_NUMSUBEXPB - 1; subexp >= 0; --subexp) {
-				if ((jpcount = judyCountBitsB(JL_JBB_BITMAP(Pjbb, subexp)))
-				    && (BMPJP0(subexp) == (Pjp_t) NULL)) {
-					JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);	// null ptr.
-					return (PPJERR);
+				if ((jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp)))
+				    && (BMPJP0(subexp) == NULL)) {
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// null ptr.
+					return PPJERR;
 				}
 				for (jpnum = jpcount - 1; jpnum >= 0; --jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-						return (PPJERR);
+						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						return PPJERR;
 					}
 					assert(pop1 != 0);
 					pop1lower -= pop1;
@@ -154,8 +154,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 				}
 			}
 		}
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}
 	case cJL_JPBRANCH_U2:
 		PREPB_DCD(Pjp, 2, BranchU);
@@ -179,8 +179,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 					continue;
 
 				if ((pop1 = judyLJPPop1((Pjbu->jbu_jp) + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-					return (PPJERR);
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					return PPJERR;
 				}
 				assert(pop1 != 0);
 				if (pop1lower + pop1 > Count0)
@@ -194,8 +194,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 				if ((Pjbu->jbu_jp[jpnum].jp_Type) <= cJL_JPNULLMAX)
 					continue;
 				if ((pop1 = judyLJPPop1(Pjbu->jbu_jp + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-					return (PPJERR);
+					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					return PPJERR;
 				}
 				assert(pop1 != 0);
 				pop1lower -= pop1;
@@ -203,8 +203,8 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 					JBU_FOUNDEXPANSE;
 			}
 		}
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}
 #define	PREPL_DCD(cState)				\
 	JL_SETDCD(*PIndex, Pjp, cState);	        \
@@ -217,18 +217,19 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 	case cJL_JPLEAF1:
 		PREPL_DCD(1);
 		JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjll)[offset]);
-		JL_RET_FOUND_LEAF1(Pjll, pop1, offset);
+
+		return (void **)(JL_LEAF1VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF2:
 		PREPL_DCD(2);
 		*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(2)))
 		    | ((uint16_t *) Pjll)[offset];
-		JL_RET_FOUND_LEAF2(Pjll, pop1, offset);
+		return (void **)(JL_LEAF2VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF3: {
 		Word_t lsb;
 		PREPL;
 		JL_COPY3_PINDEX_TO_LONG(lsb, ((uint8_t *) Pjll) + (3 * offset));
 		*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(3))) | lsb;
-		JL_RET_FOUND_LEAF3(Pjll, pop1, offset);
+		return (void **)(JL_LEAF3VALUEAREA(Pjll, pop1) + offset);
 	}
 	case cJL_JPLEAF_B1:{
 		Pjlb_t Pjlb;
@@ -239,7 +240,7 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 
 		if (LOWERHALF(Count0, pop1lower, pop1)) {
 			for (subexp = 0; subexp < cJL_NUMSUBEXPL; ++subexp) {
-				pop1 = judyCountBitsL(JL_JLB_BITMAP(Pjlb, subexp));
+				pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, subexp));
 				if (pop1lower + pop1 > Count0)
 					goto LeafB1;	// Index is in this subexpanse.
 				pop1lower += pop1;	// add this subexpanses pop1.
@@ -247,19 +248,19 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 		} else {
 			pop1lower += pop1;
 			for (subexp = cJL_NUMSUBEXPL - 1; subexp >= 0; --subexp) {
-				pop1lower -= judyCountBitsL(JL_JLB_BITMAP(Pjlb, subexp));
+				pop1lower -= judyCountBits(JL_JLB_BITMAP(Pjlb, subexp));
 				if ((pop1lower == 0) || (pop1lower - 1 < Count0))
 					goto LeafB1;
 			}
 		}
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	LeafB1:
 		SETOFFSET(offset, Count0, pop1lower, Pjp);
 		JL_BITMAPDIGITL(digit, subexp, JL_JLB_BITMAP(Pjlb, subexp),
 				offset);
 		JL_SETDIGIT1(*PIndex, digit);
-		JL_RET_FOUND_LEAF_B1(Pjlb, subexp, offset);
+		return (void **)(P_JV(JL_JLB_PVALUE(Pjlb, subexp)) + offset);
 	}
 
 #define	SET_01(cState)  JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), cState)
@@ -273,15 +274,15 @@ PPvoid_t JudyLByCount(Pcvoid_t PArray, Word_t Count, Word_t * PIndex, PJError_t 
 		SET_01(3);
 		goto Imm_01;
 	Imm_01:
-		JL_RET_FOUND_IMM_01(Pjp);
+		return (void **)(&Pjp->jp_Addr);
 #define	PJI (Pjp->jp_LIndex)
 	case cJL_JPIMMED_1_02:
 	case cJL_JPIMMED_1_03:
 		SETOFFSET_IMM(offset, Count0, pop1lower);
 		JL_SETDIGIT1(*PIndex, ((uint8_t *) PJI)[offset]);
-		JL_RET_FOUND_IMM(Pjp, offset);
+		return (void **)(P_JV(Pjp->jp_Addr) + offset);
 	default:
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}
 }

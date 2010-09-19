@@ -1,66 +1,66 @@
 #include "JudyL.h"
 
-PPvoid_t JudyLFirst(Pcvoid_t PArray, Word_t *PIndex, PJError_t PJError) 
+void **JudyLFirst(const void *PArray, uint32_t *PIndex) 
 {
-	PPvoid_t PValue;
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);
-		return (PPJERR);
+	void **PValue;
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		return PPJERR;
 	}
 
-	if ((PValue = JudyLGet(PArray, *PIndex, PJError)) == PPJERR)
-		return (PPJERR);
-	if (PValue != (PPvoid_t) NULL)
-		return (PValue);	// found *PIndex.
-	return (JudyLNext(PArray, PIndex, PJError));
+	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
+		return PPJERR;
+	if (PValue != NULL)
+		return PValue;	// found *PIndex.
+	return JudyLNext(PArray, PIndex);
 }
 
-PPvoid_t JudyLLast(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError) 
+void **JudyLLast(const void *PArray, uint32_t *PIndex) 
 {
-	PPvoid_t PValue;
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);	// caller error.
-		return (PPJERR);
+	void **PValue;
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);	// caller error.
+		return PPJERR;
 	}
 
-	if ((PValue = JudyLGet(PArray, *PIndex, PJError)) == PPJERR)
-		return (PPJERR);
-	if (PValue != (PPvoid_t) NULL)
-		return (PValue);	// found *PIndex.
-	return (JudyLPrev(PArray, PIndex, PJError));
+	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
+		return PPJERR;
+	if (PValue != NULL)
+		return PValue;
+	return JudyLPrev(PArray, PIndex);
 }
 
-int JudyLFirstEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+int JudyLFirstEmpty(const void *PArray, uint32_t *PIndex)
 {
-	PPvoid_t PValue;
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);
-		return (JERRI);
+	void **PValue;
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		return JERR;
 	}
 
-	if ((PValue = JudyLGet(PArray, *PIndex, PJError)) == PPJERR)
-		return (JERRI);
-	if (PValue == (PPvoid_t) NULL)
-		return (1);	// found *PIndex.
-	return (JudyLNextEmpty(PArray, PIndex, PJError));
+	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
+		return JERR;
+	if (PValue == NULL)
+		return 1;
+	return JudyLNextEmpty(PArray, PIndex);
 }
 
-int JudyLLastEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+int JudyLLastEmpty(const void *PArray, uint32_t *PIndex)
 {
-	PPvoid_t PValue;
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);	// caller error.
-		return (JERRI);
+	void **PValue;
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);	// caller error.
+		return JERR;
 	}
 
-	if ((PValue = JudyLGet(PArray, *PIndex, PJError)) == PPJERR)
-		return (JERRI);
-	if (PValue == (PPvoid_t) NULL)
-		return (1);	// found *PIndex.
-	return (JudyLPrevEmpty(PArray, PIndex, PJError));
+	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
+		return JERR;
+	if (PValue == NULL)
+		return 1;	// found *PIndex.
+	return JudyLPrevEmpty(PArray, PIndex);
 }
 
-PPvoid_t JudyLGet(Pcvoid_t PArray, Word_t Index, PJError_t PJError)
+void **JudyLGet(const void *PArray, uint32_t Index)
 {
 	Pjp_t Pjp;		// current JP while walking the tree.
 	Pjpm_t Pjpm;		// for global accounting.
@@ -69,16 +69,16 @@ PPvoid_t JudyLGet(Pcvoid_t PArray, Word_t Index, PJError_t PJError)
 	Pjll_t Pjll;		// pointer to LeafL.
 	int posidx;		// signed offset in leaf.
 
-	if (PArray == (Pcvoid_t) NULL)
-		return ((PPvoid_t) NULL);
+	if (PArray == NULL)
+		return NULL;
 
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {	// must be a LEAFW
 		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
 		Pop1 = Pjlw[0] + 1;
 		posidx = judySearchLeafW(Pjlw + 1, Pop1, Index);
 		if (posidx >= 0)
-			return ((PPvoid_t) (JL_LEAFWVALUEAREA(Pjlw, Pop1) + posidx));
-		return ((PPvoid_t) NULL);
+			return (void **)(JL_LEAFWVALUEAREA(Pjlw, Pop1) + posidx);
+		return NULL;
 	}
 
 	Pjpm = P_JPM(PArray);
@@ -93,7 +93,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	case cJL_JPNULL1:
 	case cJL_JPNULL2:
 	case cJL_JPNULL3:
-		return ((PPvoid_t) NULL);
+		return NULL;
 	// Note:  The use of JL_DCDNOTMATCHINDEX() in branches is not strictly
 	// required,since this can be done at leaf level, but it costs nothing to do it
 	// sooner, and it aborts an unnecessary traversal sooner.
@@ -105,7 +105,6 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	case cJL_JPBRANCH_L3:
 		Digit = JL_DIGITATSTATE(Index, 3);
 		goto JudyBranchL;
-
 	case cJL_JPBRANCH_L:{
 		Pjbl_t Pjbl;
 		Digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
@@ -136,7 +135,6 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		BITMAPB_t BitMap;	// for one subexpanse.
 		BITMAPB_t BitMask;	// bit in BitMap for Indexs Digit.
 		Digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
-// Common code for all BranchBs; come here with Digit set:
       JudyBranchB:
 		Pjbb = P_JBB(Pjp->jp_Addr);
 		subexp = Digit / cJL_BITSPERSUBEXPB;
@@ -150,10 +148,9 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		if (!(BitMap & BitMask))
 			break;
 		// Count JPs in the subexpanse below the one for Index:
-		Pjp += judyCountBitsB(BitMap & (BitMask - 1));
-
+		Pjp += judyCountBits(BitMap & (BitMask - 1));
 		goto ContinueWalk;
-	}		// case cJL_JPBRANCH_B*
+	}
 		// Notice the reverse order of the cases, and falling through to the next case,
 		// for performance.
 	case cJL_JPBRANCH_U:
@@ -182,7 +179,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		Pop1 = JL_JPLEAF_POP0(Pjp) + 1;
 		Pjll = P_JLL(Pjp->jp_Addr);
 		if ((posidx = judySearchLeaf1(Pjll, Pop1, Index)) < 0) break;
-		return ((PPvoid_t) (JL_LEAF1VALUEAREA(Pjll, Pop1) + posidx));
+		return (void **)(JL_LEAF1VALUEAREA(Pjll, Pop1) + posidx);
 	case cJL_JPLEAF2:
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 2)) break;
 
@@ -190,13 +187,13 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		Pjll = P_JLL(Pjp->jp_Addr);
 
 		if ((posidx = judySearchLeaf2(Pjll, Pop1, Index)) < 0) break;
-		return ((PPvoid_t) (JL_LEAF2VALUEAREA(Pjll, Pop1) + posidx));
+		return ((void **)(JL_LEAF2VALUEAREA(Pjll, Pop1) + posidx));
 	case cJL_JPLEAF3:
 		Pop1 = JL_JPLEAF_POP0(Pjp) + 1;
 		Pjll = P_JLL(Pjp->jp_Addr);
 
 		if ((posidx = judySearchLeaf3(Pjll, Pop1, Index)) < 0) break;
-		return ((PPvoid_t) (JL_LEAF3VALUEAREA(Pjll, Pop1) + posidx));
+		return ((void **)(JL_LEAF3VALUEAREA(Pjll, Pop1) + posidx));
 	case cJL_JPLEAF_B1:{
 		Pjlb_t Pjlb;
 		Word_t subexp;	// in bitmap, 0..7.
@@ -217,29 +214,29 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 
 		// Count value areas in the subexpanse below the one for Index:
 		Pjv = P_JV(JL_JLB_PVALUE(Pjlb, subexp));
-		assert(Pjv != (Pjv_t) NULL);
-		posidx = judyCountBitsL(BitMap & (BitMask - 1));
+		assert(Pjv != NULL);
+		posidx = judyCountBits(BitMap & (BitMask - 1));
 
-		return ((PPvoid_t) (Pjv + posidx));
-	}		// case cJL_JPLEAF_B1
+		return (void **)(Pjv + posidx);
+	}
 	// Note that the contents of jp_DcdPopO are different for cJL_JPIMMED_*_01:
 	case cJL_JPIMMED_1_01:
 	case cJL_JPIMMED_2_01:
 	case cJL_JPIMMED_3_01:
 		if (JL_JPDCDPOP0(Pjp) != JL_TRIMTODCDSIZE(Index)) break;
-		return ((PPvoid_t) & (Pjp->jp_Addr));	// immediate value area.
+		return (void **)(&Pjp->jp_Addr);	// immediate value area.
 
 #define CHECKINDEXNATIVE(LEAF_T, PJP, IDX, INDEX)                       \
 if (((LEAF_T *)((PJP)->jp_LIndex))[(IDX) - 1] == (LEAF_T)(INDEX))       \
-        return((PPvoid_t)(P_JV((PJP)->jp_Addr) + (IDX) - 1))
+        return ((void **)(P_JV((PJP)->jp_Addr) + (IDX) - 1))
 
 #define CHECKLEAFNONNAT(LFBTS, PJP, INDEX, IDX, COPY) {                 \
-    Word_t   i_ndex;                                                    \
+    Word_t i_ndex;                                                    \
     uint8_t *a_ddr;                                                     \
     a_ddr  = (PJP)->jp_LIndex + (((IDX) - 1) * (LFBTS));                \
     COPY(i_ndex, a_ddr);                                                \
     if (i_ndex == JL_LEASTBYTES((INDEX), (LFBTS)))                      \
-        return((PPvoid_t)(P_JV((PJP)->jp_Addr) + (IDX) - 1));           \
+        return ((void **)(P_JV((PJP)->jp_Addr) + (IDX) - 1));           \
 }
 	case cJL_JPIMMED_1_03:
 		CHECKINDEXNATIVE(uint8_t, Pjp, 3, Index);
@@ -249,9 +246,9 @@ if (((LEAF_T *)((PJP)->jp_LIndex))[(IDX) - 1] == (LEAF_T)(INDEX))       \
 		break;
 	default:
 	      ReturnCorrupt:
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}			// switch on JP type
 
-	return ((PPvoid_t) NULL);
+	return NULL;
 }

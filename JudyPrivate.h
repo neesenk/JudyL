@@ -1,90 +1,86 @@
 #ifndef _JUDYPRIVATE_INCLUDED
 #define _JUDYPRIVATE_INCLUDED
-
 #include "Judy.h"
-// A VERY BRIEF EXPLANATION OF A JUDY ARRAY
-//
-// A Judy array is, effectively, a digital tree (or Trie) with 256 element
-// branches (nodes), and with "compression tricks" applied to low-population
-// branches or leaves to save a lot of memory at the cost of relatively little
-// CPU time or cache fills.
-//
-// In the actual implementation, a Judy array is level-less, and traversing the
-// "tree" actually means following the states in a state machine (SM) as
-// directed by the Index.  A Judy array is referred to here as an "SM", rather
-// than as a "tree"; having "states", rather than "levels".
-//
-// Each branch or leaf in the SM decodes a portion ("digit") of the original
-// Index; with 256-way branches there are 8 bits per digit.  There are 3 kinds
-// of branches, called:  Linear, Bitmap and Uncompressed, of which the first 2
-// are compressed to contain no NULL entries.
-//
-// An Uncompressed branch has a 1.0 cache line fill cost to decode 8 bits of
-// (digit, part of an Index), but it might contain many NULL entries, and is
-// therefore inefficient with memory if lightly populated.
-//
-// A Linear branch has a ~1.75 cache line fill cost when at maximum population.
-// A Bitmap branch has ~2.0 cache line fills.  Linear and Bitmap branches are
-// converted to Uncompressed branches when the additional memory can be
-// amortized with larger populations.  Higher-state branches have higher
-// priority to be converted.
-//
-// Linear branches can hold 28 elements (based on detailed analysis) -- thus 28
-// expanses.  A Linear branch is converted to a Bitmap branch when the 29th
-// expanse is required.
-//
-// A Bitmap branch could hold 256 expanses, but is forced to convert to an
-// Uncompressed branch when 185 expanses are required.  Hopefully, it is
-// converted before that because of population growth (again, based on detailed
-// analysis and heuristics in the code).
-//
-// A path through the SM terminates to a leaf when the Index (or key)
-// population in the expanse below a pointer will fit into 1 or 2 cache lines
-// (~31..255 Indexes).  A maximum-population Leaf has ~1.5 cache line fill
-// cost.
-//
-// Leaves are sorted arrays of Indexes, where the Index Sizes (IS) are:  0, 1,
-// 8, 16, 24, 32, [40, 48, 56, 64] bits.  The IS depends on the "density"
-// (population/expanse) of the values in the Leaf.  Zero bits are possible if
-// population == expanse in the SM (that is, a full small expanse).
-//
-// Elements of a branches are called Judy Pointers (JPs).  Each JP object
-// points to the next object in the SM, plus, a JP can decode an additional
-// 2[6] bytes of an Index, but at the cost of "narrowing" the expanse
-// represented by the next object in the SM.  A "narrow" JP (one which has
-// decode bytes/digits) is a way of skipping states in the SM.
-//
-// Although counterintuitive, we think a Judy SM is optimal when the Leaves are
-// stored at MINIMUM compression (narrowing, or use of Decode bytes).  If more
-// aggressive compression was used, decompression of a leaf be required to
-// insert an index.  Additional compression would save a little memory but not
-// help performance significantly.
 
-#ifdef A_PICTURE_IS_WORTH_1000_WORDS
-*******************************************************************************
-    JUDY 32 - BIT STATE MACHINE(SM) EXAMPLE, FOR INDEX = 0x02040103
-    The Index used in this example is purposely chosen to allow small, simple
-    examples below;
-each 1 - byte "digit" from the Index has a small numeric value that fits in one column.In the drawing below:
-
-JRP ==
-    Judy Root Pointer;
-
-C == 1 byte of a 1. .3 byte Population(count of Indexes)
-below this
-    pointer.Since this is shared with the Decode field, the combined
-    sizes must be 3[7], that is,
-    1 word less 1 byte for the JP Type.The 1 -
-    byte field jp_Type is represented as:1. .3 == Number
-      of bytes in the population(Pop0) word of the Branch or Leaf below the pointer(note:1. .7 on 64 - bit);
-indicates:
--number of bytes in Decode field == 3 - this number;
--number of bytes remaining to decode.Note:The maximum is 3, not 4, because the 1 st byte of the Index is
-    always decoded digitally in the top branch.
-    - B - == JP points to a Branch(there are many kinds of Branches).
-    - L - == JP points to a Leaf(there are many kinds of Leaves).
-    (2) == Digit of Index decoded by position offset in branch(really
-							       0. .0 xff).4 * ==
+/** 
+ * A VERY BRIEF EXPLANATION OF A JUDY ARRAY
+ *
+ * A Judy array is, effectively, a digital tree (or Trie) with 256 element
+ * branches (nodes), and with "compression tricks" applied to low-population
+ * branches or leaves to save a lot of memory at the cost of relatively little
+ * CPU time or cache fills.
+ *
+ * In the actual implementation, a Judy array is level-less, and traversing the
+ * "tree" actually means following the states in a state machine (SM) as
+ * directed by the Index.  A Judy array is referred to here as an "SM", rather
+ * than as a "tree"; having "states", rather than "levels".
+ *
+ * Each branch or leaf in the SM decodes a portion ("digit") of the original
+ * Index; with 256-way branches there are 8 bits per digit.  There are 3 kinds
+ * of branches, called:  Linear, Bitmap and Uncompressed, of which the first 2
+ * are compressed to contain no NULL entries.
+ *
+ * An Uncompressed branch has a 1.0 cache line fill cost to decode 8 bits of
+ * (digit, part of an Index), but it might contain many NULL entries, and is
+ * therefore inefficient with memory if lightly populated.
+ *
+ * A Linear branch has a ~1.75 cache line fill cost when at maximum population.
+ * A Bitmap branch has ~2.0 cache line fills.  Linear and Bitmap branches are
+ * converted to Uncompressed branches when the additional memory can be
+ * amortized with larger populations.  Higher-state branches have higher
+ * priority to be converted.
+ *
+ * Linear branches can hold 28 elements (based on detailed analysis) -- thus 28
+ * expanses.  A Linear branch is converted to a Bitmap branch when the 29th
+ * expanse is required.
+ *
+ * A Bitmap branch could hold 256 expanses, but is forced to convert to an
+ * Uncompressed branch when 185 expanses are required.  Hopefully, it is
+ * converted before that because of population growth (again, based on detailed
+ * analysis and heuristics in the code).
+ *
+ * A path through the SM terminates to a leaf when the Index (or key)
+ * population in the expanse below a pointer will fit into 1 or 2 cache lines
+ * (~31..255 Indexes).  A maximum-population Leaf has ~1.5 cache line fill
+ * cost.
+ *
+ * Leaves are sorted arrays of Indexes, where the Index Sizes (IS) are:  0, 1,
+ * 8, 16, 24, 32, [40, 48, 56, 64] bits.  The IS depends on the "density"
+ * (population/expanse) of the values in the Leaf.  Zero bits are possible if
+ * population == expanse in the SM (that is, a full small expanse).
+ *
+ * Elements of a branches are called Judy Pointers (JPs).  Each JP object
+ * points to the next object in the SM, plus, a JP can decode an additional
+ * 2[6] bytes of an Index, but at the cost of "narrowing" the expanse
+ * represented by the next object in the SM.  A "narrow" JP (one which has
+ * decode bytes/digits) is a way of skipping states in the SM.
+ *
+ * Although counterintuitive, we think a Judy SM is optimal when the Leaves are
+ * stored at MINIMUM compression (narrowing, or use of Decode bytes).  If more
+ * aggressive compression was used, decompression of a leaf be required to
+ * insert an index.  Additional compression would save a little memory but not
+ * help performance significantly.
+ *
+ * JUDY 32 - BIT STATE MACHINE(SM) EXAMPLE, FOR INDEX = 0x02040103
+ * The Index used in this example is purposely chosen to allow small, simple examples 
+ * below; each 1 - byte "digit" from the Index has a small numeric value that fits in 
+ * one column.In the drawing below:
+ *
+ * JRP ==
+ * Judy Root Pointer;
+ * C == 1 byte of a 1. .3 byte Population(count of Indexes)
+ * below this pointer.Since this is shared with the Decode field, the combined sizes 
+ * must be 3[7], that is, 1 word less 1 byte for the JP Type.The 1 - byte field jp_Type 
+ * is represented as:1. .3 == Number of bytes in the population(Pop0) word of the Branch 
+ * or Leaf below the pointer(note:1. .7 on 64 - bit);
+ *
+ * indicates:
+ * -number of bytes in Decode field == 3 - this number;
+ * -number of bytes remaining to decode.Note:The maximum is 3, not 4, because the 1 st 
+ * byte of the Index is always decoded digitally in the top branch.
+ * - B - == JP points to a Branch(there are many kinds of Branches).
+ * - L - == JP points to a Leaf(there are many kinds of Leaves).
+ * (2) == Digit of Index decoded by position offset in branch(really 0. .0 xff).4 * ==
     Digit of Index necessary for decoding
 	a "narrow" pointer, in a Decode field;
 replaces 1 missing branch(really 0. .0 xff).4 + ==
@@ -121,25 +117,9 @@ Note that this example shows every possibly topology to reach a leaf in a
     O | 1 + O | 1 + 2 + ------+------/|C | |C / |1 | |1 | +-L-- -- |+-L-- --
     |||||/|/||||V V V V + ------+------+------+------One byte Index Leaf | <3 > |<3 >
     |<3 > |<3 > 1 + ------+------+------+------
-#endif				// A_PICTURE_IS_WORTH_1000_WORDS
-#ifndef _BOOL_T
-#define _BOOL_T
-typedef int bool_t;
-#endif
+*/
 
-#ifndef TRUE
-#define TRUE 1
-#endif
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-// #ifndef DEBUG
-// #define NDEBUG 1		// must be 1 for "#if".
-// #endif
-
-#include <assert.h>
 // Machine (CPU) cache line size:
 // NOTE:  A leaf size of 2 cache lines maximum is the target (optimal) for
 // Judy.  Its hard to obtain a machines cache line size at compile time, but
@@ -156,8 +136,8 @@ typedef int bool_t;
 // Bytes Per Word and Bits Per Word, latter assuming sizeof(byte) is 8 bits:
 // Expect 32 [64] bits per word.
 
-#define cJL_BYTESPERWORD (sizeof(Word_t))
-#define cJL_BITSPERWORD  (sizeof(Word_t) * cJL_BITSPERBYTE)
+#define cJL_BYTESPERWORD (sizeof(Word_t ))
+#define cJL_BITSPERWORD  (sizeof(Word_t ) * cJL_BITSPERBYTE)
 #define JL_BYTESTOWORDS(BYTES) \
         (((BYTES) + cJL_BYTESPERWORD - 1) / cJL_BYTESPERWORD)
 
@@ -171,7 +151,7 @@ typedef int bool_t;
 // ROOT STATE:
 // State at the start of the Judy SM, based on 1 byte decoded per state; equal
 // to the number of bytes per Index to decode.
-#define cJL_ROOTSTATE (sizeof(Word_t))
+#define cJL_ROOTSTATE (sizeof(Word_t ))
 
 // SUBEXPANSES PER STATE:
 // Number of subexpanses per state traversed, which is the number of JPs in a
@@ -184,14 +164,14 @@ typedef int bool_t;
 // few remaining types are declared below.
 // Note:  Leaf pointers are cast to different-sized objects depending on the
 // leafs level, but are at least addresses (not just numbers), so use void *
-// (Pvoid_t), not PWord_t or Word_t for them, except use Pjlw_t for whole-word
+// (void *), not PWord_t or Word_t for them, except use Pjlw_t for whole-word
 // (top-level, root-level) leaves.  Value areas, however, are always whole
 // words.
 // Furthermore, use Pjll_t only for generic leaf pointers (for various size
 // LeafLs).  Use Pjlw_t for LeafWs.  Use Pleaf (with type uint8_t *, uint16_t
 // *, etc) when the leaf index size is known.
+typedef void * Pjll_t;		// pointer to lower-level linear leaf.
 typedef PWord_t Pjlw_t;		// pointer to root-level leaf (whole-word indexes).
-typedef Pvoid_t Pjll_t;		// pointer to lower-level linear leaf.
 typedef PWord_t Pjv_t;		// pointer to JudyL value area.
 
 // POINTER PREPARATION MACROS:
@@ -243,18 +223,16 @@ typedef PWord_t Pjv_t;		// pointer to JudyL value area.
 // A default aspect ratio is hardwired here if not overridden at compile time,
 // such as by "EXTCCOPTS=-DBITMAP_BRANCH16x16 make".
 #define BITMAPB_t uint32_t
-
 // Note:  For bitmap leaves
 #define BITMAPL_t uint32_t
 
-// EXPORTED DATA AND FUNCTIONS:
 extern const uint8_t jL_BranchBJPPopToWords[];
 #define SEARCHLEAFNATIVE(LEAFTYPE,ADDR,POP1,INDEX)              \
     LEAFTYPE *P_leaf = (LEAFTYPE *)(ADDR);                      \
     LEAFTYPE I_ndex = (LEAFTYPE)INDEX; /* truncate hi bits */   \
-    Word_t   l_ow   = cJL_ALLONES;                              \
-    Word_t   m_id;                                              \
-    Word_t   h_igh  = POP1;                                     \
+    Word_t l_ow   = cJL_ALLONES;                              \
+    Word_t m_id;                                              \
+    Word_t h_igh  = POP1;                                     \
                                                                 \
     while ((h_igh - l_ow) > 1UL) {                              \
         m_id = (h_igh + l_ow) / 2;                              \
@@ -269,11 +247,11 @@ extern const uint8_t jL_BranchBJPPopToWords[];
 
 #define SEARCHLEAFNONNAT(ADDR,POP1,INDEX,LFBTS,COPYINDEX)       \
     uint8_t *P_leaf = (uint8_t *)(ADDR);                        \
-    Word_t   l_ow   = cJL_ALLONES;                              \
-    Word_t   m_id;                                              \
-    Word_t   h_igh  = POP1;                                     \
-    Word_t   I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));          \
-    Word_t   i_ndex;                                            \
+    Word_t l_ow   = cJL_ALLONES;                              \
+    Word_t m_id;                                              \
+    Word_t h_igh  = POP1;                                     \
+    Word_t I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));          \
+    Word_t i_ndex;                                            \
                                                                 \
     I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));                   \
     while ((h_igh - l_ow) > 1UL) {                              \
@@ -290,8 +268,7 @@ extern const uint8_t jL_BranchBJPPopToWords[];
     if (i_ndex != I_ndex) return(~h_igh);                       \
     return(l_ow)
 
-#define judyCountBitsB judyCountBitsL
-static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
+static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 {
 	word = (word & 0x55555555) + ((word & 0xAAAAAAAA) >> 1);
 	word = (word & 0x33333333) + ((word & 0xCCCCCCCC) >> 2);
@@ -299,7 +276,7 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 	word = (word & 0x00FF00FF) + ((word & 0xFF00FF00) >> 8);	// >= 16 bits.
 	word = (word & 0x0000FFFF) + ((word & 0xFFFF0000) >> 16);	// >= 32 bits.
 	return (word);
-}				// judyCountBitsL()
+}
 
 // Get from jp_DcdPopO the Pop0 for various JP Types.
 // Notes:
@@ -316,28 +293,27 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 //   Unfortunately theres no way to trigger an assertion here if the JP type
 //   is incorrect for the macro, because these are merely expressions, not
 //   statements.
-#define  JL_LEAFW_POP0(JRP)                  (*P_JLW(JRP))
-#define cJL_JPFULLPOPU1_POP0                 (cJL_SUBEXPPERSTATE - 1)
+#define JL_LEAFW_POP0(JRP)	(*P_JLW(JRP))
+#define cJL_JPFULLPOPU1_POP0	(cJL_SUBEXPPERSTATE - 1)
 
 // GET JP Type:
 // Since bit fields greater than 32 bits are not supported in some compilers
 // the jp_DcdPopO field is expanded to include the jp_Type in the high 8 bits
-// of the Word_t.
+// of the Word_t .
 // First the read macro:
-#define JL_JPTYPE(PJP)          ((PJP)->jp_Type)
-#define JL_JPLEAF_POP0(PJP)     ((PJP)->jp_DcdP0[sizeof(Word_t) - 2])
-#define JL_JPDCDPOP0(PJP)               \
-    ((Word_t)(PJP)->jp_DcdP0[0] << 16 | \
-     (Word_t)(PJP)->jp_DcdP0[1] <<  8 | \
-     (Word_t)(PJP)->jp_DcdP0[2])
+#define JL_JPTYPE(PJP) ((PJP)->jp_Type)
+#define JL_JPLEAF_POP0(PJP) ((PJP)->jp_DcdP0[sizeof(Word_t ) - 2])
+#define JL_JPDCDPOP0(PJP) ((Word_t )(PJP)->jp_DcdP0[0] << 16 | \
+			   (Word_t )(PJP)->jp_DcdP0[1] <<  8 | \
+			   (Word_t )(PJP)->jp_DcdP0[2])
 
-#define JL_JPSETADT(PJP,ADDR,DCDPOP0,TYPE) {                    \
+#define JL_JPSETADT(PJP,ADDR,DCDPOP0,TYPE) do {                 \
     (PJP)->jp_Addr     = (ADDR);                                \
-    (PJP)->jp_DcdP0[0] = (uint8_t)((Word_t)(DCDPOP0) >> 16);    \
-    (PJP)->jp_DcdP0[1] = (uint8_t)((Word_t)(DCDPOP0) >>  8);    \
-    (PJP)->jp_DcdP0[2] = (uint8_t)((Word_t)(DCDPOP0));          \
+    (PJP)->jp_DcdP0[0] = (uint8_t)((Word_t )(DCDPOP0) >> 16);    \
+    (PJP)->jp_DcdP0[1] = (uint8_t)((Word_t )(DCDPOP0) >>  8);    \
+    (PJP)->jp_DcdP0[2] = (uint8_t)((Word_t )(DCDPOP0));          \
     (PJP)->jp_Type     = (TYPE);                                \
-}
+} while (0)
 
 // NUMBER OF BITS IN A BRANCH OR LEAF BITMAP AND SUBEXPANSE:
 // Note:  cJL_BITSPERBITMAP must be the same as the number of JPs in a branch.
@@ -381,23 +357,23 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 // bits are seen.  Avoid expensive variable shifts.  Offset should be less than
 // the number of set bits in the bitmap; assert this.
 // If theres a better way to do this, I dont know what it is.
-#define JL_BITMAPDIGITB(DIGIT,SUBEXP,BITMAP,OFFSET) {           \
-            BITMAPB_t bitmap = (BITMAP); int remain = (OFFSET); \
-            (DIGIT) = (SUBEXP) * cJL_BITSPERSUBEXPB;            \
-            while ((remain -= (bitmap & 1)) >= 0) {             \
-                bitmap >>= 1; ++(DIGIT);                        \
-                assert((DIGIT) < ((SUBEXP) + 1) * cJL_BITSPERSUBEXPB); \
-            }                                                   \
-        }
+#define JL_BITMAPDIGITB(DIGIT,SUBEXP,BITMAP,OFFSET) do {		\
+        BITMAPB_t bitmap = (BITMAP); int remain = (OFFSET);		\
+        (DIGIT) = (SUBEXP) * cJL_BITSPERSUBEXPB;			\
+        while ((remain -= (bitmap & 1)) >= 0) {				\
+                bitmap >>= 1; ++(DIGIT);				\
+                assert((DIGIT) < ((SUBEXP) + 1) * cJL_BITSPERSUBEXPB);	\
+        }								\
+} while (0)
 
-#define JL_BITMAPDIGITL(DIGIT,SUBEXP,BITMAP,OFFSET) {           \
-            BITMAPL_t bitmap = (BITMAP); int remain = (OFFSET); \
-            (DIGIT) = (SUBEXP) * cJL_BITSPERSUBEXPL;            \
-            while ((remain -= (bitmap & 1)) >= 0) {             \
-                bitmap >>= 1; ++(DIGIT);                        \
-                assert((DIGIT) < ((SUBEXP) + 1) * cJL_BITSPERSUBEXPL); \
-            }                                                   \
-        }
+#define JL_BITMAPDIGITL(DIGIT,SUBEXP,BITMAP,OFFSET) do {		\
+        BITMAPL_t bitmap = (BITMAP); int remain = (OFFSET);		\
+        (DIGIT) = (SUBEXP) * cJL_BITSPERSUBEXPL;			\
+        while ((remain -= (bitmap & 1)) >= 0) {				\
+		bitmap >>= 1; ++(DIGIT);				\
+                assert((DIGIT) < ((SUBEXP) + 1) * cJL_BITSPERSUBEXPL);	\
+	}								\
+} while (0)
 
 // MASKS FOR PORTIONS OF 32-BIT WORDS:
 // These are useful for bitmap subexpanses.
@@ -417,19 +393,18 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 
 // Copy a series of generic objects (uint8_t, uint16_t, uint32_t, Word_t) from
 // one place to another.
-#define JL_COPYMEM(PDST,PSRC,POP1)                      \
-    {                                                   \
+#define JL_COPYMEM(PDST,PSRC,POP1) do {                 \
         Word_t i_ndex = 0;                              \
         assert((POP1) > 0);                             \
-        do { (PDST)[i_ndex] = (PSRC)[i_ndex]; } \
+        do { (PDST)[i_ndex] = (PSRC)[i_ndex]; }		\
         while (++i_ndex < (POP1));                      \
-    }
+} while (0)
 
-// Copy a 3-byte Index pointed by a uint8_t * to a Word_t:
+// Copy a 3-byte Index pointed by a uint8_t * to a Word_t :
 #define JL_COPY3_PINDEX_TO_LONG(DESTLONG,PINDEX)        \
-    DESTLONG  = (Word_t)(PINDEX)[0] << 16;              \
-    DESTLONG += (Word_t)(PINDEX)[1] <<  8;              \
-    DESTLONG += (Word_t)(PINDEX)[2]
+    DESTLONG  = (Word_t )(PINDEX)[0] << 16;              \
+    DESTLONG += (Word_t )(PINDEX)[1] <<  8;              \
+    DESTLONG += (Word_t )(PINDEX)[2]
 
 // Copy a Word_t to a 3-byte Index pointed at by a uint8_t *:
 #define JL_COPY3_LONG_TO_PINDEX(PINDEX,SOURCELONG)      \
@@ -444,7 +419,8 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 // though that would be simpler, but would operate in endian-specific memory.
 #define JL_SETDIGIT(INDEX,DIGIT,STATE)                  \
         (INDEX) = ((INDEX) & (~cJL_MASKATSTATE(STATE))) \
-                | (((Word_t) (DIGIT)) << (((STATE) - 1) * cJL_BITSPERBYTE))
+                | (((Word_t ) (DIGIT)) << (((STATE) - 1) * cJL_BITSPERBYTE))
+
 // Fast version for single LSB:
 #define JL_SETDIGIT1(INDEX,DIGIT) (INDEX) = ((INDEX) & ~0xff) | (DIGIT)
 
@@ -482,7 +458,7 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 // for them appended to this file.
 #define JL_INSERTINPLACE(PARRAY,POP1,OFFSET,INDEX)              \
         assert((long) (POP1) > 0);                              \
-        assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
+        assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
         {                                                       \
             Word_t i_offset = (POP1);                           \
             while (i_offset-- > (OFFSET))                       \
@@ -492,160 +468,114 @@ static inline BITMAPL_t judyCountBitsL(BITMAPL_t word)
 
 // Variation for non-native Indexes, where cIS = Index Size
 // and PByte must point to a uint8_t (byte); shift byte-by-byte:
-#define JL_INSERTINPLACE3(PBYTE,POP1,OFFSET,INDEX)              \
-{                                                               \
-    Word_t i_off = POP1;                                        \
-    while (i_off-- > (OFFSET)) {                                \
-        Word_t  i_dx = i_off * 3;                               \
-        (PBYTE)[i_dx + 0 + 3] = (PBYTE)[i_dx + 0];              \
-        (PBYTE)[i_dx + 1 + 3] = (PBYTE)[i_dx + 1];              \
-        (PBYTE)[i_dx + 2 + 3] = (PBYTE)[i_dx + 2];              \
-    }                                                           \
-    JL_COPY3_LONG_TO_PINDEX(&((PBYTE)[(OFFSET) * 3]), INDEX);   \
-}
+#define JL_INSERTINPLACE3(PBYTE,POP1,OFFSET,INDEX) do {		\
+	Word_t i_off = POP1;                                    \
+	while (i_off-- > (OFFSET)) {                            \
+		Word_t i_dx = i_off * 3;                       \
+		(PBYTE)[i_dx + 0 + 3] = (PBYTE)[i_dx + 0];      \
+		(PBYTE)[i_dx + 1 + 3] = (PBYTE)[i_dx + 1];      \
+		(PBYTE)[i_dx + 2 + 3] = (PBYTE)[i_dx + 2];      \
+	}                                                       \
+	JL_COPY3_LONG_TO_PINDEX(&(PBYTE)[(OFFSET) * 3], INDEX);	\
+} while (0)
 
 // Counterparts to the above for deleting an Index:
 // "Shift down" the array elements starting at the Index to be deleted.
-#define JL_DELETEINPLACE(PARRAY,POP1,OFFSET,IGNORE)             \
-        assert((long) (POP1) > 0);                              \
-        assert((Word_t) (OFFSET) < (Word_t) (POP1));            \
-        {                                                       \
-            Word_t i_offset = (OFFSET);                         \
-            while (++i_offset < (POP1))                         \
+#define JL_DELETEINPLACE(PARRAY,POP1,OFFSET,IGNORE) do {        \
+        Word_t i_offset = (OFFSET);				\
+	Word_t i_pop1 = (POP1);					\
+        assert((long)i_pop1 > 0);				\
+        assert(i_offset < i_pop1);				\
+        while (++i_offset < i_pop1)				\
                 (PARRAY)[i_offset - 1] = (PARRAY)[i_offset];    \
-        }
+} while (0)
 
 // Variation for odd-byte-sized (non-native) Indexes, where cIS = Index Size
 // and PByte must point to a uint8_t (byte); copy byte-by-byte:
 // Note:  If cIS == 1, JL_DELETEINPLACE_ODD == JL_DELETEINPLACE.
 // Note:  There are no endian issues here because bytes are just shifted as-is,
 // not converted to/from an Index.
-#define JL_DELETEINPLACE_ODD(PBYTE,POP1,OFFSET,cIS)             \
+#define JL_DELETEINPLACE_ODD(PBYTE,POP1,OFFSET,cIS) do {        \
+        Word_t b_off = (((OFFSET) + 1) * (cIS)) - 1;		\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t) (OFFSET) < (Word_t) (POP1));            \
-        {                                                       \
-            Word_t b_off = (((OFFSET) + 1) * (cIS)) - 1;        \
-            while (++b_off < ((POP1) * (cIS)))                  \
+        assert((Word_t ) (OFFSET) < (Word_t ) (POP1));            \
+        while (++b_off < ((POP1) * (cIS)))			\
                 (PBYTE)[b_off - (cIS)] = (PBYTE)[b_off];        \
-        }
+} while (0)
 
 // INSERT/DELETE AN INDEX WHILE COPYING OTHERS:
 // Copy PSource[] to PDest[], where PSource[] has Pop1 elements (Indexes),
 // inserting Index at PDest[Offset].  Unlike JL_*INPLACE*() above, these macros
 // are used when moving Indexes from one memory object to another.
-#define JL_INSERTCOPY(PDEST,PSOURCE,POP1,OFFSET,INDEX)          \
+#define JL_INSERTCOPY(PDEST,PSOURCE,POP1,OFFSET,INDEX) do {     \
+        Word_t i_offset;					\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
-        {                                                       \
-            Word_t i_offset;                                    \
-            for (i_offset = 0; i_offset < (OFFSET); ++i_offset) \
+        assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
+        for (i_offset = 0; i_offset < (OFFSET); ++i_offset)	\
                 (PDEST)[i_offset] = (PSOURCE)[i_offset];        \
-            (PDEST)[i_offset] = (INDEX);                        \
-            for (/* null */; i_offset < (POP1); ++i_offset)     \
+        (PDEST)[i_offset] = (INDEX);				\
+        for (/* null */; i_offset < (POP1); ++i_offset)		\
                 (PDEST)[i_offset + 1] = (PSOURCE)[i_offset];    \
-        }
+} while (0)
 
-#define JL_INSERTCOPY3(PDEST,PSOURCE,POP1,OFFSET,INDEX)         \
-assert((long) (POP1) > 0);                                      \
-assert((Word_t) (OFFSET) <= (Word_t) (POP1));                   \
-{                                                               \
-    Word_t o_ff;                                                \
-    for (o_ff = 0; o_ff < (OFFSET); o_ff++) {                   \
-        Word_t  i_dx = o_ff * 3;                                \
-        (PDEST)[i_dx + 0] = (PSOURCE)[i_dx + 0];                \
-        (PDEST)[i_dx + 1] = (PSOURCE)[i_dx + 1];                \
-        (PDEST)[i_dx + 2] = (PSOURCE)[i_dx + 2];                \
-    }                                                           \
-    JL_COPY3_LONG_TO_PINDEX(&((PDEST)[(OFFSET) * 3]), INDEX);   \
-    for (; o_ff < (POP1); o_ff++) {		                \
-        Word_t  i_dx = o_ff * 3;                                \
-        (PDEST)[i_dx + 0 + 3] = (PSOURCE)[i_dx + 0];            \
-        (PDEST)[i_dx + 1 + 3] = (PSOURCE)[i_dx + 1];            \
-        (PDEST)[i_dx + 2 + 3] = (PSOURCE)[i_dx + 2];            \
-    }                                                           \
-}
+#define JL_INSERTCOPY3(PDEST,PSOURCE,POP1,OFFSET,INDEX)  do {   \
+	Word_t o_ff;                                            \
+	assert((long) (POP1) > 0);                              \
+	assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
+	for (o_ff = 0; o_ff < (OFFSET); o_ff++) {               \
+		Word_t i_dx = o_ff * 3;                        \
+		(PDEST)[i_dx + 0] = (PSOURCE)[i_dx + 0];        \
+		(PDEST)[i_dx + 1] = (PSOURCE)[i_dx + 1];        \
+		(PDEST)[i_dx + 2] = (PSOURCE)[i_dx + 2];        \
+	}                                                       \
+	JL_COPY3_LONG_TO_PINDEX(&(PDEST)[(OFFSET) * 3], INDEX); \
+	for (; o_ff < (POP1); o_ff++) {		                \
+		Word_t i_dx = o_ff * 3;                        \
+		(PDEST)[i_dx + 0 + 3] = (PSOURCE)[i_dx + 0];    \
+		(PDEST)[i_dx + 1 + 3] = (PSOURCE)[i_dx + 1];    \
+		(PDEST)[i_dx + 2 + 3] = (PSOURCE)[i_dx + 2];    \
+	}                                                       \
+} while (0)
 
 // Counterparts to the above for deleting an Index:
-#define JL_DELETECOPY(PDEST,PSOURCE,POP1,OFFSET,IGNORE)         \
+#define JL_DELETECOPY(PDEST,PSOURCE,POP1,OFFSET,IGNORE) do {    \
+        Word_t i_offset;					\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t) (OFFSET) < (Word_t) (POP1));            \
-        {                                                       \
-            Word_t i_offset;                                    \
-            for (i_offset = 0; i_offset < (OFFSET); ++i_offset) \
+        assert((Word_t ) (OFFSET) < (Word_t ) (POP1));            \
+        for (i_offset = 0; i_offset < (OFFSET); ++i_offset)	\
                 (PDEST)[i_offset] = (PSOURCE)[i_offset];        \
-            for (++i_offset; i_offset < (POP1); ++i_offset)     \
+        for (++i_offset; i_offset < (POP1); ++i_offset)		\
                 (PDEST)[i_offset - 1] = (PSOURCE)[i_offset];    \
-        }
+} while (0)
 
 // Variation for odd-byte-sized (non-native) Indexes, where cIS = Index Size;
 // copy byte-by-byte:
 // Note:  There are no endian issues here because bytes are just shifted as-is,
 // not converted to/from an Index.
 // Note:  If cIS == 1, JL_DELETECOPY_ODD == JL_DELETECOPY, at least in concept.
-#define JL_DELETECOPY_ODD(PDEST,PSOURCE,POP1,OFFSET,cIS)  {		\
+#define JL_DELETECOPY_ODD(PDEST,PSOURCE,POP1,OFFSET,cIS)  do {		\
         uint8_t *_Pdest   = (uint8_t *) (PDEST);			\
         uint8_t *_Psource = (uint8_t *) (PSOURCE);			\
-        Word_t   b_off;							\
+        Word_t b_off;							\
 	assert((long) (POP1) > 0);					\
-	assert((Word_t) (OFFSET) < (Word_t) (POP1));			\
+	assert((Word_t ) (OFFSET) < (Word_t ) (POP1));			\
         for (b_off = 0; b_off < ((OFFSET) * (cIS)); ++b_off)		\
 		*_Pdest++ = *_Psource++;				\
         _Psource += (cIS);						\
         for (b_off += (cIS); b_off < ((POP1) * (cIS)); ++b_off)		\
 		*_Pdest++ = *_Psource++;				\
-}
+} while (0)
 
-#define JERRI ((int) ~0)
+#define JL_ALLOC_ERRNO(ADDR)			\
+        (((void *) (ADDR) != NULL) ? JL_ERRNO_OVERRUN : JL_ERRNO_NOMEM)
 
-#define JL_RET_NOTFOUND				\
-	return((PPvoid_t) NULL)
-#define JL_RET_FOUND_JPM(Pjpm)			\
-	return((PPvoid_t) ((Pjpm)->jpm_PValue))
-#define JL_RET_FOUND_PVALUE(Pjv,OFFSET)		\
-	return((PPvoid_t) ((Pjv) + OFFSET))
-#define JL_RET_FOUND_LEAFW(PJLW,POP1,OFFSET)	\
-        return((PPvoid_t) (JL_LEAFWVALUEAREA(PJLW, POP1) + (OFFSET)))
-#define JL_RET_FOUND_LEAF1(Pjll,POP1,OFFSET)	\
-        return((PPvoid_t) (JL_LEAF1VALUEAREA(Pjll, POP1) + (OFFSET)))
-#define JL_RET_FOUND_LEAF2(Pjll,POP1,OFFSET)	\
-        return((PPvoid_t) (JL_LEAF2VALUEAREA(Pjll, POP1) + (OFFSET)))
-#define JL_RET_FOUND_LEAF3(Pjll,POP1,OFFSET)	\
-        return((PPvoid_t) (JL_LEAF3VALUEAREA(Pjll, POP1) + (OFFSET)))
-#define JL_RET_FOUND_IMM_01(PJP)		\
-	return((PPvoid_t) (&((PJP)->jp_Addr)))
-#define JL_RET_FOUND_IMM(PJP,OFFSET)		\
-	return ((PPvoid_t)(P_JV((PJP)->jp_Addr) + (OFFSET)))
-#define JL_RET_FOUND_LEAF_B1(PJLB,SUBEXP,OFFSET) \
-        return((PPvoid_t) (P_JV(JL_JLB_PVALUE(PJLB, SUBEXP)) + (OFFSET)))
+#define JL_CHECKALLOC(Type, Ptr, Retval) do {           \
+        if ((Ptr) < (Type) sizeof(Word_t )) {          \
+		JL_SET_ERRNO(JL_ALLOC_ERRNO(Ptr));	\
+		return(Retval);                         \
+        }						\
+} while (0)
 
-#define JL_SET_ERRNO(PJError, JErrno)  {          \
-      assert((JErrno) != JL_ERRNO_OVERRUN);       \
-      assert((JErrno) != JL_ERRNO_CORRUPT);       \
-      if (PJError != (PJError_t) NULL) {          \
-             JL_ERRNO(PJError) = (JErrno);        \
-             JL_ERRID(PJError) = __LINE__;        \
-      }                                           \
-}
-#define JL_SET_ERRNO_NONNULL(PJError, JErrno)   {       \
-        assert((JErrno) != JL_ERRNO_OVERRUN);		\
-        assert((JErrno) != JL_ERRNO_CORRUPT);		\
-        assert(PJError);				\
-        JL_ERRNO(PJError) = (JErrno);			\
-        JL_ERRID(PJError) = __LINE__;			\
-}
-#define JL_COPY_ERRNO(PJError, Pjpm)                            \
-       if (PJError) {                                           \
-		JL_ERRNO(PJError) = (uint8_t)JL_ERRNO(Pjpm);    \
-                JL_ERRID(PJError) = JL_ERRID(Pjpm);             \
-       }
-#define JL_ALLOC_ERRNO(ADDR) \
-        (((void *) (ADDR) != (void *) NULL) ? JL_ERRNO_OVERRUN : JL_ERRNO_NOMEM)
-
-#define JL_CHECKALLOC(Type,Ptr,Retval)                  \
-        if ((Ptr) < (Type) sizeof(Word_t)) {            \
-            JL_SET_ERRNO(PJError, JL_ALLOC_ERRNO(Ptr)); \
-            return(Retval);                             \
-        }
 // Leaf search routines
 static inline int judySearchLeaf1(Pjll_t Pjll, Word_t LeafPop1, Word_t Index)
 {
@@ -664,6 +594,6 @@ static inline int judySearchLeaf3(Pjll_t Pjll, Word_t LeafPop1, Word_t Index)
 
 static inline int judySearchLeafW(Pjlw_t Pjlw, Word_t LeafPop1, Word_t Index)
 {
-	SEARCHLEAFNATIVE(Word_t, Pjlw, LeafPop1, Index);
+	SEARCHLEAFNATIVE(Word_t , Pjlw, LeafPop1, Index);
 }
 #endif // ! _JUDYPRIVATE_INCLUDED

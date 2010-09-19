@@ -7,9 +7,9 @@
 #include "JudyL.h"
 
 #ifdef JUDYPREV
-int JudyLPrevEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+int JudyLPrevEmpty(const void *PArray, uint32_t *PIndex)
 #else
-int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+int JudyLNextEmpty(const void *PArray, uint32_t *PIndex)
 #endif
 {
 	Word_t Index;		// fast copy, in a register.
@@ -42,16 +42,16 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 	   (JL_JPTYPE(Pjp) == cJL_JPLEAF_B1)				\
 	 && (((JL_JPDCDPOP0(Pjp) & cJL_POP0MASK(1)) == cJL_POP0MASK(1))) : \
 	 JPFULL_BRANCH(Pjp))
-#define	RET_SUCCESS { *PIndex = Index; return(1); }
-#define	RET_CORRUPT { JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT); return(JERRI); }
+#define	RET_SUCCESS { *PIndex = Index; return 1; }
+#define	RET_CORRUPT { JL_SET_ERRNO(JL_ERRNO_CORRUPT); return JERR; }
 #define	SEARCHBITMAPB(Bitmap,Digit,Bitposmask)				\
 	(((Bitmap) == cJL_FULLBITMAPB) ? (Digit % cJL_BITSPERSUBEXPB) :	\
-	 judyCountBitsB((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
+	 judyCountBits((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
 
 #ifdef JUDYPREV
 #define	SEARCHBITMAPMAXB(Bitmap)					\
 	(((Bitmap) == cJL_FULLBITMAPB) ? cJL_BITSPERSUBEXPB - 1 :	\
-	 judyCountBitsB(Bitmap) - 1)
+	 judyCountBits(Bitmap) - 1)
 #endif
 #define	CHECKDCD(cDigits) \
 	if (JL_DCDNOTMATCHINDEX(Index, Pjp, cDigits)) RET_SUCCESS
@@ -295,22 +295,22 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 #define	judySearchLeafEmpty3(Addr,Pop0) \
 	JSLE_ODD(3, Addr, Pop0, judySearchLeaf3, JL_COPY3_PINDEX_TO_LONG)
 #define	judySearchLeafEmptyL(Addr,Pop0) \
-	JSLE_EVEN(Addr, Pop0, 4, Word_t)
+	JSLE_EVEN(Addr, Pop0, 4, Word_t )
 
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);
-		return (JERRI);
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		return JERR;
 	}
 	Index = *PIndex;
       SMGetRestart:
 #ifdef JUDYPREV
 	if (Index-- == 0)
-		return (0);
+		return 0;
 #else
 	if (++Index == 0)
-		return (0);
+		return 0;
 #endif
-	if (PArray == (Pvoid_t) NULL)
+	if (PArray == NULL)
 		RET_SUCCESS;
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
 		Pjlw_t Pjlw = P_JLW(PArray);
@@ -406,8 +406,7 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		offset = SEARCHBITMAPB(JL_JBB_BITMAP(Pjbb, subexp), digit, bitposmaskB);
 		assert(offset >= 0);
 		assert(offset < (int)cJL_BITSPERSUBEXPB);
-		if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp)))
-		    == (Pjp_t) NULL)
+		if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL)
 			RET_CORRUPT;
 		Pjp += offset;
 		if (!JPFULL(Pjp))
@@ -422,7 +421,7 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 #define	BRANCHB_STARTSUBEXP(OpLeastDigits)				\
     if (! JL_JBB_BITMAP(Pjbb, subexp)) /* empty subexpanse, shortcut */ \
 	SET_AND_RETURN(OpLeastDigits, digit, digits)			\
-    if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == (Pjp_t) NULL) RET_CORRUPT
+    if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL) RET_CORRUPT
 
 #ifdef JUDYPREV
 		--digit;	// skip initial digit.
@@ -495,7 +494,7 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 #endif
 		SMRESTART(digits);
 #define	SMLEAFL(cDigits,Func)                   \
-	Pword = (PWord_t) P_JLW(Pjp->jp_Addr);  \
+	Pword = (PWord_t ) P_JLW(Pjp->jp_Addr);  \
 	pop0  = JL_JPLEAF_POP0(Pjp);            \
 	Func(Pword, pop0)
 	case cJL_JPLEAF1:
@@ -566,7 +565,7 @@ int JudyLNextEmpty(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		LEAF_EDGE(JL_LEASTBYTES(JL_JPDCDPOP0(Pjp), digits), digits);
 // Immediate JPs with Pop1 > 1:
 #define	IMM_MULTI(Func,BaseJPType)			\
-	Pword = (PWord_t) (Pjp->jp_LIndex);	\
+	Pword = (PWord_t ) (Pjp->jp_LIndex);	\
 	Func(Pword, JL_JPTYPE(Pjp) - (BaseJPType) + 1)
 	case cJL_JPIMMED_1_02:
 	case cJL_JPIMMED_1_03:

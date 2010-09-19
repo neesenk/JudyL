@@ -1,5 +1,5 @@
 #include "JudyL.h"
-extern int judyCreateBranchL(Pjp_t, Pjp_t, uint8_t *, Word_t, Pvoid_t);
+extern int judyCreateBranchL(Pjp_t, Pjp_t, uint8_t *, Word_t , void *);
 
 int judyInsertBranch(Pjp_t Pjp,	Word_t Index, Word_t BranchLevel, Pjpm_t Pjpm)
 {

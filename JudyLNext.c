@@ -121,16 +121,16 @@
  * for both Prev and Next means many fewer ifdefs in this code. */
 
 #ifdef JUDYPREV
-PPvoid_t JudyLPrev(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+void **JudyLPrev(const void *PArray, uint32_t *PIndex)
 #else
-PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
+void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #endif
 {
 	Pjp_t Pjp, Pjp2;	// current JPs.
 	Pjbl_t Pjbl;		// Pjp->jp_Addr masked and cast to types:
 	Pjbb_t Pjbb;
 	Pjbu_t Pjbu;
-	Pjll_t Pjll = (Pjll_t) NULL;
+	Pjll_t Pjll = NULL;
 	Word_t state;		// current state in SM.
 	Word_t digit;		// next digit to decode from Index.
 #if defined(JUDYPREV)
@@ -149,15 +149,13 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 #define	HISTPUSH(Pjp,Offset)			\
 	APjphist[histnum] = (Pjp);		\
 	Aoffhist[histnum] = (Offset);		\
-						\
-	if (++histnum >= HISTNUMMAX)		\
-	{					\
-	    JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT) \
-	    return(PPJERR);		\
+	if (++histnum >= HISTNUMMAX) {		\
+	    JL_SET_ERRNO(JL_ERRNO_CORRUPT);	\
+	    return PPJERR;			\
 	}
 
 #define	HISTPOP(Pjp,Offset)			\
-	if ((histnum--) < 1) JL_RET_NOTFOUND;	\
+	if ((histnum--) < 1) return NULL;	\
 	(Pjp)	 = APjphist[histnum];		\
 	(Offset) = Aoffhist[histnum]
 
@@ -180,17 +178,17 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 
 #define	SEARCHBITMAPB(Bitmap,Digit,Bitposmask)				\
 	(((Bitmap) == cJL_FULLBITMAPB) ? (Digit % cJL_BITSPERSUBEXPB) :	\
-	 judyCountBitsB((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
+	 judyCountBits((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
 #define	SEARCHBITMAPL(Bitmap,Digit,Bitposmask)				\
 	(((Bitmap) == cJL_FULLBITMAPL) ? (Digit % cJL_BITSPERSUBEXPL) :	\
-	 judyCountBitsL((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
+	 judyCountBits((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
 #ifdef JUDYPREV
 #define	SEARCHBITMAPMAXB(Bitmap)				  \
 	(((Bitmap) == cJL_FULLBITMAPB) ? cJL_BITSPERSUBEXPB - 1 : \
-	 judyCountBitsB(Bitmap) - 1)
+	 judyCountBits(Bitmap) - 1)
 #define	SEARCHBITMAPMAXL(Bitmap)				  \
 	(((Bitmap) == cJL_FULLBITMAPL) ? cJL_BITSPERSUBEXPL - 1 : \
-	 judyCountBitsL(Bitmap) - 1)
+	 judyCountBits(Bitmap) - 1)
 #endif
 
 #ifdef JUDYPREV
@@ -216,16 +214,16 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 	SM3PREPB(cState,Next)
 #define	SM3PREPB(cState,Next)  state = (cState); goto Next
 
-	if (PIndex == (PWord_t) NULL) {
-		JL_SET_ERRNO(PJError, JL_ERRNO_NULLPINDEX);
-		return (PPJERR);
+	if (PIndex == NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		return PPJERR;
 	}
 #ifdef JUDYPREV
-	if ((PArray == (Pvoid_t) NULL) || ((*PIndex)-- == 0))
+	if ((PArray == NULL) || ((*PIndex)-- == 0))
 #else
-	if ((PArray == (Pvoid_t) NULL) || ((*PIndex)++ == cJL_ALLONES))
+	if ((PArray == NULL) || ((*PIndex)++ == cJL_ALLONES))
 #endif
-		JL_RET_NOTFOUND;
+		return NULL;
 
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {	// must be a LEAFW
 		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
@@ -233,21 +231,22 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 
 		if ((offset = judySearchLeafW(Pjlw + 1, pop1, *PIndex)) >= 0) {	// Index is present.
 			assert(offset < pop1);	// in expected range.
-			JL_RET_FOUND_LEAFW(Pjlw, pop1, offset);	// *PIndex is set.
+			return (void **)(JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
 		}
 #ifdef JUDYPREV
 		if ((offset = ~offset) == 0)
 #else
 		if ((offset = ~offset) >= pop1)
 #endif
-			JL_RET_NOTFOUND;
+			return NULL;
+
 		assert(offset <= pop1);
 #ifdef JUDYPREV
 		*PIndex = Pjlw[offset--];
 #else
 		*PIndex = Pjlw[offset + 1];
 #endif
-		JL_RET_FOUND_LEAFW(Pjlw, pop1, offset);	
+		return (void **) (JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
 	} else {
 		Pjpm_t Pjpm = P_JPM(PArray);
 		Pjp = &(Pjpm->jpm_JP);
@@ -299,9 +298,9 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		if (JL_JBB_BITMAP(Pjbb, subexp) & bitposmask) {	// faster.
 			assert(offset >= 0);
 			HISTPUSH(Pjp, HISTPUSHBOFF(subexp, offset, digit));
-			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == (Pjp_t) NULL) {
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL) {
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 			Pjp += offset;
 			goto SM1Get;
@@ -330,9 +329,9 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 			JL_BITMAPDIGITB(digit, subexp, JL_JBB_BITMAP(Pjbb, subexp), offset);
 			JL_SETDIGIT(*PIndex, digit, state);
 
-			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == (Pjp_t) NULL) {
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL) {
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 
 			Pjp += offset;
@@ -388,22 +387,22 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		if (offset >= 0) {	// *PIndex is in LeafL / Immed.
 			switch (JL_JPTYPE(Pjp)) {
 			case cJL_JPLEAF1:
-				JL_RET_FOUND_LEAF1(Pjll, pop1, offset);
+				return (void **) (JL_LEAF1VALUEAREA(Pjll, pop1) + offset);
 			case cJL_JPLEAF2:
-				JL_RET_FOUND_LEAF2(Pjll, pop1, offset);
+				return (void **) (JL_LEAF2VALUEAREA(Pjll, pop1) + offset);
 			case cJL_JPLEAF3:
-				JL_RET_FOUND_LEAF3(Pjll, pop1, offset);
+				return (void **) (JL_LEAF3VALUEAREA(Pjll, pop1) + offset);
 			case cJL_JPIMMED_1_01:
 			case cJL_JPIMMED_2_01:
 			case cJL_JPIMMED_3_01:
-				JL_RET_FOUND_IMM_01(Pjp);
+				return (void **)(&Pjp->jp_Addr);
 			case cJL_JPIMMED_1_02:
 			case cJL_JPIMMED_1_03:
-				JL_RET_FOUND_IMM(Pjp, offset);
+				return (void **)(P_JV(Pjp->jp_Addr) + offset);
 			}
 
-			JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);	// impossible?
-			return (PPJERR);
+			JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// impossible?
+			return PPJERR;
 		}		// found *PIndex
 #ifdef JUDYPREV
 		if ((offset = (~offset) - 1) < 0)	// no next-left Index.
@@ -415,16 +414,16 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		switch (JL_JPTYPE(Pjp)) {
 		case cJL_JPLEAF1:
 			JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjll)[offset]);
-			JL_RET_FOUND_LEAF1(Pjll, pop1, offset);
+			return (void **) (JL_LEAF1VALUEAREA(Pjll, pop1) + offset);
 		case cJL_JPLEAF2:
 			*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(2)))
 			    | ((uint16_t *) Pjll)[offset];
-			JL_RET_FOUND_LEAF2(Pjll, pop1, offset);
+			return (void **) (JL_LEAF2VALUEAREA(Pjll, pop1) + offset);
 		case cJL_JPLEAF3: {
 			Word_t lsb;
 			JL_COPY3_PINDEX_TO_LONG(lsb, ((uint8_t *) Pjll) + (3 * offset));
 			*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(3))) | lsb;
-			JL_RET_FOUND_LEAF3(Pjll, pop1, offset);
+			return (void **) (JL_LEAF3VALUEAREA(Pjll, pop1) + offset);
 		}
 #define	SET_01(cState)  JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), cState)
 		case cJL_JPIMMED_1_01:
@@ -436,16 +435,17 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		case cJL_JPIMMED_3_01:
 			SET_01(3);
 			goto SM1Imm_01;
-		      SM1Imm_01:JL_RET_FOUND_IMM_01(Pjp);
+		      SM1Imm_01:
+			return (void **)(&Pjp->jp_Addr);
 
 #define	PJI (Pjp->jp_LIndex)
 		case cJL_JPIMMED_1_02:
 		case cJL_JPIMMED_1_03:
 			JL_SETDIGIT1(*PIndex, ((uint8_t *) PJI)[offset]);
-			JL_RET_FOUND_IMM(Pjp, offset);
+			return (void **)(P_JV(Pjp->jp_Addr) + offset);
 		}		// switch for not-found *PIndex
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);	// impossible?
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// impossible?
+		return PPJERR;
 	case cJL_JPLEAF_B1: {
 		Pjlb_t Pjlb;
 		CHECKDCD(1);
@@ -457,7 +457,7 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		assert(subexp < cJL_NUMSUBEXPL);	// falls in expected range.
 		if (JL_JLB_BITMAP(Pjlb, subexp) & bitposmask) {	// faster.
 			offset = SEARCHBITMAPL(JL_JLB_BITMAP(Pjlb, subexp), digit, bitposmask);
-			JL_RET_FOUND_LEAF_B1(Pjlb, subexp, offset);
+			return (void **)(P_JV(JL_JLB_PVALUE(Pjlb, subexp)) + offset);
 		}
 
 		offset = SEARCHBITMAPL(JL_JLB_BITMAP(Pjlb, subexp), digit, bitposmask);
@@ -486,7 +486,7 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		SM1LeafB1Findlimit:
 			JL_BITMAPDIGITL(digit, subexp, JL_JLB_BITMAP(Pjlb, subexp), offset);
 			JL_SETDIGIT1(*PIndex, digit);
-			JL_RET_FOUND_LEAF_B1(Pjlb, subexp, offset);
+			return (void **)(P_JV(JL_JLB_PVALUE(Pjlb, subexp)) + offset);
 		}
 		goto SM2Backtrack;
 	}
@@ -520,8 +520,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 	case cJL_JPIMMED_1_03:
 		SM1IMM(judySearchLeaf1, 3);
 	default:
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 
 	}
 
@@ -587,9 +587,9 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		SM2BranchBFindlimit:
 			JL_BITMAPDIGITB(digit, subexp, JL_JBB_BITMAP(Pjbb, subexp), offset);
 			JL_SETDIGIT(*PIndex, digit, state);
-			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == (Pjp_t) NULL) {
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+			if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL) {
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 
 			Pjp += offset;
@@ -622,8 +622,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		}
 		goto SM2Backtrack;
 	default:
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}
 
       SM3Findlimit:
@@ -643,8 +643,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		if ((Pjbl->jbl_NumJPs) == 0)
 #endif
 		{
-			JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-			return (PPJERR);
+			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+			return PPJERR;
 		}
 
 		JL_SETDIGIT(*PIndex, Pjbl->jbl_Expanse[offset], state);
@@ -663,8 +663,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		subexp = cJL_NUMSUBEXPB;
 		while (!(JL_JBB_BITMAP(Pjbb, --subexp))) {	// find non-empty subexp.
 			if (subexp <= 0) {	// wholly empty bitmap.
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 		}
 
@@ -674,17 +674,17 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		subexp = -1;
 		while (!(JL_JBB_BITMAP(Pjbb, ++subexp))) {	// find non-empty subexp.
 			if (subexp >= cJL_NUMSUBEXPB - 1) {	// didnt find one.
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 		}
 		offset = 0;
 #endif
 		JL_BITMAPDIGITB(digit, subexp, JL_JBB_BITMAP(Pjbb, subexp), offset);
 		JL_SETDIGIT(*PIndex, digit, state);
-		if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == (Pjp_t) NULL) {
-			JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-			return (PPJERR);
+		if ((Pjp = P_JP(JL_JBB_PJP(Pjbb, subexp))) == NULL) {
+			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+			return PPJERR;
 		}
 
 		Pjp += offset;
@@ -711,8 +711,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 			JL_SETDIGIT(*PIndex, digit, state);
 			goto SM3Findlimit;
 		}
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 
 #define	SM3LEAFLDCD(cState)				\
 	JL_SETDCD(*PIndex, Pjp, cState);	        \
@@ -734,17 +734,17 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 	case cJL_JPLEAF1:
 		SM3LEAFLDCD(1);
 		JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjll)[offset]);
-		JL_RET_FOUND_LEAF1(Pjll, pop1, offset);
+		return (void **) (JL_LEAF1VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF2:
 		SM3LEAFLDCD(2);
 		*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(2))) | ((uint16_t *) Pjll)[offset];
-		JL_RET_FOUND_LEAF2(Pjll, pop1, offset);
+		return (void **) (JL_LEAF2VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF3: {
 			Word_t lsb;
 			SM3LEAFLNODCD;
 			JL_COPY3_PINDEX_TO_LONG(lsb, ((uint8_t *) Pjll) + (3 * offset));
 			*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(3))) | lsb;
-			JL_RET_FOUND_LEAF3(Pjll, pop1, offset);
+			return (void **) (JL_LEAF3VALUEAREA(Pjll, pop1) + offset);
 		}
 
 	case cJL_JPLEAF_B1: {
@@ -755,8 +755,8 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		subexp = cJL_NUMSUBEXPL;
 		while (!JL_JLB_BITMAP(Pjlb, --subexp)) {	// find non-empty subexp.
 			if (subexp <= 0) {	// wholly empty bitmap.
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 		}
 		offset = SEARCHBITMAPMAXL(JL_JLB_BITMAP(Pjlb, subexp));
@@ -765,15 +765,14 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		subexp = -1;
 		while (!JL_JLB_BITMAP(Pjlb, ++subexp)) {	// find non-empty subexp.
 			if (subexp >= cJL_NUMSUBEXPL - 1) {	// didnt find one.
-				JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-				return (PPJERR);
+				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				return PPJERR;
 			}
 		}
 		offset = 0;
 #endif
 		JL_BITMAPDIGITL(digit, subexp, JL_JLB_BITMAP(Pjlb, subexp), offset);
 		JL_SETDIGIT1(*PIndex, digit);
-		JL_RET_FOUND_LEAF_B1(Pjlb, subexp, offset);
 	}
 
 	case cJL_JPIMMED_1_01:
@@ -786,7 +785,7 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		SET_01(3);
 		goto SM3Imm_01;
       SM3Imm_01:
-		JL_RET_FOUND_IMM_01(Pjp);
+		return (void **)(&Pjp->jp_Addr);
 #ifdef JUDYPREV
 #define	SM3IMM_OFFSET(cPop1)  (cPop1) - 1	// highest.
 #else
@@ -799,10 +798,11 @@ PPvoid_t JudyLNext(Pcvoid_t PArray, Word_t * PIndex, PJError_t PJError)
 		SM3IMM(2, SM3Imm1);
 	case cJL_JPIMMED_1_03:
 		SM3IMM(3, SM3Imm1);
-	      SM3Imm1:JL_SETDIGIT1(*PIndex, ((uint8_t *) PJI)[offset]);
-		JL_RET_FOUND_IMM(Pjp, offset);
+	      SM3Imm1:
+		JL_SETDIGIT1(*PIndex, ((uint8_t *) PJI)[offset]);
+		return (void **)(P_JV(Pjp->jp_Addr) + offset);
 	default:
-		JL_SET_ERRNO(PJError, JL_ERRNO_CORRUPT);
-		return (PPJERR);
+		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		return PPJERR;
 	}
 }

@@ -1,7 +1,8 @@
 #include "JudyL.h"
 
 // Leave the malloc() sizes readable in the binary (via strings(1)):
-const char * JudyLMallocSizes = "JudyLMallocSizes = 3, 5, 7, 11, 15, 23, 32, 47, 64, Leaf1 = 25";
+const char *JudyLMallocSizes = 
+	"JudyLMallocSizes = 3, 5, 7, 11, 15, 23, 32, 47, 64, Leaf1 = 25";
 
 //	cJL_BITSPERSUBEXPB = 32
 const uint8_t jL_BranchBJPPopToWords[cJL_BITSPERSUBEXPB + 1] =
