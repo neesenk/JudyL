@@ -37,8 +37,8 @@ double get_counter(void)
 	return result;
 }
 
-
-int buff[10000000];
+#define N_ 1000000
+int buff[N_];
 int main(void)
 {
 	int arrlen  = sizeof(buff)/sizeof(buff[0]);
@@ -47,7 +47,6 @@ int main(void)
 	clock_t beg = 0;
 	double count = 0;
 	void *root = NULL;
-	int j = 0;
 	printf("array size %d\n", arrlen);
 
 	srand(0);
@@ -57,6 +56,8 @@ int main(void)
 	//		num = random();
 	//	buff[i] = num + i;
 		buff[i] = random();
+		if (buff[i] == 0)
+			buff[i] = 1;
 	}
 	num = 0;
 	start_counter();
@@ -65,9 +66,13 @@ int main(void)
 		if (ret == (void **)-1) 
 			abort();
 		if (*ret == NULL)
-			*ret = (void *)buff[i];
-		else 
+			*ret = (void *)(buff + i);
+		else { 
+			int *p = *ret;
+			assert(*p = buff[i]);
+			buff[i] = 0;
 			num++;
+		}
 	}
 	count += get_counter();
 	printf("insert count %lf\n", count);
@@ -76,34 +81,70 @@ int main(void)
 	count = 0;
 	start_counter();
 	beg = clock();
-	for (j = 0; j < 10000000; j += arrlen)
-	for (i=0; i<arrlen; i +=4) {
-		JudyLGet(root, buff[i]);
-		JudyLGet(root, buff[i + 1]);
-		JudyLGet(root, buff[i + 2]);
-		JudyLGet(root, buff[i + 3]);
+	for (i=0; i<arrlen; i++) {
+		int **ret = 0;
+		if (buff[i] == 0) {
+			ret = (int **)JudyLGet(root, buff[i]);
+			assert(ret != (int **)-1);
+			assert(ret == NULL);
+		} else {
+			ret = (int **)JudyLGet(root, buff[i]);
+			assert(ret != (int **)-1);
+			assert(*ret == buff + i);
+		}
 	}
 	count += get_counter();
 	printf("clock %d\n", (int)(clock() - beg));
 	printf("search count %lf\n", count);
-	printf("memory count %lu\n", JudyLMemUsed(root));
+	printf("memory count %u\n", JudyLMemUsed(root));
+
 
 	count = 0;
-	{ int idx = random() % arrlen;
-	  while (buff[idx] == 0) idx++; 
 	start_counter();
 	beg = clock();
-	for (j = 0; j < 10000000; j += arrlen)
-	for (i=0; i<arrlen; i +=4) {
-		JudyLGet(root, buff[idx]);
-		JudyLGet(root, buff[idx]);
-		JudyLGet(root, buff[idx]);
-		JudyLGet(root, buff[idx]);
+	{ 
+		uint32_t p = 0;
+		int **ret = NULL;
+		int n = 0;
+		uint32_t pp = 0;
+		for (ret = (int **)JudyLFirst(root, &p); 
+		     (ret != (int **)-1 && ret != NULL);
+		     ret = (int **)JudyLNext(root, &p)) {
+			n++;
+			assert(**ret == p);
+			assert(*ret >= buff && *ret < buff + arrlen);
+			assert(pp <= p);
+			pp = p;
+		}
+		assert(n+num == arrlen);
 	}
 	count += get_counter();
 	printf("clock %d\n", (int)(clock() - beg));
-	printf("search count %lf\n", count);
+	printf("next count %lf\n", count);
+
+	count = 0;
+	start_counter();
+	beg = clock();
+	{ 
+		uint32_t p = ~0;
+		int **ret = NULL;
+		int n = 0;
+		uint32_t pp = ~0;
+		for (ret = (int **)JudyLLast(root, &p); 
+		     (ret != (int **)-1 && ret != NULL);
+		     ret = (int **)JudyLPrev(root, &p)) {
+			n++;
+			assert(**ret == p);
+			assert(*ret >= buff && *ret < buff + arrlen);
+			assert(pp >= p);
+			pp = p;
+		}
+
+		assert(n+num == arrlen);
 	}
+	count += get_counter();
+	printf("clock %d\n", (int)(clock() - beg));
+	printf("prev count %lf\n", count);
 
 	count = 0;
 	start_counter();

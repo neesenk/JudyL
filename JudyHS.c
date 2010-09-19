@@ -1,13 +1,13 @@
 #include "Judy.h"
 
-#define IS_PLS(PLS)     (((Word_t ) (PLS)) & JLAP_INVALID)
-#define CLEAR_PLS(PLS)  (((Word_t ) (PLS)) & (~JLAP_INVALID))
-#define SET_PLS(PLS)    (((Word_t ) (PLS)) | JLAP_INVALID)
-#define WORDSIZE     (sizeof(Word_t ))
+#define IS_PLS(PLS)     (((uint32_t ) (PLS)) & JLAP_INVALID)
+#define CLEAR_PLS(PLS)  (((uint32_t ) (PLS)) & (~JLAP_INVALID))
+#define SET_PLS(PLS)    (((uint32_t ) (PLS)) | JLAP_INVALID)
+#define WORDSIZE     (sizeof(uint32_t ))
 
 typedef struct L_EAFSTRING {
-	Word_t ls_Value;	// Value area (cannot change size)
-	uint8_t ls_String[WORDSIZE];	// to fill out to a Word_t size
+	void *ls_Value;	// Value area (cannot change size)
+	uint8_t ls_String[WORDSIZE];	// to fill out to a uint32_t size
 } ls_t, *Pls_t;
 
 #define LS_STRUCTOVD     (sizeof(ls_t) - WORDSIZE)
@@ -17,10 +17,10 @@ typedef struct L_EAFSTRING {
     WORD = 0;							\
     switch (LEN) {						\
     default:    /* four and greater */				\
-    case 4: WORD += (Word_t )(((uint8_t *)(STR))[3] << 24);	\
-    case 3: WORD += (Word_t )(((uint8_t *)(STR))[2] << 16);	\
-    case 2: WORD += (Word_t )(((uint8_t *)(STR))[1] <<  8);	\
-    case 1: WORD += (Word_t )(((uint8_t *)(STR))[0]);		\
+    case 4: WORD += (uint32_t )(((uint8_t *)(STR))[3] << 24);	\
+    case 3: WORD += (uint32_t )(((uint8_t *)(STR))[2] << 16);	\
+    case 2: WORD += (uint32_t )(((uint8_t *)(STR))[1] <<  8);	\
+    case 1: WORD += (uint32_t )(((uint8_t *)(STR))[0]);		\
     case 0: break;						\
     }								\
 }
@@ -41,7 +41,7 @@ void **JudyHSGet(const void *PArray, void *Str, size_t Len)
 {
 	uint8_t *String = (uint8_t *) Str;
 	void **PPValue;
-	Word_t Index;
+	uint32_t Index;
 
 	PPValue = JudyLGet(PArray, Len);
 	if (PPValue == NULL)
@@ -53,7 +53,7 @@ void **JudyHSGet(const void *PArray, void *Str, size_t Len)
 	if (Len > WORDSIZE) {
 		uint32_t HValue;	// hash of input string
 		JUDYHASHSTR(HValue, String, Len);	// hash to no more than 32 bits
-		PPValue = JudyLGet(*PPValue, (Word_t )HValue); // get ^ to hash bucket
+		PPValue = JudyLGet(*PPValue, (uint32_t )HValue); // get ^ to hash bucket
 		if (PPValue == NULL)
 			return NULL;	// no entry in Hash table
 	}
@@ -84,9 +84,9 @@ void **JudyHSGet(const void *PArray, void *Str, size_t Len)
 	return PPValue;
 }
 
-static void **insStrJudyLTree(uint8_t *String, Word_t Len, void **PPValue)
+static void **insStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)
 {
-	Word_t Index;		// next 4[8] bytes of String
+	uint32_t Index;		// next 4[8] bytes of String
 
 	while (Len > WORDSIZE) {
 		if (*PPValue == NULL) {
@@ -99,14 +99,14 @@ static void **insStrJudyLTree(uint8_t *String, Word_t Len, void **PPValue)
 			Pls->ls_Value = 0;	// clear Value word
 			memcpy(Pls->ls_String, String, Len);	// copy to new struct
 			*PPValue = (void *) SET_PLS(Pls);	// mark pointer
-			return (void **)(&Pls->ls_Value);	// return ^ to Value
+			return &Pls->ls_Value;	// return ^ to Value
 		}
 
 		if (IS_PLS(*PPValue)) {
 			Pls_t Pls;	// ^ to ls_t
 			uint8_t *String0;	// ^ to string in ls_t
-			Word_t Index0;	// 4[8] bytes in string
-			Word_t FreeLen;	// length of ls_t
+			uint32_t Index0;	// 4[8] bytes in string
+			uint32_t FreeLen;	// length of ls_t
 			void **PPsplit;
 
 			FreeLen = LS_WORDLEN(Len);	// length of ls_t
@@ -114,7 +114,7 @@ static void **insStrJudyLTree(uint8_t *String, Word_t Len, void **PPValue)
 			Pls = (Pls_t) CLEAR_PLS(*PPValue);	// demangle ^ to ls_t
 			String0 = Pls->ls_String;
 			if (memcmp(String, String0, Len) == 0)
-				return (void **) (&Pls->ls_Value);	// yes, duplicate
+				return &Pls->ls_Value;	// yes, duplicate
 
 			*PPValue = NULL;	// clear ^ to ls_t and make JudyL
 
@@ -133,7 +133,7 @@ static void **insStrJudyLTree(uint8_t *String, Word_t Len, void **PPValue)
 			PPValue = insStrJudyLTree(String0, Len, PPValue);
 			if (PPValue == PPJERR)
 				return PPJERR;
-			*(PWord_t ) PPValue = Pls->ls_Value;
+			*PPValue = Pls->ls_Value;
 
 			JudyFree((void *) Pls, FreeLen);
 			PPValue = JudyLIns(PPsplit, Index);
@@ -179,7 +179,7 @@ void **JudyHSIns(void **PPArray, void *Str, size_t Len)
 	if (Len > WORDSIZE) {
 		uint32_t HValue;
 		JUDYHASHSTR(HValue, String, Len);
-		PPValue = JudyLIns(PPValue, (Word_t ) HValue);
+		PPValue = JudyLIns(PPValue, (uint32_t ) HValue);
 		if (PPValue == PPJERR)
 			return PPJERR;
 	}
@@ -188,10 +188,10 @@ void **JudyHSIns(void **PPArray, void *Str, size_t Len)
 	return PPValue;
 }
 
-static int delStrJudyLTree(uint8_t *String, Word_t Len, void **PPValue)
+static int delStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)
 {
 	void **PPValueN;
-	Word_t Index;
+	uint32_t Index;
 	int Ret;
 
 	if (IS_PLS(*PPValue)) {
@@ -238,7 +238,7 @@ int JudyHSDel(void **PPArray, void *Str, size_t Len)
 	PPHtble = JudyLGet(*PPArray, Len);
 	if (Len > WORDSIZE) {
 		JUDYHASHSTR(HValue, String, Len);
-		PPBucket = JudyLGet(*PPHtble, (Word_t ) HValue);
+		PPBucket = JudyLGet(*PPHtble, (uint32_t ) HValue);
 	} else {
 		PPBucket = PPHtble;	// no bucket to JLGet
 	}
@@ -249,7 +249,7 @@ int JudyHSDel(void **PPArray, void *Str, size_t Len)
 
 	if (*PPBucket == NULL) {
 		if (Len > WORDSIZE) {
-			Ret = JudyLDel(PPHtble, (Word_t ) HValue);
+			Ret = JudyLDel(PPHtble, (uint32_t ) HValue);
 			if (Ret != 1)
 				return -1;
 		}
@@ -262,10 +262,10 @@ int JudyHSDel(void **PPArray, void *Str, size_t Len)
 	return 1;
 }
 
-static Word_t delJudyLTree(void **PPValue, Word_t Len)
+static uint32_t delJudyLTree(void **PPValue, uint32_t Len)
 {
-	Word_t bytes_freed = 0;	// bytes freed at point
-	Word_t bytes_total = 0;	// accumulated bytes freed
+	uint32_t bytes_freed = 0;	// bytes freed at point
+	uint32_t bytes_total = 0;	// accumulated bytes freed
 	void **PPValueN;
 
 	if (Len > WORDSIZE) {
@@ -273,7 +273,7 @@ static Word_t delJudyLTree(void **PPValue, Word_t Len)
 
 		if (IS_PLS(*PPValue)) {
 			Pls_t Pls;
-			Word_t freewords;
+			uint32_t freewords;
 
 			freewords = LS_WORDLEN(Len);	// calculate length
 			Pls = (Pls_t) CLEAR_PLS(*PPValue);	// demangle pointer
@@ -308,11 +308,11 @@ static Word_t delJudyLTree(void **PPValue, Word_t Len)
 	return bytes_freed;
 }
 
-Word_t JudyHSFreeArray(void **PPArray)
+uint32_t JudyHSFreeArray(void **PPArray)
 {
 	uint32_t Len;		// start at beginning
-	Word_t bytes_freed;	// bytes freed at this level.
-	Word_t bytes_total;	// bytes total at all levels.
+	uint32_t bytes_freed;	// bytes freed at this level.
+	uint32_t bytes_total;	// bytes total at all levels.
 	void **PPHtble;
 
 	if (PPArray == NULL)

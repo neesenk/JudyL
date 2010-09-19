@@ -1,6 +1,6 @@
 #include "JudyL.h"
 
-Word_t JudyLFreeArray(void **PPArray)
+size_t JudyLFreeArray(void **PPArray)
 {
 	jLpm_t jpm;
 

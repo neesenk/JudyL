@@ -34,7 +34,7 @@ uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 		Pjlw_t Pjlw = P_JLW(PArray);
 		Pjpm = &fakejpm;
 		Pjp = &fakejp;
-		Pjp->jp_Addr = (Word_t ) Pjlw;
+		Pjp->jp_Addr = (Word_t) Pjlw;
 		Pjp->jp_Type = cJL_LEAFW;
 		Pjpm->jpm_Pop0 = Pjlw[0];
 		pop1 = Pjpm->jpm_Pop0 + 1;

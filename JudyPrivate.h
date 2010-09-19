@@ -119,6 +119,8 @@ Note that this example shows every possibly topology to reach a leaf in a
     |<3 > |<3 > 1 + ------+------+------+------
 */
 
+/* assert(sizeof(Word_t) == sizeof(void *)) */
+typedef unsigned long Word_t, *PWord_t; 
 
 // Machine (CPU) cache line size:
 // NOTE:  A leaf size of 2 cache lines maximum is the target (optimal) for
@@ -136,8 +138,8 @@ Note that this example shows every possibly topology to reach a leaf in a
 // Bytes Per Word and Bits Per Word, latter assuming sizeof(byte) is 8 bits:
 // Expect 32 [64] bits per word.
 
-#define cJL_BYTESPERWORD (sizeof(Word_t ))
-#define cJL_BITSPERWORD  (sizeof(Word_t ) * cJL_BITSPERBYTE)
+#define cJL_BYTESPERWORD (sizeof(Word_t))
+#define cJL_BITSPERWORD  (sizeof(Word_t) * cJL_BITSPERBYTE)
 #define JL_BYTESTOWORDS(BYTES) \
         (((BYTES) + cJL_BYTESPERWORD - 1) / cJL_BYTESPERWORD)
 
@@ -151,7 +153,7 @@ Note that this example shows every possibly topology to reach a leaf in a
 // ROOT STATE:
 // State at the start of the Judy SM, based on 1 byte decoded per state; equal
 // to the number of bytes per Index to decode.
-#define cJL_ROOTSTATE (sizeof(Word_t ))
+#define cJL_ROOTSTATE (sizeof(Word_t))
 
 // SUBEXPANSES PER STATE:
 // Number of subexpanses per state traversed, which is the number of JPs in a
@@ -301,17 +303,17 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 // the jp_DcdPopO field is expanded to include the jp_Type in the high 8 bits
 // of the Word_t .
 // First the read macro:
-#define JL_JPTYPE(PJP) ((PJP)->jp_Type)
-#define JL_JPLEAF_POP0(PJP) ((PJP)->jp_DcdP0[sizeof(Word_t ) - 2])
-#define JL_JPDCDPOP0(PJP) ((Word_t )(PJP)->jp_DcdP0[0] << 16 | \
-			   (Word_t )(PJP)->jp_DcdP0[1] <<  8 | \
-			   (Word_t )(PJP)->jp_DcdP0[2])
+#define JL_JPTYPE(PJP)	((PJP)->jp_Type)
+#define JL_JPLEAF_POP0(PJP) ((PJP)->jp_DcdP0[sizeof(Word_t) - 2])
+#define JL_JPDCDPOP0(PJP) ((Word_t)(PJP)->jp_DcdP0[0] << 16 | \
+			   (Word_t)(PJP)->jp_DcdP0[1] <<  8 | \
+			   (Word_t)(PJP)->jp_DcdP0[2])
 
 #define JL_JPSETADT(PJP,ADDR,DCDPOP0,TYPE) do {                 \
     (PJP)->jp_Addr     = (ADDR);                                \
-    (PJP)->jp_DcdP0[0] = (uint8_t)((Word_t )(DCDPOP0) >> 16);    \
-    (PJP)->jp_DcdP0[1] = (uint8_t)((Word_t )(DCDPOP0) >>  8);    \
-    (PJP)->jp_DcdP0[2] = (uint8_t)((Word_t )(DCDPOP0));          \
+    (PJP)->jp_DcdP0[0] = (uint8_t)((Word_t)(DCDPOP0) >> 16);    \
+    (PJP)->jp_DcdP0[1] = (uint8_t)((Word_t)(DCDPOP0) >>  8);    \
+    (PJP)->jp_DcdP0[2] = (uint8_t)((Word_t)(DCDPOP0));          \
     (PJP)->jp_Type     = (TYPE);                                \
 } while (0)
 
@@ -402,9 +404,9 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 
 // Copy a 3-byte Index pointed by a uint8_t * to a Word_t :
 #define JL_COPY3_PINDEX_TO_LONG(DESTLONG,PINDEX)        \
-    DESTLONG  = (Word_t )(PINDEX)[0] << 16;              \
-    DESTLONG += (Word_t )(PINDEX)[1] <<  8;              \
-    DESTLONG += (Word_t )(PINDEX)[2]
+    DESTLONG  = (Word_t)(PINDEX)[0] << 16;              \
+    DESTLONG += (Word_t)(PINDEX)[1] <<  8;              \
+    DESTLONG += (Word_t)(PINDEX)[2]
 
 // Copy a Word_t to a 3-byte Index pointed at by a uint8_t *:
 #define JL_COPY3_LONG_TO_PINDEX(PINDEX,SOURCELONG)      \
@@ -419,7 +421,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 // though that would be simpler, but would operate in endian-specific memory.
 #define JL_SETDIGIT(INDEX,DIGIT,STATE)                  \
         (INDEX) = ((INDEX) & (~cJL_MASKATSTATE(STATE))) \
-                | (((Word_t ) (DIGIT)) << (((STATE) - 1) * cJL_BITSPERBYTE))
+                | (((Word_t) (DIGIT)) << (((STATE) - 1) * cJL_BITSPERBYTE))
 
 // Fast version for single LSB:
 #define JL_SETDIGIT1(INDEX,DIGIT) (INDEX) = ((INDEX) & ~0xff) | (DIGIT)
@@ -458,7 +460,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 // for them appended to this file.
 #define JL_INSERTINPLACE(PARRAY,POP1,OFFSET,INDEX)              \
         assert((long) (POP1) > 0);                              \
-        assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
+        assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
         {                                                       \
             Word_t i_offset = (POP1);                           \
             while (i_offset-- > (OFFSET))                       \
@@ -498,7 +500,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 #define JL_DELETEINPLACE_ODD(PBYTE,POP1,OFFSET,cIS) do {        \
         Word_t b_off = (((OFFSET) + 1) * (cIS)) - 1;		\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t ) (OFFSET) < (Word_t ) (POP1));            \
+        assert((Word_t) (OFFSET) < (Word_t) (POP1));            \
         while (++b_off < ((POP1) * (cIS)))			\
                 (PBYTE)[b_off - (cIS)] = (PBYTE)[b_off];        \
 } while (0)
@@ -510,7 +512,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 #define JL_INSERTCOPY(PDEST,PSOURCE,POP1,OFFSET,INDEX) do {     \
         Word_t i_offset;					\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
+        assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
         for (i_offset = 0; i_offset < (OFFSET); ++i_offset)	\
                 (PDEST)[i_offset] = (PSOURCE)[i_offset];        \
         (PDEST)[i_offset] = (INDEX);				\
@@ -521,7 +523,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 #define JL_INSERTCOPY3(PDEST,PSOURCE,POP1,OFFSET,INDEX)  do {   \
 	Word_t o_ff;                                            \
 	assert((long) (POP1) > 0);                              \
-	assert((Word_t ) (OFFSET) <= (Word_t ) (POP1));           \
+	assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
 	for (o_ff = 0; o_ff < (OFFSET); o_ff++) {               \
 		Word_t i_dx = o_ff * 3;                        \
 		(PDEST)[i_dx + 0] = (PSOURCE)[i_dx + 0];        \
@@ -541,7 +543,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 #define JL_DELETECOPY(PDEST,PSOURCE,POP1,OFFSET,IGNORE) do {    \
         Word_t i_offset;					\
         assert((long) (POP1) > 0);                              \
-        assert((Word_t ) (OFFSET) < (Word_t ) (POP1));            \
+        assert((Word_t) (OFFSET) < (Word_t) (POP1));            \
         for (i_offset = 0; i_offset < (OFFSET); ++i_offset)	\
                 (PDEST)[i_offset] = (PSOURCE)[i_offset];        \
         for (++i_offset; i_offset < (POP1); ++i_offset)		\
@@ -558,7 +560,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
         uint8_t *_Psource = (uint8_t *) (PSOURCE);			\
         Word_t b_off;							\
 	assert((long) (POP1) > 0);					\
-	assert((Word_t ) (OFFSET) < (Word_t ) (POP1));			\
+	assert((Word_t) (OFFSET) < (Word_t) (POP1));			\
         for (b_off = 0; b_off < ((OFFSET) * (cIS)); ++b_off)		\
 		*_Pdest++ = *_Psource++;				\
         _Psource += (cIS);						\
@@ -570,7 +572,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
         (((void *) (ADDR) != NULL) ? JL_ERRNO_OVERRUN : JL_ERRNO_NOMEM)
 
 #define JL_CHECKALLOC(Type, Ptr, Retval) do {           \
-        if ((Ptr) < (Type) sizeof(Word_t )) {          \
+        if ((Ptr) < (Type) sizeof(Word_t)) {          \
 		JL_SET_ERRNO(JL_ALLOC_ERRNO(Ptr));	\
 		return(Retval);                         \
         }						\
@@ -594,6 +596,6 @@ static inline int judySearchLeaf3(Pjll_t Pjll, Word_t LeafPop1, Word_t Index)
 
 static inline int judySearchLeafW(Pjlw_t Pjlw, Word_t LeafPop1, Word_t Index)
 {
-	SEARCHLEAFNATIVE(Word_t , Pjlw, LeafPop1, Index);
+	SEARCHLEAFNATIVE(Word_t, Pjlw, LeafPop1, Index);
 }
 #endif // ! _JUDYPRIVATE_INCLUDED

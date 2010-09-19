@@ -1,6 +1,6 @@
 #include "JudyL.h"
 
-extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t , void *);
+extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t, void *);
 extern int judyCreateBranchU(Pjp_t, void *);
 extern int judyCascade1(Pjp_t, void *);
 extern int judyCascade2(Pjp_t, void *);
@@ -107,7 +107,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 			Pjbu->jbu_jp[offset] = *Pjp1;
 		}
 		judyLFreeJBL(PjblRaw, Pjpm);
-		Pjp->jp_Addr = (Word_t ) PjbuRaw;
+		Pjp->jp_Addr = (Word_t) PjbuRaw;
 		Pjp->jp_Type += cJL_JPBRANCH_U - cJL_JPBRANCH_L;
 		Pjpm->jpm_LastUPop0 = Pjpm->jpm_Pop0;
 		goto ContinueInsWalk;
@@ -262,7 +262,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
             InsertCopy(Pleafnew, Pleaf, exppop1, offset, Index);        \
             JL_LEAFGROWVALUENEW(ValueArea, Pjv, exppop1, offset);       \
             Free(PjllRaw, exppop1, Pjpm);                               \
-            (Pjp->jp_Addr) = (Word_t ) PjllnewRaw;                     \
+            (Pjp->jp_Addr) = (Word_t) PjllnewRaw;                     \
             return 1;                                                  \
         }                                                               \
         assert(exppop1 == (MaxPop1))
@@ -452,7 +452,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 	Pjv = P_JV(PjvRaw);					\
 								\
 	oldValue       = Pjp->jp_Addr;				\
-	(Pjp->jp_Addr) = (Word_t ) PjvRaw;			\
+	(Pjp->jp_Addr) = (Word_t) PjvRaw;			\
 	Pjll           = (LeafType) (Pjp->jp_LIndex);		\
 								\
 	Copy(cIS,CopyWord);					\
@@ -487,7 +487,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
     *Pjv = 0;							\
     Pjpm->jpm_PValue  = Pjv;					\
     D_P0 = Index & cJL_DCDMASK(cIS); /* pop0 = 0 */		\
-    JL_JPSETADT(Pjp, (Word_t )PjllRaw, D_P0, NewJPType);	\
+    JL_JPSETADT(Pjp, (Word_t)PjllRaw, D_P0, NewJPType);	\
     return 1;							\
 }
 
@@ -517,7 +517,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
     /* see TBD above about this: */                               \
     JL_INSERTCOPY(Pjvnew, Pjv, exppop1, offset, 0);               \
     judyLFreeJV(PjvRaw, exppop1, Pjpm);				  \
-    Pjp->jp_Addr     = (Word_t ) PjvnewRaw;                      \
+    Pjp->jp_Addr     = (Word_t) PjvnewRaw;                      \
     Pjpm->jpm_PValue = Pjvnew + offset;                           \
     ++(Pjp->jp_Type);                                             \
     return 1;                                                    \
@@ -551,7 +551,7 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
             Pjpm->jpm_PValue = Pjvnew + offset;                         \
                                                                         \
             D_P0 = (Index & cJL_DCDMASK(cIS)) + (OldPop1) - 1;          \
-            JL_JPSETADT(Pjp, (Word_t )PjllRaw, D_P0, NewJPType);         \
+            JL_JPSETADT(Pjp, (Word_t)PjllRaw, D_P0, NewJPType);         \
             return 1;                                                  \
         }
 #define JL_IMMSET_01(     cIS, LeafType, NewJPType) \
@@ -675,7 +675,7 @@ void **JudyLIns(void **PPArray, uint32_t Index)
 		JL_CHECKALLOC(Pjpm_t, Pjpm, PPJERR);
 
 		Pjpm->jpm_Pop0 = cJL_LEAFW_MAXPOP1 - 1;
-		Pjpm->jpm_JP.jp_Addr = (Word_t ) Pjlw;
+		Pjpm->jpm_JP.jp_Addr = (Word_t) Pjlw;
 
 		if (judyCascadeL(&Pjpm->jpm_JP, Pjpm) == -1)
 			return PPJERR;

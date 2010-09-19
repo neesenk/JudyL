@@ -2,10 +2,10 @@
 
 extern int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm);
 extern int judyLeafB1ToLeaf1(Pjp_t, void *);
-extern Word_t judyLeaf1ToLeaf2(uint16_t *, Pjv_t, Pjp_t, Word_t , void *);
-extern Word_t judyLeaf2ToLeaf3(uint8_t *, Pjv_t, Pjp_t, Word_t , void *);
-extern Word_t judyLLeaf3ToLeafW(Pjlw_t, Pjv_t, Pjp_t, Word_t , void *);
-extern Word_t judyLeaf3ToLeafW(Pjlw_t, Pjv_t, Pjp_t, Word_t , void *);
+extern Word_t judyLeaf1ToLeaf2(uint16_t *, Pjv_t, Pjp_t, Word_t, void *);
+extern Word_t judyLeaf2ToLeaf3(uint8_t *, Pjv_t, Pjp_t, Word_t, void *);
+extern Word_t judyLLeaf3ToLeafW(Pjlw_t, Pjv_t, Pjp_t, Word_t, void *);
+extern Word_t judyLeaf3ToLeafW(Pjlw_t, Pjv_t, Pjp_t, Word_t, void *);
 
 // For convenience in the calling code; "M1" means "minus one":
 #define judyLeafM1ToLeafW judyLeaf3ToLeafW
@@ -57,7 +57,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 
 #define JL_BRANCH_COPY_IMMED_ODD(cLevel,Pjp,CopyIndex)          \
         if (JL_JPTYPE(Pjp) == cJL_JPIMMED_1_01 + (cLevel) - 2) {\
-            CopyIndex(Pleaf, (Word_t ) (JL_JPDCDPOP0(Pjp)));     \
+            CopyIndex(Pleaf, (Word_t) (JL_JPDCDPOP0(Pjp)));     \
             Pleaf += (cLevel);  /* index size = level */        \
 	    *Pjv++ = (Pjp)->jp_Addr;                            \
             continue;   /* for-loop */                          \
@@ -87,14 +87,14 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 		  (Pjbl->jbl_jp) + offset,                      \
 		  JL_DIGITTOSTATE(Pjbl->jbl_Expanse[offset],    \
 		  cLevel), (void *) Pjpm);                     \
-	Pleaf = (LeafType) (((Word_t ) Pleaf) + ((cLevel) * pop1)); \
+	Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
 	Pjv  += pop1;                                          \
     }                                                           \
-    assert(((((Word_t ) Pleaf) - ((Word_t ) Pjllnew)) / (cLevel)) == (MaxPop1)); \
+    assert(((((Word_t) Pleaf) - ((Word_t) Pjllnew)) / (cLevel)) == (MaxPop1)); \
     assert((Pjv - ValueArea(Pjllnew, MaxPop1)) == (MaxPop1));  \
     judyLFreeJBL(PjblRaw, Pjpm);                               \
     Pjp->jp_Type = (NewJPType);                                 \
-    Pjp->jp_Addr = (Word_t ) PjllnewRaw;                         \
+    Pjp->jp_Addr = (Word_t) PjllnewRaw;                         \
     goto ContinueDelWalk;       /* delete from new leaf */      \
 }
 
@@ -173,16 +173,16 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 			      Pjp2 + offset - 1,                \
 			      JL_DIGITTOSTATE(digit, cLevel),   \
 			      (void *) Pjpm);                  \
-	    Pleaf = (LeafType) (((Word_t ) Pleaf) + ((cLevel) * pop1)); \
+	    Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
 	    Pjv  += pop1;                                      \
 	}                                                       \
 	judyLFreeJBBJP(Pjp2Raw, /* pop1 = */ offset, Pjpm);    \
     }                                                           \
-    assert(((((Word_t ) Pleaf) - ((Word_t ) Pjllnew)) / (cLevel)) == (MaxPop1)); \
+    assert(((((Word_t) Pleaf) - ((Word_t) Pjllnew)) / (cLevel)) == (MaxPop1)); \
     assert((Pjv - ValueArea(Pjllnew, MaxPop1)) == (MaxPop1));  \
     judyLFreeJBB(PjbbRaw, Pjpm);                               \
     Pjp->jp_Type = (NewJPType);                                 \
-    Pjp->jp_Addr = (Word_t ) PjllnewRaw;                         \
+    Pjp->jp_Addr = (Word_t) PjllnewRaw;                         \
     goto ContinueDelWalk;       /* delete from new leaf */      \
 }
 
@@ -292,14 +292,14 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
                 pop1 = LeafToLeaf(Pleaf, JL_PVALUEPASS Pjp2,            \
                                   JL_DIGITTOSTATE(ldigit, cLevel),      \
                                   (void *) Pjpm);                      \
-                Pleaf = (LeafType) (((Word_t ) Pleaf) + ((cLevel) * pop1)); \
+                Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
                 Pjv  += pop1;                                          \
             }                                                           \
-            assert(((((Word_t ) Pleaf) - ((Word_t ) Pjllnew)) / (cLevel)) == (MaxPop1)); \
+            assert(((((Word_t) Pleaf) - ((Word_t) Pjllnew)) / (cLevel)) == (MaxPop1)); \
 	    assert((Pjv - ValueArea(Pjllnew, MaxPop1)) == (MaxPop1));  \
             judyLFreeJBU(PjbuRaw, Pjpm);                               \
             Pjp->jp_Type = (NewJPType);                                 \
-            Pjp->jp_Addr = (Word_t ) PjllnewRaw;                         \
+            Pjp->jp_Addr = (Word_t) PjllnewRaw;                         \
             goto ContinueDelWalk;       /* delete from new leaf */      \
         }
 
@@ -384,7 +384,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
                               Index & cJL_DCDMASK(cIS), /* TBD, Doug says */ \
                               (void *) Pjpm);                          \
             D_cdP0 = (~cJL_MASKATSTATE((cIS) + 1)) & JL_JPDCDPOP0(Pjp); \
-            JL_JPSETADT(Pjp, (Word_t )PjllnewRaw, D_cdP0, NewJPType);    \
+            JL_JPSETADT(Pjp, (Word_t)PjllnewRaw, D_cdP0, NewJPType);    \
             goto ContinueDelWalk;       /* delete from new leaf */      \
         }
 
@@ -431,7 +431,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
             DeleteCopy((LeafType) (Pjp->jp_LIndex), Pleaf, pop1, offset, cIS); \
             JL_DELETECOPY(Pjvnew, Pjv, pop1, offset, cIS);      \
             FreeLeaf(PjllRaw, pop1, Pjpm);                      \
-            Pjp->jp_Addr = (Word_t ) PjvnewRaw;                  \
+            Pjp->jp_Addr = (Word_t) PjvnewRaw;                  \
             Pjp->jp_Type = (BaseJPType) - 2 + (MaxPop1);        \
             return 1;                                          \
         }
@@ -468,7 +468,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
             DeleteCopy((LeafType) Pjllnew, Pleaf, pop1, offset, cIS);   \
             JL_DELETECOPY(Pjvnew, Pjv, pop1, offset, cIS);              \
             FreeLeaf(PleafRaw, pop1, Pjpm);                             \
-            Pjp->jp_Addr = (Word_t ) PjllnewRaw;                         \
+            Pjp->jp_Addr = (Word_t) PjllnewRaw;                         \
             return 1;                                                  \
         }
 
@@ -626,7 +626,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
             DeleteInPlace(Pleaf, pop1, offset, cIS);            \
             JL_DELETECOPY(Pjvnew, Pjv, pop1, offset, ignore);   \
             judyLFreeJV(PjvRaw, pop1, Pjpm);                  \
-            (Pjp->jp_Addr) = (Word_t ) PjvnewRaw;                \
+            (Pjp->jp_Addr) = (Word_t) PjvnewRaw;                \
         }
 
 #define JL_IMMED(cIS,LeafType,BaseJPType,SearchLeaf,DeleteInPlace)      \

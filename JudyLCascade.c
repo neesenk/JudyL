@@ -1,7 +1,7 @@
 #include "JudyL.h"
 
-extern int judyCreateBranchL(Pjp_t, Pjp_t, uint8_t *, Word_t , void *);
-extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t , void *);
+extern int judyCreateBranchL(Pjp_t, Pjp_t, uint8_t *, Word_t, void *);
+extern int judyCreateBranchB(Pjp_t, Pjp_t, uint8_t *, Word_t, void *);
 static const jbb_t StageJBBZero;	// zeroed versions of namesake struct.
 
 static void judyCopy3toW(PWord_t PDest, uint8_t * PSrc, Word_t LeafIndexes)
@@ -72,7 +72,7 @@ static int judyStageJBBtoJBB(Pjp_t PjpLeaf,	// JP of leaf being splayed.
 		JL_COPYMEM(Pjp, PjpArray, NumJP);
 		PjpArray += NumJP;
 	}
-	PjpLeaf->jp_Addr = (Word_t ) PjbbRaw;
+	PjpLeaf->jp_Addr = (Word_t) PjbbRaw;
 	PjpLeaf->jp_Type += cJL_JPBRANCH_B2 - cJL_JPLEAF2;	// Leaf to BranchB.
 
 	return 1;
@@ -171,7 +171,7 @@ int judyCascade1(Pjp_t Pjp, void *Pjpm)
 	}
 
 	DcdP0 = JL_JPDCDPOP0(Pjp) | (PLeaf[0] & cJL_DCDMASK(1));
-	JL_JPSETADT(Pjp, (Word_t ) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
+	JL_JPSETADT(Pjp, (Word_t)PjlbRaw, DcdP0, cJL_JPLEAF_B1);
 
 	return 1;
 }
@@ -203,7 +203,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 			return -1;	// out of memory
 
 		DcdP0 = (CIndex & cJL_DCDMASK(1)) | JL_JPDCDPOP0(Pjp);
-		JL_JPSETADT(Pjp, (Word_t ) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
+		JL_JPSETADT(Pjp, (Word_t) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
 
 		return 1;
 	}
@@ -240,7 +240,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 				Pjvnew = P_JV(PjvnewRaw);
 
 				JL_COPYMEM(Pjvnew, Pjv + Start, Pop1);
-				PjpJP->jp_Addr = (Word_t ) PjvnewRaw;
+				PjpJP->jp_Addr = (Word_t) PjvnewRaw;
 
 				JL_COPYMEM(PjpJP->jp_LIndex, PLeaf + Start, Pop1);
 				PjpJP->jp_Type = cJL_JPIMMED_1_02 + Pop1 - 2;
@@ -261,7 +261,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 				DcdP0 = (JL_JPDCDPOP0(Pjp) & cJL_DCDMASK(2))
 				    | (CIndex & cJL_DCDMASK(2 - 1)) | (Pop1 - 1);
 
-				JL_JPSETADT(PjpJP, (Word_t ) PjllRaw, DcdP0, cJL_JPLEAF1);
+				JL_JPSETADT(PjpJP, (Word_t) PjllRaw, DcdP0, cJL_JPLEAF1);
 			} else {
 				Word_t DcdP0;
 				Pjlb_t PjlbRaw;
@@ -273,7 +273,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 				DcdP0 = (JL_JPDCDPOP0(Pjp) & cJL_DCDMASK(2))
 				    | (CIndex & cJL_DCDMASK(2 - 1)) | (Pop1 - 1);
 
-				JL_JPSETADT(PjpJP, (Word_t ) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
+				JL_JPSETADT(PjpJP, (Word_t) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
 			}
 			ExpCnt++;
 			if (End == cJL_LEAF2_MAXPOP1)
@@ -330,7 +330,7 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 		JL_COPYMEM(Pjvnew, Pjv, cJL_LEAF3_MAXPOP1);
 
 		DcdP0 = (CIndex & cJL_DCDMASK(2)) | JL_JPDCDPOP0(Pjp);
-		JL_JPSETADT(Pjp, (Word_t ) PjllRaw, DcdP0, cJL_JPLEAF2);
+		JL_JPSETADT(Pjp, (Word_t) PjllRaw, DcdP0, cJL_JPLEAF2);
 
 		return 1;
 	}
@@ -369,7 +369,7 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 				DcdP0 = (JL_JPDCDPOP0(Pjp) & cJL_DCDMASK(3))
 				    | (CIndex & cJL_DCDMASK(3 - 1)) | (Pop1 - 1);
 
-				JL_JPSETADT(PjpJP, (Word_t ) PjllRaw, DcdP0, cJL_JPLEAF2);
+				JL_JPSETADT(PjpJP, (Word_t) PjllRaw, DcdP0, cJL_JPLEAF2);
 			}
 			ExpCnt++;
 			if (End == cJL_LEAF3_MAXPOP1)
@@ -439,7 +439,7 @@ int judyCascadeL(Pjp_t Pjp, void *Pjpm)
 		Pjvnew = JL_LEAF3VALUEAREA(Pjll, cJL_LEAFW_MAXPOP1);
 		JL_COPYMEM(Pjvnew, Pjv, cJL_LEAFW_MAXPOP1);
 
-		JL_JPSETADT(&(StageJP[0]), (Word_t )PjllRaw, cJL_LEAFW_MAXPOP1-1, cJL_JPLEAF3);
+		JL_JPSETADT(&(StageJP[0]), (Word_t)PjllRaw, cJL_LEAFW_MAXPOP1-1, cJL_JPLEAF3);
 		if (judyCreateBranchL(Pjp, StageJP, StageExp, 1, Pjpm) == -1)
 			return -1;
 
@@ -474,7 +474,7 @@ int judyCascadeL(Pjp_t Pjp, void *Pjpm)
 				Pjvnew = JL_LEAF3VALUEAREA(Pjll, Pop1);
 				JL_COPYMEM(Pjvnew, Pjv + Start, Pop1);
 
-				JL_JPSETADT(PjpJP, (Word_t ) PjllRaw, Pop1 - 1, cJL_JPLEAF3);
+				JL_JPSETADT(PjpJP, (Word_t) PjllRaw, Pop1 - 1, cJL_JPLEAF3);
 			}
 			ExpCnt++;
 			if (End == cJL_LEAFW_MAXPOP1)

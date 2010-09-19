@@ -17,10 +17,10 @@
  * fortunately portable, and its all hide-able by macros (see below). 
  */
 typedef struct JUDY_POINTER_OTHERS {
-	Word_t j_po_Addr;				// first word:  Pjp_t, Word_t , etc.
+	Word_t j_po_Addr;				// first word:  Pjp_t, Word_t, etc.
 	union {
-		uint8_t j_po_DcdP0[sizeof(Word_t ) - 1];
-		uint8_t j_po_Bytes[sizeof(Word_t )];	// last byte = jp_Type.
+		uint8_t j_po_DcdP0[sizeof(Word_t) - 1];
+		uint8_t j_po_Bytes[sizeof(Word_t)];	// last byte = jp_Type.
 	} jpo_u;
 } jpo_t;
 
@@ -36,8 +36,8 @@ typedef struct JUDY_POINTER_OTHERS {
  * JudyL the j_po_Addr field can hold the target value.
  */
 typedef struct JUDY_POINTER_IMMED {
-	uint8_t j_pi_1Index[sizeof(Word_t )];
-	uint8_t j_pi_LIndex[sizeof(Word_t ) - 1];
+	uint8_t j_pi_1Index[sizeof(Word_t)];
+	uint8_t j_pi_LIndex[sizeof(Word_t) - 1];
 	uint8_t j_pi_Type; // JP type, 1 of cJ*_JPIMMED*.
 } jpi_t;
 
@@ -54,7 +54,7 @@ typedef union JUDY_POINTER {	// JP.
 
 #define jp_LIndex  j_pi.j_pi_LIndex	// for storing Indexes in second word.
 #define jp_Addr    j_po.j_po_Addr
-#define jp_Type    j_po.jpo_u.j_po_Bytes[sizeof(Word_t ) - 1]
+#define jp_Type    j_po.jpo_u.j_po_Bytes[sizeof(Word_t) - 1]
 #define jp_DcdP0   j_po.jpo_u.j_po_DcdP0
 
 /** 
@@ -221,6 +221,6 @@ typedef struct JUDY_BRANCH_UNCOMPRESSED {
 // Also, to make lint happy, cast the whole result again because apparently
 // shifting a Word_t does not result in a Word_t !
 #define JL_DIGITTOSTATE(Digit,cState) \
-        ((Word_t ) (((Word_t ) (Digit)) << (((cState) - 1) * cJL_BITSPERBYTE)))
+        ((Word_t) (((Word_t) (Digit)) << (((cState) - 1) * cJL_BITSPERBYTE)))
 
 #endif // ! _JUDY_PRIVATE_BRANCH_INCLUDED

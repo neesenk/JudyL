@@ -27,7 +27,7 @@ int judyCreateBranchL(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 	JL_COPYMEM(Pjbl->jbl_Expanse, Exp, ExpCnt);
 	JL_COPYMEM(Pjbl->jbl_jp, PJPs, ExpCnt);
 
-	Pjp->jp_Addr = (Word_t ) PjblRaw;
+	Pjp->jp_Addr = (Word_t) PjblRaw;
 	return 1;
 }
 
@@ -101,7 +101,7 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 		}
 	}
 
-	Pjp->jp_Addr = (Word_t ) PjbbRaw;
+	Pjp->jp_Addr = (Word_t) PjbbRaw;
 	return 1;
 }
 
@@ -163,7 +163,7 @@ int judyCreateBranchU(Pjp_t Pjp, void *Pjpm)
 	}
 
 	judyLFreeJBB(PjbbRaw, Pjpm);
-	Pjp->jp_Addr = (Word_t ) PjbuRaw;
+	Pjp->jp_Addr = (Word_t) PjbuRaw;
 	Pjp->jp_Type += cJL_JPBRANCH_U - cJL_JPBRANCH_B;
 
 	return 1;

@@ -11,11 +11,6 @@
 extern "C" {
 #endif
 
-#ifndef _WORD_T
-#define _WORD_T
-typedef unsigned long Word_t, * PWord_t;  // expect 32-bit or 64-bit words.
-#endif
-
 /* Judy error numbers */
 typedef enum
 {
@@ -47,13 +42,13 @@ typedef enum
 
 extern void **	JudyLGet(const void *PArray, uint32_t Index);
 extern void **	JudyLIns(void **PPArray, uint32_t Index);
-extern int	JudyLInsArray(void **PPArray, Word_t, const PWord_t, const PWord_t);
+extern int	JudyLInsArray(void **PPArray, size_t, const uint32_t *, const void **);
 extern int	JudyLDel(void **PPArray, uint32_t Index);
 extern uint32_t	JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2);
 extern void **	JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex);
-extern Word_t	JudyLFreeArray(void **PPArray);
-extern Word_t	JudyLMemUsed(const void *PArray);
-extern Word_t	JudyLMemActive(const void *PArray);
+extern size_t	JudyLFreeArray(void **PPArray);
+extern size_t	JudyLMemUsed(const void *PArray);
+extern size_t	JudyLMemActive(const void *PArray);
 extern void **	JudyLFirst(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLNext(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLLast(const void *PArray, uint32_t *PIndex);
@@ -63,13 +58,13 @@ extern int      JudyLNextEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLLastEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLPrevEmpty(const void *PArray, uint32_t *PIndex);
 
-extern void *	JudyMalloc(Word_t);     // words reqd => words allocd.
-extern void	JudyFree(void *, Word_t); // free, size in words.
+extern void *	JudyMalloc(size_t);     // words reqd => words allocd.
+extern void	JudyFree(void *, size_t); // free, size in words.
 
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);
 extern int      JudySLDel(void **, const uint8_t *Index);
-extern Word_t	JudySLFreeArray(void **);
+extern size_t	JudySLFreeArray(void **);
 extern void **	JudySLFirst(const void *, uint8_t *Index);
 extern void **	JudySLNext(const void *, uint8_t *Index);
 extern void **	JudySLLast(const void *, uint8_t *Index);
@@ -78,7 +73,7 @@ extern void **	JudySLPrev(const void *, uint8_t *Index);
 extern void **	JudyHSGet(const void *PArray, void *Index, size_t len);
 extern void **	JudyHSIns(void **PPArray, void *Index, size_t len);
 extern int      JudyHSDel(void **PPArray, void *Index, size_t len);
-extern Word_t	JudyHSFreeArray(void **PPArray);
+extern size_t	JudyHSFreeArray(void **PPArray);
 extern uint32_t JudyHashStr(void *, size_t);
 
 #ifdef __cplusplus

@@ -73,7 +73,7 @@ int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm)
 	judyLFreeJBB(PjbbRaw, Pjpm);	// BranchB itself.
 
 	Pjp->jp_Type += cJL_JPBRANCH_L - cJL_JPBRANCH_B;
-	Pjp->jp_Addr = (Word_t ) PjblRaw;
+	Pjp->jp_Addr = (Word_t) PjblRaw;
 
 	return 1;
 }
@@ -118,11 +118,11 @@ int judyLeafB1ToLeaf1(Pjp_t Pjp, void *Pjpm)
 		PjvNew += Pop1;	// advance through new.
 	}
 
-	assert((((Word_t ) Pleaf1) - (Word_t ) P_JLL(PjllRaw))
+	assert((((Word_t) Pleaf1) - (Word_t) P_JLL(PjllRaw))
 	       == (PjvNew - JL_LEAF1VALUEAREA(P_JLL(PjllRaw), cJL_LEAF1_MAXPOP1)));
 	judyLFreeJLB1(PjlbRaw, Pjpm);
 
-	Pjp->jp_Addr = (Word_t ) PjllRaw;
+	Pjp->jp_Addr = (Word_t) PjllRaw;
 	Pjp->jp_Type = cJL_JPLEAF1;
 
 	return 1;

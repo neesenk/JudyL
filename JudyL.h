@@ -131,7 +131,7 @@ typedef enum {
 #define JL_LEAFTYPE(IndexSize)   ((IndexSize) + cJL_JPLEAF1 - 1)
 
 // MAXIMUM POPULATIONS OF LINEAR LEAVES:
-#define J_L_MAXB                (sizeof(Word_t ) * 64)
+#define J_L_MAXB                (sizeof(Word_t) * 64)
 #define ALLOCSIZES { 3, 5, 7, 11, 15, 23, 32, 47, 64, TERMINATOR }	// in words.
 #define cJL_LEAF1_MAXWORDS               (32)	// max Leaf1 size in words.
 
@@ -230,22 +230,22 @@ Pjbl_t judyLAllocJBL(Pjpm_t);
 void   judyLFreeJBL(Pjbl_t, Pjpm_t);
 Pjbb_t judyLAllocJBB(Pjpm_t);
 void   judyLFreeJBB(Pjbb_t, Pjpm_t);
-Pjp_t  judyLAllocJBBJP(Word_t , Pjpm_t);
-void   judyLFreeJBBJP(Pjp_t, Word_t , Pjpm_t);
+Pjp_t  judyLAllocJBBJP(Word_t, Pjpm_t);
+void   judyLFreeJBBJP(Pjp_t, Word_t, Pjpm_t);
 Pjbu_t judyLAllocJBU(Pjpm_t);
 void   judyLFreeJBU(Pjbu_t, Pjpm_t);
-Pjll_t judyLAllocJLL1(Word_t , Pjpm_t);
-void   judyLFreeJLL1(Pjll_t, Word_t , Pjpm_t);
-Pjll_t judyLAllocJLL2(Word_t , Pjpm_t);
-void   judyLFreeJLL2(Pjll_t, Word_t , Pjpm_t);
-Pjll_t judyLAllocJLL3(Word_t , Pjpm_t);
-void   judyLFreeJLL3(Pjll_t, Word_t , Pjpm_t);
-Pjlw_t judyLAllocJLW(Word_t );
-void   judyLFreeJLW(Pjlw_t, Word_t , Pjpm_t);
+Pjll_t judyLAllocJLL1(Word_t, Pjpm_t);
+void   judyLFreeJLL1(Pjll_t, Word_t, Pjpm_t);
+Pjll_t judyLAllocJLL2(Word_t, Pjpm_t);
+void   judyLFreeJLL2(Pjll_t, Word_t, Pjpm_t);
+Pjll_t judyLAllocJLL3(Word_t, Pjpm_t);
+void   judyLFreeJLL3(Pjll_t, Word_t, Pjpm_t);
+Pjlw_t judyLAllocJLW(Word_t);
+void   judyLFreeJLW(Pjlw_t, Word_t, Pjpm_t);
 Pjlb_t judyLAllocJLB1(Pjpm_t);
 void   judyLFreeJLB1(Pjlb_t, Pjpm_t);
-Pjv_t  judyLAllocJV(Word_t , Pjpm_t);
-void   judyLFreeJV(Pjv_t, Word_t , Pjpm_t);
+Pjv_t  judyLAllocJV(Word_t, Pjpm_t);
+void   judyLFreeJV(Pjv_t, Word_t, Pjpm_t);
 Pjpm_t judyLAllocJPM(void);
 void   judyLFreeJPM(Pjpm_t PjpmFree, Pjpm_t PjpmStats);
 void   judyLFreeSM(Pjp_t, Pjpm_t);	// everything below Pjp.

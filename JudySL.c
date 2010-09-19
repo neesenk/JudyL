@@ -1,20 +1,20 @@
 #include "Judy.h"
 
-#define WORDSIZE (sizeof (Word_t ))	// bytes in word = JudyL index.
-#define WORDS(BYTES) (((BYTES) + WORDSIZE - 1) / WORDSIZE)	// round up.
-#define IS_PSCL(PSCL)     (((Word_t ) (PSCL)) & JLAP_INVALID)
-#define CLEAR_PSCL(PSCL)  ((Pscl_t)(((Word_t ) (PSCL)) & (~JLAP_INVALID)))
-#define SET_PSCL(PSCL)    (((Word_t ) (PSCL)) | JLAP_INVALID)
-#define LASTWORD_BY_VALUE(WORD) (! ((WORD) & 0xffL))
+#define WORDSIZE		(sizeof (uint32_t))	// bytes in word = JudyL index.
+#define WORDS(BYTES)		(((BYTES) + WORDSIZE - 1) / WORDSIZE)	// round up.
+#define IS_PSCL(PSCL)		(((uint32_t ) (PSCL)) & JLAP_INVALID)
+#define CLEAR_PSCL(PSCL)	((Pscl_t)(((uint32_t ) (PSCL)) & (~JLAP_INVALID)))
+#define SET_PSCL(PSCL)		(((uint32_t ) (PSCL)) | JLAP_INVALID)
+#define LASTWORD_BY_VALUE(WORD) (!((WORD) & 0xffL))
 
 #define COPYSTRINGtoWORD(WORD,STR) do {                 \
         uint8_t chr;                                    \
         WORD =  (STR)[0] << 24;				\
         if (WORD == 0) break;                           \
         if (!(chr = (STR)[1])) break;			\
-        WORD += (Word_t )(chr << 16);                    \
+        WORD += (uint32_t )(chr << 16);                    \
         if (!(chr  = (STR)[2])) break;                  \
-        WORD += (Word_t )(chr << 8) + (STR)[3];          \
+        WORD += (uint32_t )(chr << 8) + (STR)[3];          \
 } while(0)
 
 #define COPYWORDtoSTRING(STR,WORD)      do {                    \
@@ -64,10 +64,10 @@ static void JudySLModifyErrno(const void *PArray, const void *PArrayOrig)
 	JL_SET_ERRNO(PArray == PArrayOrig ? JL_ERRNO_NOTJUDYSL : JL_ERRNO_CORRUPT);
 }
 
-void **JudySLGet(const void *PArray, const uint8_t * Index)
+void **JudySLGet(const void *PArray, const uint8_t *Index)
 {
 	const uint8_t *pos = Index;	// place in Index.
-	Word_t indexword;	// buffer for aligned copy.
+	uint32_t indexword;	// buffer for aligned copy.
 	void **PPValue;	// from JudyL array.
 
 	if (Index == NULL) {
@@ -88,17 +88,17 @@ void **JudySLGet(const void *PArray, const uint8_t * Index)
 	} while (1);
 }
 
-void **JudySLIns(void **PPArray, const uint8_t * Index)
+void **JudySLIns(void **PPArray, const uint8_t *Index)
 {
 	void **PPArrayOrig = PPArray;	// for error reporting.
 	const uint8_t *pos = Index;	// place in Index.
 	const uint8_t *pos2 = NULL;	// old Index (SCL being moved).
-	Word_t len;		// bytes remaining.
+	uint32_t len;		// bytes remaining.
 
-	Word_t len2 = 0;	// for old Index (SCL being moved).
-	Word_t scl2 = 0;	// size in words of SCL
-	Word_t indexword;	// buffer for aligned copy.
-	Word_t indexword2;	// for old Index (SCL being moved).
+	uint32_t len2 = 0;	// for old Index (SCL being moved).
+	uint32_t scl2 = 0;	// size in words of SCL
+	uint32_t indexword;	// buffer for aligned copy.
+	uint32_t indexword2;	// for old Index (SCL being moved).
 	void **PPValue;	// from JudyL array.
 	void **PPValue2;	// for old Index (SCL being moved).
 	Pscl_t Pscl = NULL;	// shortcut leaf.
@@ -149,7 +149,7 @@ void **JudySLIns(void **PPArray, const uint8_t * Index)
 				assert(PPValue2 != NULL);
 
 				if (len2 <= WORDSIZE) {
-					*((PWord_t ) PPValue2) = (Word_t ) (Pscl->scl_Pvalue);
+					*((uint32_t *) PPValue2) = (uint32_t ) (Pscl->scl_Pvalue);
 				} else {
 					APPEND_SCL(Pscl2, PPValue2, pos2 + WORDSIZE, len2 - WORDSIZE);
 					(Pscl2->scl_Pvalue) = Pscl->scl_Pvalue;
@@ -197,7 +197,7 @@ int JudySLDel(void **PPArray, const uint8_t * Index)
 static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 			const uint8_t *Index, size_t len)
 {
-	Word_t indexword;	// next word to find.
+	uint32_t indexword;	// next word to find.
 	void **PPValue;	// from JudyL array.
 	int retcode;		// from lower-level call.
 
@@ -206,7 +206,7 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 
 	if (IS_PSCL(*PPArray)) {
 		Pscl_t Pscll = CLEAR_PSCL(*PPArray);
-		Word_t words;
+		uint32_t words;
 
 		if (STRCMP(Index, Pscll->scl_Index))
 			return 0;	// incorrect index.
@@ -416,13 +416,13 @@ void **JudySLLast(const void *PArray, uint8_t * Index)
 	return PPValue;
 }
 
-Word_t JudySLFreeArray(void **PPArray)
+size_t JudySLFreeArray(void **PPArray)
 {
 	void **PPArrayOrig = PPArray;	// for error reporting.
 	uint32_t indexword = 0;		// word just found.
 	void **PPValue;			// from Judy array.
-	Word_t bytes_freed = 0;		// bytes freed at this level.
-	Word_t bytes_total = 0;		// bytes freed at all levels.
+	uint32_t bytes_freed = 0;		// bytes freed at this level.
+	uint32_t bytes_total = 0;		// bytes freed at all levels.
 	if (PPArray == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
 		return JERR;
@@ -430,7 +430,7 @@ Word_t JudySLFreeArray(void **PPArray)
 
 	if (IS_PSCL(*PPArray)) {
 		Pscl_t Pscl = CLEAR_PSCL(*PPArray);
-		Word_t freewords = SCLSIZE(STRLEN(Pscl->scl_Index));
+		uint32_t freewords = SCLSIZE(STRLEN(Pscl->scl_Index));
 		JudyFree((void *)Pscl, freewords);
 		*PPArray = NULL;
 		return freewords * WORDSIZE;
