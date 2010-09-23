@@ -175,8 +175,7 @@ static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjp
 
 #define	BMPJP0(Subexp)       (P_JP(JL_JBB_PJP(Pjbb, Subexp)))
 #define	BMPJP(Subexp,JPnum)  (BMPJP0(Subexp) + (JPnum))
-#define	CLPERJPS(jpcount) \
-((((jpcount) * cJL_WORDSPERJP) + cJL_WORDSPERCL - 1) / cJL_WORDSPERCL)
+#define	CLPERJPS(jpcount)    ((((jpcount) * cJL_WORDSPERJP) + cJL_WORDSPERCL - 1) / cJL_WORDSPERCL)
 
 		for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
 			jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp));

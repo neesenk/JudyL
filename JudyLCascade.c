@@ -221,15 +221,11 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 
 			StageExp[ExpCnt] = JL_DIGITATSTATE(CIndex, 2);
 
-			if (Pop1 == 1) {// cJL_JPIMMED_1_01
+			if (Pop1 == 1) {
 				Word_t DcdP0;
 				DcdP0 = (JL_JPDCDPOP0(Pjp) & cJL_DCDMASK(1)) | CIndex;
 				JL_JPSETADT(PjpJP, Pjv[Start], DcdP0, cJL_JPIMMED_1_01);
 			} else if (Pop1 <= cJL_IMMED1_MAXPOP1) {
-//              cJL_JPIMMED_1_02..3:  JudyL 32
-//              cJ1_JPIMMED_1_02..7:  Judy1 32
-//              cJL_JPIMMED_1_02..7:  JudyL 64
-//              cJ1_JPIMMED_1_02..15: Judy1 64
 				Pjv_t PjvnewRaw;
 				Pjv_t Pjvnew;
 

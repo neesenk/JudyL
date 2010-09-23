@@ -1,11 +1,11 @@
 #include "JudyL.h"
 
-void *JudyMalloc(size_t Words)
+static void *JudyMalloc(size_t Words)
 {
 	return calloc(Words, sizeof(Word_t));
 }
 
-void JudyFree(void *PWord, size_t Words)
+static void JudyFree(void *PWord, size_t Words)
 {
 	(void)Words;
 	free(PWord);

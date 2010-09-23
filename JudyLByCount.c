@@ -56,12 +56,6 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 	(Offset) = (Count0) - (Pop1lower);	\
 	assert((Offset) >= 0);			\
 	assert((Offset) <= JL_JPLEAF_POP0(Pjp))
-#define	SETOFFSET_IMM_CK(Offset,Count0,Pop1lower,cPop1)	\
-	(Offset) = (Count0) - (Pop1lower);		\
-	assert((Offset) >= 0);				\
-	assert((Offset) <  (cPop1))
-#define	SETOFFSET_IMM(Offset,Count0,Pop1lower) \
-	(Offset) = (Count0) - (Pop1lower)
 
       SMByCount:		// return here for next branch/leaf.
 	switch (JL_JPTYPE(Pjp)) {
@@ -107,8 +101,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		Pjbb = P_JBB(Pjp->jp_Addr);
 #define	BMPJP0(Subexp)	     (P_JP(JL_JBB_PJP(Pjbb, Subexp)))
 #define	BMPJP(Subexp,JPnum)  (BMPJP0(Subexp) + (JPnum))
-#define	JBB_FOUNDEXPANSE			\
-{					\
+#define	JBB_FOUNDEXPANSE	{				       \
     JL_BITMAPDIGITB(digit, subexp, JL_JBB_BITMAP(Pjbb,subexp), jpnum); \
     JL_SETDIGIT(*PIndex, digit, state);	\
     Pjp = BMPJP(subexp, jpnum);		\
@@ -168,11 +161,11 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 	// Common code (state-independent) for all cases of uncompressed branches:
 	BranchU:
 		Pjbu = P_JBU(Pjp->jp_Addr);
-#define	JBU_FOUNDEXPANSE {			\
+#define	JBU_FOUNDEXPANSE do {			\
 	JL_SETDIGIT(*PIndex, jpnum, state);	\
 	Pjp = (Pjbu->jbu_jp) + jpnum;		\
 	goto SMByCount;				\
-}
+} while (0)
 		if (LOWERHALF(Count0, pop1lower, pop1)) {
 			for (jpnum = 0; jpnum < cJL_BRANCHUNUMJPS; ++jpnum) {
 				if ((Pjbu->jbu_jp[jpnum].jp_Type) <= cJL_JPNULLMAX)
@@ -206,13 +199,11 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 		return PPJERR;
 	}
-#define	PREPL_DCD(cState)				\
-	JL_SETDCD(*PIndex, Pjp, cState);	        \
-	PREPL
-#define	PREPL_SETPOP1  pop1 = JL_JPLEAF_POP0(Pjp) + 1
+
+#define	PREPL_DCD(cState) JL_SETDCD(*PIndex, Pjp, cState); PREPL
 #define	PREPL				\
 	Pjll = P_JLL(Pjp->jp_Addr);	\
-	PREPL_SETPOP1;			\
+	pop1 = JL_JPLEAF_POP0(Pjp) + 1;	\
 	SETOFFSET(offset, Count0, pop1lower, Pjp)
 	case cJL_JPLEAF1:
 		PREPL_DCD(1);
@@ -263,23 +254,21 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		return (void **)(P_JV(JL_JLB_PVALUE(Pjlb, subexp)) + offset);
 	}
 
-#define	SET_01(cState)  JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), cState)
 	case cJL_JPIMMED_1_01:
-		SET_01(1);
+		JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), 1);
 		goto Imm_01;
 	case cJL_JPIMMED_2_01:
-		SET_01(2);
+		JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), 2);
 		goto Imm_01;
 	case cJL_JPIMMED_3_01:
-		SET_01(3);
+		JL_SETDIGITS(*PIndex, JL_JPDCDPOP0(Pjp), 3);
 		goto Imm_01;
 	Imm_01:
 		return (void **)(&Pjp->jp_Addr);
-#define	PJI (Pjp->jp_LIndex)
 	case cJL_JPIMMED_1_02:
 	case cJL_JPIMMED_1_03:
-		SETOFFSET_IMM(offset, Count0, pop1lower);
-		JL_SETDIGIT1(*PIndex, ((uint8_t *) PJI)[offset]);
+		offset = Count0 - pop1lower;
+		JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjp->jp_LIndex)[offset]);
 		return (void **)(P_JV(Pjp->jp_Addr) + offset);
 	default:
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);

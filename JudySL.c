@@ -2,9 +2,9 @@
 
 #define WORDSIZE		(sizeof (uint32_t))	// bytes in word = JudyL index.
 #define WORDS(BYTES)		(((BYTES) + WORDSIZE - 1) / WORDSIZE)	// round up.
-#define IS_PSCL(PSCL)		(((uint32_t ) (PSCL)) & JLAP_INVALID)
-#define CLEAR_PSCL(PSCL)	((Pscl_t)(((uint32_t ) (PSCL)) & (~JLAP_INVALID)))
-#define SET_PSCL(PSCL)		(((uint32_t ) (PSCL)) | JLAP_INVALID)
+#define IS_PSCL(PSCL)		(((unsigned long) (PSCL)) & JLAP_INVALID)
+#define CLEAR_PSCL(PSCL)	((Pscl_t)(((unsigned long) (PSCL)) & (~JLAP_INVALID)))
+#define SET_PSCL(PSCL)		(((unsigned long) (PSCL)) | JLAP_INVALID)
 #define LASTWORD_BY_VALUE(WORD) (!((WORD) & 0xffL))
 
 #define COPYSTRINGtoWORD(WORD,STR) do {                 \
@@ -53,6 +53,17 @@ typedef struct SHORCUTLEAF {
     *(PPARRAY) = (void *)SET_PSCL(PSCL);                               \
     ((PSCL)->scl_Pvalue) = NULL;                               \
     (void)STRCPY((PSCL)->scl_Index, INDEX);                             \
+}
+
+static void *JudyMalloc(size_t words)
+{
+	return calloc(words, WORDSIZE);
+}
+
+static void JudyFree(void *PWord, size_t Words)
+{
+	(void)Words;
+	free(PWord);
 }
 
 static int JudySLDelSub(void **, void **, const uint8_t *, size_t);
@@ -149,7 +160,7 @@ void **JudySLIns(void **PPArray, const uint8_t *Index)
 				assert(PPValue2 != NULL);
 
 				if (len2 <= WORDSIZE) {
-					*((uint32_t *) PPValue2) = (uint32_t ) (Pscl->scl_Pvalue);
+					*PPValue2 = Pscl->scl_Pvalue;
 				} else {
 					APPEND_SCL(Pscl2, PPValue2, pos2 + WORDSIZE, len2 - WORDSIZE);
 					(Pscl2->scl_Pvalue) = Pscl->scl_Pvalue;
@@ -299,7 +310,7 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 			return (&PSCLVALUE(PArray));
 		}
 
-		indexword = ~0UL;
+		indexword = (uint32_t)~0UL;
 		if ((PPValue = JudyLLast(PArray, &indexword)) == PPJERR) {
 			JudySLModifyErrno(PArray, orig ? PArray : NULL);
 			return PPJERR;

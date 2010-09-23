@@ -232,9 +232,9 @@ extern const uint8_t jL_BranchBJPPopToWords[];
 #define SEARCHLEAFNATIVE(LEAFTYPE,ADDR,POP1,INDEX)              \
     LEAFTYPE *P_leaf = (LEAFTYPE *)(ADDR);                      \
     LEAFTYPE I_ndex = (LEAFTYPE)INDEX; /* truncate hi bits */   \
-    Word_t l_ow   = cJL_ALLONES;                              \
-    Word_t m_id;                                              \
-    Word_t h_igh  = POP1;                                     \
+    Word_t l_ow   = cJL_ALLONES;				\
+    Word_t m_id;						\
+    Word_t h_igh  = POP1;					\
                                                                 \
     while ((h_igh - l_ow) > 1UL) {                              \
         m_id = (h_igh + l_ow) / 2;                              \
@@ -249,11 +249,11 @@ extern const uint8_t jL_BranchBJPPopToWords[];
 
 #define SEARCHLEAFNONNAT(ADDR,POP1,INDEX,LFBTS,COPYINDEX)       \
     uint8_t *P_leaf = (uint8_t *)(ADDR);                        \
-    Word_t l_ow   = cJL_ALLONES;                              \
-    Word_t m_id;                                              \
-    Word_t h_igh  = POP1;                                     \
-    Word_t I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));          \
-    Word_t i_ndex;                                            \
+    Word_t l_ow   = cJL_ALLONES;				\
+    Word_t m_id;						\
+    Word_t h_igh  = POP1;					\
+    Word_t I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));		\
+    Word_t i_ndex;						\
                                                                 \
     I_ndex = JL_LEASTBYTES((INDEX), (LFBTS));                   \
     while ((h_igh - l_ow) > 1UL) {                              \
@@ -473,7 +473,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 #define JL_INSERTINPLACE3(PBYTE,POP1,OFFSET,INDEX) do {		\
 	Word_t i_off = POP1;                                    \
 	while (i_off-- > (OFFSET)) {                            \
-		Word_t i_dx = i_off * 3;                       \
+		Word_t i_dx = i_off * 3;			\
 		(PBYTE)[i_dx + 0 + 3] = (PBYTE)[i_dx + 0];      \
 		(PBYTE)[i_dx + 1 + 3] = (PBYTE)[i_dx + 1];      \
 		(PBYTE)[i_dx + 2 + 3] = (PBYTE)[i_dx + 2];      \
@@ -525,14 +525,14 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 	assert((long) (POP1) > 0);                              \
 	assert((Word_t) (OFFSET) <= (Word_t) (POP1));           \
 	for (o_ff = 0; o_ff < (OFFSET); o_ff++) {               \
-		Word_t i_dx = o_ff * 3;                        \
+		Word_t i_dx = o_ff * 3;				\
 		(PDEST)[i_dx + 0] = (PSOURCE)[i_dx + 0];        \
 		(PDEST)[i_dx + 1] = (PSOURCE)[i_dx + 1];        \
 		(PDEST)[i_dx + 2] = (PSOURCE)[i_dx + 2];        \
 	}                                                       \
 	JL_COPY3_LONG_TO_PINDEX(&(PDEST)[(OFFSET) * 3], INDEX); \
 	for (; o_ff < (POP1); o_ff++) {		                \
-		Word_t i_dx = o_ff * 3;                        \
+		Word_t i_dx = o_ff * 3;				\
 		(PDEST)[i_dx + 0 + 3] = (PSOURCE)[i_dx + 0];    \
 		(PDEST)[i_dx + 1 + 3] = (PSOURCE)[i_dx + 1];    \
 		(PDEST)[i_dx + 2 + 3] = (PSOURCE)[i_dx + 2];    \
@@ -568,14 +568,14 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 		*_Pdest++ = *_Psource++;				\
 } while (0)
 
-#define JL_ALLOC_ERRNO(ADDR)			\
+#define JL_ALLOC_ERRNO(ADDR)		\
         (((void *) (ADDR) != NULL) ? JL_ERRNO_OVERRUN : JL_ERRNO_NOMEM)
 
-#define JL_CHECKALLOC(Type, Ptr, Retval) do {           \
-        if ((Ptr) < (Type) sizeof(Word_t)) {          \
-		JL_SET_ERRNO(JL_ALLOC_ERRNO(Ptr));	\
-		return(Retval);                         \
-        }						\
+#define JL_CHECKALLOC(Type, Ptr, Retval) do {				\
+        if ((Ptr) < (Type) sizeof(Word_t)) {				\
+		JL_SET_ERRNO(JL_ALLOC_ERRNO(Ptr));			\
+		return(Retval);						\
+        }								\
 } while (0)
 
 // Leaf search routines

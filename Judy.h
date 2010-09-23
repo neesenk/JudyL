@@ -58,9 +58,6 @@ extern int      JudyLNextEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLLastEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLPrevEmpty(const void *PArray, uint32_t *PIndex);
 
-extern void *	JudyMalloc(size_t);     // words reqd => words allocd.
-extern void	JudyFree(void *, size_t); // free, size in words.
-
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);
 extern int      JudySLDel(void **, const uint8_t *Index);

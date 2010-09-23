@@ -46,8 +46,6 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
             goto Next;                                  \
         }
 
-#define JL_PVALUEPASS  Pjv,
-
 #define JL_BRANCH_COPY_IMMED_EVEN(cLevel,Pjp,ignore)            \
         if (JL_JPTYPE(Pjp) == cJL_JPIMMED_1_01 + (cLevel) - 2) {\
             *Pleaf++ = JL_JPDCDPOP0(Pjp);                       \
@@ -83,8 +81,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 								\
     for (offset = 0; offset < numJPs; ++offset) {               \
 	CopyImmed(cLevel, (Pjbl->jbl_jp) + offset, CopyIndex);  \
-	pop1 = LeafToLeaf(Pleaf, JL_PVALUEPASS                  \
-		  (Pjbl->jbl_jp) + offset,                      \
+	pop1 = LeafToLeaf(Pleaf, Pjv, (Pjbl->jbl_jp) + offset,  \
 		  JL_DIGITTOSTATE(Pjbl->jbl_Expanse[offset],    \
 		  cLevel), (void *) Pjpm);                     \
 	Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
@@ -169,8 +166,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 		continue;       /* empty sub-subexpanse */      \
 	    ++offset;           /* before any continue */       \
 	    CopyImmed(cLevel, Pjp2 + offset - 1, CopyIndex);    \
-	    pop1 = LeafToLeaf(Pleaf, JL_PVALUEPASS              \
-			      Pjp2 + offset - 1,                \
+	    pop1 = LeafToLeaf(Pleaf, Pjv, Pjp2 + offset - 1,    \
 			      JL_DIGITTOSTATE(digit, cLevel),   \
 			      (void *) Pjpm);                  \
 	    Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
@@ -289,9 +285,8 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
                 /* fast-process common types: */                        \
                 if (JL_JPTYPE(Pjp2) == (NullJPType)) continue;          \
                 CopyImmed(cLevel, Pjp2, CopyIndex);                     \
-                pop1 = LeafToLeaf(Pleaf, JL_PVALUEPASS Pjp2,            \
-                                  JL_DIGITTOSTATE(ldigit, cLevel),      \
-                                  (void *) Pjpm);                      \
+                pop1 = LeafToLeaf(Pleaf, Pjv, Pjp2,			\
+			JL_DIGITTOSTATE(ldigit, cLevel), (void *)Pjpm); \
                 Pleaf = (LeafType) (((Word_t) Pleaf) + ((cLevel) * pop1)); \
                 Pjv  += pop1;                                          \
             }                                                           \
@@ -375,14 +370,13 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
                         Alloc,ValueArea)                                \
         assert(((ParentLevel - 1) == (cIS)) || (pop1 >= (MaxPop1)));    \
         if (((ParentLevel - 1) > (cIS))  /* under narrow pointer */     \
-         && (pop1 == (MaxPop1))) {         /* hysteresis = 1       */     \
+         && (pop1 == (MaxPop1))) {         /* hysteresis = 1       */   \
             Word_t D_cdP0;                                              \
-            if ((PjllnewRaw = Alloc(MaxPop1, Pjpm)) == 0) return -1;   \
+            if ((PjllnewRaw = Alloc(MaxPop1, Pjpm)) == 0) return -1;	\
             Pjllnew = P_JLL(PjllnewRaw);                                \
-	    Pjv     = ValueArea((LeafType) Pjllnew, MaxPop1);          \
-            (void) LeafToLeaf((LeafType) Pjllnew, JL_PVALUEPASS Pjp,    \
-                              Index & cJL_DCDMASK(cIS), /* TBD, Doug says */ \
-                              (void *) Pjpm);                          \
+	    Pjv     = ValueArea((LeafType) Pjllnew, MaxPop1);		\
+            (void) LeafToLeaf((LeafType) Pjllnew, Pjv, Pjp,		\
+                              Index & cJL_DCDMASK(cIS),	(void *) Pjpm);	\
             D_cdP0 = (~cJL_MASKATSTATE((cIS) + 1)) & JL_JPDCDPOP0(Pjp); \
             JL_JPSETADT(Pjp, (Word_t)PjllnewRaw, D_cdP0, NewJPType);    \
             goto ContinueDelWalk;       /* delete from new leaf */      \
@@ -781,8 +775,7 @@ int JudyLDel(void **PPArray, uint32_t Index)
 			Pjbl_t Pjbl = P_JBL(PjblRaw);
 
 			for (offset = 0; offset < Pjbl->jbl_NumJPs; ++offset) {
-				pop1 = judyLeafM1ToLeafW(Pjlwnew, JL_PVALUEPASS
-					(Pjbl->jbl_jp) + offset, 
+				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, (Pjbl->jbl_jp) + offset, 
 					JL_DIGITTOSTATE(Pjbl->jbl_Expanse [offset],
 					cJL_BYTESPERWORD), (void *) Pjpm);
 				Pjlwnew += pop1;	// advance through indexes.
@@ -815,7 +808,7 @@ int JudyLDel(void **PPArray, uint32_t Index)
 				     bitmap >>= 1, ++digit) {
 					if (!(bitmap & 1))	// skip empty sub-subexpanse.
 						continue;
-					pop1 = judyLeafM1ToLeafW(Pjlwnew, JL_PVALUEPASS Pjp2 + offset,
+					pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, Pjp2 + offset,
 						JL_DIGITTOSTATE(digit, cJL_BYTESPERWORD), (void *) Pjpm);
 					Pjlwnew += pop1;	// advance through indexes.
 					Pjv += pop1;	// advance through values.
@@ -843,9 +836,8 @@ int JudyLDel(void **PPArray, uint32_t Index)
 					continue;
 				}
 
-				pop1 = judyLeafM1ToLeafW(Pjlwnew, JL_PVALUEPASS Pjp,
-							 JL_DIGITTOSTATE(ldigit, cJL_BYTESPERWORD),
-							 (void *) Pjpm);
+				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, Pjp,
+					JL_DIGITTOSTATE(ldigit, cJL_BYTESPERWORD), (void *) Pjpm);
 				Pjlwnew += pop1;	// advance through indexes.
 				Pjv += pop1;	// advance through values.
 			}

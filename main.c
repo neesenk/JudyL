@@ -37,9 +37,10 @@ double get_counter(void)
 	return result;
 }
 
-#define N_ 1000000
+#define N_ 10000000
 int buff[N_];
-int main(void)
+
+int random_test(void)
 {
 	int arrlen  = sizeof(buff)/sizeof(buff[0]);
 	int i = 0;
@@ -52,9 +53,6 @@ int main(void)
 	srand(0);
 	num = random();
 	for (i = 0; i< arrlen; i++) {
-	//	if (i % 1000 == 0)
-	//		num = random();
-	//	buff[i] = num + i;
 		buff[i] = random();
 		if (buff[i] == 0)
 			buff[i] = 1;
@@ -154,5 +152,11 @@ int main(void)
 	count += get_counter();
 	printf("delete count %lf\n", count);
 
+	return 0;
+}
+
+int main(void)
+{
+	random_test();
 	return 0;
 }

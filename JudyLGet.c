@@ -82,21 +82,14 @@ void **JudyLGet(const void *PArray, uint32_t Index)
 	}
 
 	Pjpm = P_JPM(PArray);
-	Pjp = &(Pjpm->jpm_JP);	// top branch is below JPM.
+	Pjp = &Pjpm->jpm_JP;	// top branch is below JPM.
 
 ContinueWalk:	// for going down one level; come here with Pjp set.
 	switch (JL_JPTYPE(Pjp)) {
-	// Ensure the switch table starts at 0 for speed; otherwise more code is executed:
 	case 0:
 		goto ReturnCorrupt;	// save a little code.
-	// Note:  These are legitimate in a BranchU (only) and do not constitute a fault.
-	case cJL_JPNULL1:
-	case cJL_JPNULL2:
-	case cJL_JPNULL3:
+	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		return NULL;
-	// Note:  The use of JL_DCDNOTMATCHINDEX() in branches is not strictly
-	// required,since this can be done at leaf level, but it costs nothing to do it
-	// sooner, and it aborts an unnecessary traversal sooner.
 	case cJL_JPBRANCH_L2:
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 2))
 			break;
@@ -108,8 +101,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	case cJL_JPBRANCH_L:{
 		Pjbl_t Pjbl;
 		Digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
-		// Common code for all BranchLs; come here with Digit set:
-	      JudyBranchL:
+	JudyBranchL: // Common code for all BranchLs; come here with Digit set:
 		Pjbl = P_JBL(Pjp->jp_Addr);
 		posidx = 0;
 		do {
@@ -155,9 +147,6 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		// for performance.
 	case cJL_JPBRANCH_U:
 		Pjp = JL_JBU_PJP(Pjp, Index, cJL_ROOTSTATE);
-		// If not a BranchU, traverse; otherwise fall into the next case, which makes
-		// this very fast code for a large Judy array (mainly BranchUs), especially
-		// when branches are already in the cache, such as for prev/next:
 		if (JL_JPTYPE(Pjp) != cJL_JPBRANCH_U3)
 			goto ContinueWalk;
 	case cJL_JPBRANCH_U3:
@@ -168,11 +157,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	case cJL_JPBRANCH_U2:
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 2)) break;
 		Pjp = JL_JBU_PJP(Pjp, Index, 2);
-		// Note:  BranchU2 is a special case that must continue traversal to a leaf,
-		// immed, full, or null type:
 		goto ContinueWalk;
-	// Note:  Here the calls of JL_DCDNOTMATCHINDEX() are necessary and check
-	// whether Index is out of the expanse of a narrow pointer.
 	case cJL_JPLEAF1:
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 1)) break;
 
@@ -219,36 +204,23 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 
 		return (void **)(Pjv + posidx);
 	}
-	// Note that the contents of jp_DcdPopO are different for cJL_JPIMMED_*_01:
-	case cJL_JPIMMED_1_01:
-	case cJL_JPIMMED_2_01:
-	case cJL_JPIMMED_3_01:
+	case cJL_JPIMMED_1_01: case cJL_JPIMMED_2_01: case cJL_JPIMMED_3_01:
 		if (JL_JPDCDPOP0(Pjp) != JL_TRIMTODCDSIZE(Index)) break;
 		return (void **)(&Pjp->jp_Addr);	// immediate value area.
-
-#define CHECKINDEXNATIVE(LEAF_T, PJP, IDX, INDEX)                       \
-if (((LEAF_T *)((PJP)->jp_LIndex))[(IDX) - 1] == (LEAF_T)(INDEX))       \
-        return ((void **)(P_JV((PJP)->jp_Addr) + (IDX) - 1))
-
-#define CHECKLEAFNONNAT(LFBTS, PJP, INDEX, IDX, COPY) {                 \
-    Word_t i_ndex;                                                    \
-    uint8_t *a_ddr;                                                     \
-    a_ddr  = (PJP)->jp_LIndex + (((IDX) - 1) * (LFBTS));                \
-    COPY(i_ndex, a_ddr);                                                \
-    if (i_ndex == JL_LEASTBYTES((INDEX), (LFBTS)))                      \
-        return ((void **)(P_JV((PJP)->jp_Addr) + (IDX) - 1));           \
-}
 	case cJL_JPIMMED_1_03:
-		CHECKINDEXNATIVE(uint8_t, Pjp, 3, Index);
+		if (((uint8_t *)Pjp->jp_LIndex)[2] == (uint8_t)Index)
+			return (void **)(P_JV(Pjp->jp_Addr) + 2);
 	case cJL_JPIMMED_1_02:
-		CHECKINDEXNATIVE(uint8_t, Pjp, 2, Index);
-		CHECKINDEXNATIVE(uint8_t, Pjp, 1, Index);
+		if (((uint8_t *)Pjp->jp_LIndex)[1] == (uint8_t)Index)
+			return (void **)(P_JV(Pjp->jp_Addr) + 1);
+		if (((uint8_t *)Pjp->jp_LIndex)[0] == (uint8_t)Index)
+			return (void **)(P_JV(Pjp->jp_Addr) + 0);
 		break;
 	default:
 	      ReturnCorrupt:
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 		return PPJERR;
-	}			// switch on JP type
+	}
 
 	return NULL;
 }

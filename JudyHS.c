@@ -1,9 +1,9 @@
 #include "Judy.h"
 
-#define IS_PLS(PLS)     (((uint32_t ) (PLS)) & JLAP_INVALID)
-#define CLEAR_PLS(PLS)  (((uint32_t ) (PLS)) & (~JLAP_INVALID))
-#define SET_PLS(PLS)    (((uint32_t ) (PLS)) | JLAP_INVALID)
-#define WORDSIZE     (sizeof(uint32_t ))
+#define IS_PLS(PLS)     (((unsigned long) (PLS)) & JLAP_INVALID)
+#define CLEAR_PLS(PLS)  (((unsigned long) (PLS)) & (~JLAP_INVALID))
+#define SET_PLS(PLS)    (((unsigned long) (PLS)) | JLAP_INVALID)
+#define WORDSIZE     (sizeof(uint32_t))
 
 typedef struct L_EAFSTRING {
 	void *ls_Value;	// Value area (cannot change size)
@@ -12,8 +12,7 @@ typedef struct L_EAFSTRING {
 
 #define LS_STRUCTOVD     (sizeof(ls_t) - WORDSIZE)
 #define LS_WORDLEN(LEN)  (((LEN) + LS_STRUCTOVD + WORDSIZE - 1) / WORDSIZE)
-#define  COPYSTRING4toWORD(WORD,STR,LEN)			\
-{								\
+#define COPYSTRINGtoWORD(WORD,STR,LEN)	do {			\
     WORD = 0;							\
     switch (LEN) {						\
     default:    /* four and greater */				\
@@ -23,18 +22,26 @@ typedef struct L_EAFSTRING {
     case 1: WORD += (uint32_t )(((uint8_t *)(STR))[0]);		\
     case 0: break;						\
     }								\
-}
-#define COPYSTRINGtoWORD COPYSTRING4toWORD
+} while (0)
 
-#define JUDYHASHSTR(HVALUE,STRING,LENGTH)       \
-{                                               \
+#define JUDYHASHSTR(HVALUE,STRING,LENGTH) do {  \
     uint8_t *p_ = (uint8_t *)(STRING);          \
     uint8_t *q_ = p_ + (LENGTH);                \
     uint32_t c_ = 0;                            \
-    for (; p_ != q_; ++p_) {                    \
+    for (; p_ != q_; ++p_)			\
         c_ = (c_ * 31) + *p_;                   \
-    }                                           \
     (HVALUE) = c_;                              \
+} while (0)
+
+static void *JudyMalloc(size_t words)
+{
+	return calloc(words, WORDSIZE);
+}
+
+static void JudyFree(void *PWord, size_t Words)
+{
+	(void)Words;
+	free(PWord);
 }
 
 void **JudyHSGet(const void *PArray, void *Str, size_t Len)
@@ -308,7 +315,7 @@ static uint32_t delJudyLTree(void **PPValue, uint32_t Len)
 	return bytes_freed;
 }
 
-uint32_t JudyHSFreeArray(void **PPArray)
+size_t JudyHSFreeArray(void **PPArray)
 {
 	uint32_t Len;		// start at beginning
 	uint32_t bytes_freed;	// bytes freed at this level.

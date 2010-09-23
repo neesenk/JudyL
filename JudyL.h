@@ -167,9 +167,6 @@ typedef struct JUDYL_LEAF_BITMAP {
 	jLlbs_t jLlb_jLlbs[cJL_NUMSUBEXPL];
 } jlb_t, *Pjlb_t;
 
-// Words per bitmap leaf:
-#define cJL_WORDSPERLEAFB1  (sizeof(jlb_t) / cJL_BYTESPERWORD)
-
 /**
  * ARRAY-GLOBAL INFORMATION:
  * At the cost of an occasional additional cache fill, this object, which is

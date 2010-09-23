@@ -28,8 +28,8 @@ libjudy.so : $(OBJS)
 
 main.o: $(HEADFILE)
 
-test : libjudy.so main.o
-	$(CC) -O2 -g -Wall main.o -L. -ljudy -o test
+test : $(OBJS) main.o
+	$(CC) -O2 -g -Wall $(OBJS) main.o -o test
 
 $(OBJS) : $(HEADFILE)
 

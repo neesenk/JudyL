@@ -155,7 +155,6 @@ typedef struct JUDY_BRANCH_LINEAR {
 #define JL_BITMAPSETB(Pjbb, Index)  \
         (JL_JBB_BITMAP(Pjbb, JL_SUBEXPB(Index)) |= JL_BITPOSMASKB(Index))
 
-// Note:  JL_BITMAPCLEARB is not defined because the code does it a faster way.
 typedef struct JUDY_BRANCH_BITMAP_SUBEXPANSE {
 	BITMAPB_t jbbs_Bitmap;
 	Pjp_t jbbs_Pjp;
