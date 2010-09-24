@@ -28,10 +28,8 @@ static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 	int retcode;		// return codes:  -1, 0, 1.
 
 ContinueInsWalk:		// for modifying state without recursing.
-	switch (JL_JPTYPE(Pjp))	{// entry:  Pjp, Index.
-	case cJL_JPNULL1:
-	case cJL_JPNULL2:
-	case cJL_JPNULL3:
+	switch (JL_JPTYPE(Pjp))	{
+	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		assert((Pjp->jp_Addr) == 0);
 		JL_JPSETADT(Pjp, 0, Index, JL_JPTYPE(Pjp) + cJL_JPIMMED_1_01 - cJL_JPNULL1);
 		Pjpm->jpm_PValue = (Pjv_t)(&Pjp->jp_Addr);
@@ -91,7 +89,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 		Pjp->jp_Type += cJL_JPBRANCH_B - cJL_JPBRANCH_L;
 		judyLFreeJBL(PjblRaw, Pjpm);	// free old BranchL.
 		goto ContinueInsWalk;
-	      ConvertBranchLtoU:
+	ConvertBranchLtoU:
 		if ((PjbuRaw = judyLAllocJBU(Pjpm)) == NULL)
 			return -1;
 		Pjbu = P_JBU(PjbuRaw);
@@ -112,7 +110,6 @@ ContinueInsWalk:		// for modifying state without recursing.
 		Pjpm->jpm_LastUPop0 = Pjpm->jpm_Pop0;
 		goto ContinueInsWalk;
 	}
-
 	case cJL_JPBRANCH_B2:
 		JL_BRANCH_OUTLIER(digit, exppop1, 2, Pjp, Index, Pjpm);
 		goto JudyBranchB;
@@ -132,7 +129,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 
 		digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
 		exppop1 = Pjpm->jpm_Pop0;
-	      JudyBranchB:
+	JudyBranchB:
 		if ((Pjpm->jpm_Pop0 - Pjpm->jpm_LastUPop0) > JL_BTOU_POP_INCREMENT) {
 			if (Pjpm->jpm_Pop0 > JL_BRANCHB_MAX_POP) {
 				if (exppop1 > JL_BRANCHB_MIN_POP) {
@@ -243,7 +240,7 @@ ContinueInsWalk:		// for modifying state without recursing.
         if (GrowInPlace(exppop1)) {      /* add to current leaf */      \
             InsertInPlace(Pleaf, exppop1, offset, Index);               \
             JL_LEAFGROWVALUEADD(Pjv, exppop1, offset);                  \
-            return 1;                                                  \
+            return 1;							\
         }                                                               \
                                                                         \
         if (exppop1 < (MaxPop1)) {        /* grow to new leaf */        \
@@ -255,8 +252,8 @@ ContinueInsWalk:		// for modifying state without recursing.
             InsertCopy(Pleafnew, Pleaf, exppop1, offset, Index);        \
             JL_LEAFGROWVALUENEW(ValueArea, Pjv, exppop1, offset);       \
             Free(PjllRaw, exppop1, Pjpm);                               \
-            (Pjp->jp_Addr) = (Word_t) PjllnewRaw;                     \
-            return 1;                                                  \
+            (Pjp->jp_Addr) = (Word_t) PjllnewRaw;			\
+            return 1;							\
         }                                                               \
         assert(exppop1 == (MaxPop1))
 
@@ -673,7 +670,7 @@ void **JudyLIns(void **PPArray, uint32_t Index)
 		if (retcode == -1)
 			return PPJERR;
 		if (retcode == 1)
-			++(Pjpm->jpm_Pop0);	// incr total array popu.
+			++(Pjpm->jpm_Pop0);
 		assert(((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_L)
 		       || ((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_B)
 		       || ((Pjpm->jpm_JP.jp_Type) == cJL_JPBRANCH_U));

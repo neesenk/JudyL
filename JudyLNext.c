@@ -3,122 +3,8 @@
 #define	JUDYPREV 1		// neither set => use default.
 #endif
 #endif
-#include "JudyL.h"
 
-/* OVERVIEW OF Judy*Prev():
- * Use a reentrant switch statement (state machine, SM1 = "get") to decode the
- * callers *PIndex-1, starting with the (PArray), through branches, if
- * any, down to an immediate or a leaf.  Look for *PIndex-1 in that leaf, and
- * if found, return it.
- *
- * A dead end is either a branch that does not contain a JP for the appropriate
- * digit in *PIndex-1, or a leaf that does not contain the undecoded digits of
- * *PIndex-1.  Upon reaching a dead end, backtrack through the leaf/branches
- * that were just traversed, using a list (history) of parent JPs that is built
- * while going forward in SM1Get.  Start with the current leaf or branch.  In a
- * backtracked leaf, look for an Index less than *PIndex-1.  In each
- * backtracked branch, look "sideways" for the next JP, if any, lower than the
- * one for the digit (from *PIndex-1) that was previously decoded.  While
- * backtracking, if a leaf has no previous Index or a branch has no lower JP,
- * go to its parent branch in turn.  Upon reaching the JRP, return failure, "no
- * previous Index".  The backtrack process is sufficiently different from
- * SM1Get to merit its own separate reentrant switch statement (SM2 =
- * "backtrack").
- *
- * While backtracking, upon finding a lower JP in a branch, there is certain to
- * be a "prev" Index under that JP (unless the Judy array is corrupt).
- * Traverse forward again, this time taking the last (highest, right-most) JP
- * in each branch, and the last (highest) Index upon reaching an immediate or a
- * leaf.  This traversal is sufficiently different from SM1Get and SM2Backtrack
- * to merit its own separate reentrant switch statement (SM3 = "findlimit").
- *
- * "Decode" bytes in JPs complicate this process a little.  In SM1Get, when a
- * JP is a narrow pointer, that is, when states are skipped (so the skipped
- * digits are stored in jp_DcdPopO), compare the relevant digits to the same
- * digits in *PIndex-1.  If they are EQUAL, proceed in SM1Get as before.  If
- * jp_DcdPopOs digits are GREATER, treat the JP as a dead end and proceed in
- * SM2Backtrack.  If jp_DcdPopOs digits are LESS, treat the JP as if it had
- * just been found during a backtrack and proceed directly in SM3Findlimit.
- *
- * Note that Decode bytes can be ignored in SM3Findlimit; they dont matter.
- * Also note that in practice the Decode bytes are routinely compared with
- * *PIndex-1 because thats simpler and no slower than first testing for
- * narrowness.
- *
- * Decode bytes also make it unnecessary to construct the Index to return (the
- * revised *PIndex) during the search.  This step is deferred until finding an
- * Index during backtrack or findlimit, before returning it.  The first digit
- * of *PIndex is derived (saved) based on which JP is used in a JRP branch.
- * The remaining digits are obtained from the jp_DcdPopO field in the JP (if
- * any) above the immediate or leaf containing the found (prev) Index, plus the
- * remaining digit(s) in the immediate or leaf itself.  In the case of a LEAFW,
- * the Index to return is found directly in the leaf.
- *
- * Note:  Theoretically, as described above, upon reaching a dead end, SM1Get
- * passes control to SM2Backtrack to look sideways, even in a leaf.  Actually
- * its a little more efficient for the SM1Get leaf cases to shortcut this and
- * take care of the sideways searches themselves.  Hence the history list only
- * contains branch JPs, and SM2Backtrack only handles branches.  In fact, even
- * the branch handling cases in SM1Get do some shortcutting (sideways
- * searching) to avoid pushing history and calling SM2Backtrack unnecessarily.
- *
- * Upon reaching an Index to return after backtracking, *PIndex must be
- * modified to the found Index.  In principle this could be done by building
- * the Index from a saved rootdigit (in the top branch) plus the Dcd bytes from
- * the parent JP plus the appropriate Index bytes from the leaf.  However,
- * Immediates are difficult because their parent JPs lack one (last) digit.  So
- * instead just build the *PIndex to return "top down" while backtracking and
- * findlimiting.
- *
- * This function is written iteratively for speed, rather than recursively.
- *
- * CAVEATS:
- * Why use a backtrack list (history stack), since it has finite size?  The
- * size is small for Judy on both 32-bit and 64-bit systems, and a list (really
- * just an array) is fast to maintain and use.  Other alternatives include
- * doing a lookahead (lookaside) in each branch while traversing forward
- * (decoding), and restarting from the top upon a dead end.
- *
- * A lookahead means noting the last branch traversed which contained a
- * non-null JP lower than the one specified by a digit in *PIndex-1, and
- * returning to that point for SM3Findlimit.  This seems like a good idea, and
- * should be pretty cheap for linear and bitmap branches, but it could result
- * in up to 31 unnecessary additional cache line fills (in extreme cases) for
- * every uncompressed branch traversed.  We have considered means of attaching
- * to or hiding within an uncompressed branch (in null JPs) a "cache line map"
- * or other structure, such as an offset to the next non-null JP, that would
- * speed this up, but it seems unnecessary merely to avoid having a
- * finite-length list (array).  (If JudySL is ever made "native", the finite
- * list length will be an issue.)
- *
- * Restarting at the top of the Judy array after a dead end requires a careful
- * modification of *PIndex-1 to decrement the digit for the parent branch and
- * set the remaining lower digits to all 1s.  This must be repeated each time a
- * parent branch contains another dead end, so even though it should all happen
- * in cache, the CPU time can be excessive.  (For JudySL or an equivalent
- * "infinitely deep" Judy array, consider a hybrid of a large, finite,
- * "circular" list and a restart-at-top when the list is backtracked to
- * exhaustion.)
- *
- * Why search for *PIndex-1 instead of *PIndex during SM1Get?  In rare
- * instances this prevents an unnecessary decode down the wrong path followed
- * by a backtrack; its pretty cheap to set up initially; and it means the
- * SM1Get machine can simply return if/when it finds that Index.
- *
- * VARIATIONS FOR Judy*Next():
- *
- * The Judy*Next() code is nearly a perfect mirror of the Judy*Prev() code.
- * See the Judy*Prev() overview comments, and mentally switch the following:
- *
- * - "*PIndex-1"  => "*PIndex+1"
- * - "less than"  => "greater than"
- * - "lower"      => "higher"
- * - "lowest"     => "highest"
- * - "next-left"  => "next-right"
- * - "right-most" => "left-most"
- *
- * Note:  SM3Findlimit could be called SM3Findmax/SM3Findmin, but a common name
- * for both Prev and Next means many fewer ifdefs in this code. */
+#include "JudyL.h"
 
 #ifdef JUDYPREV
 void **JudyLPrev(const void *PArray, uint32_t *PIndex)
@@ -141,15 +27,14 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 	int offset;		// linear branch/leaf, from judySearchLeaf*().
 	int subexp;		// subexpanse in a bitmap branch.
 	Word_t bitposmask;	// bit in bitmap for Index.
-#define	HISTNUMMAX cJL_ROOTSTATE	// maximum branches traversable.
-	Pjp_t APjphist[HISTNUMMAX];	// list of branch JPs traversed.
-	int Aoffhist[HISTNUMMAX];	// list of next JP offsets; see above.
+	Pjp_t APjphist[cJL_ROOTSTATE];	// list of branch JPs traversed.
+	int Aoffhist[cJL_ROOTSTATE];	// list of next JP offsets; see above.
 	int histnum = 0;	// number of JPs now in list.
 
 #define	HISTPUSH(Pjp,Offset)			\
 	APjphist[histnum] = (Pjp);		\
 	Aoffhist[histnum] = (Offset);		\
-	if (++histnum >= HISTNUMMAX) {		\
+	if (++histnum >= cJL_ROOTSTATE) {	\
 	    JL_SET_ERRNO(JL_ERRNO_CORRUPT);	\
 	    return PPJERR;			\
 	}
@@ -225,11 +110,11 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #endif
 		return NULL;
 
-	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {	// must be a LEAFW
-		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
+	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
+		Pjlw_t Pjlw = P_JLW(PArray);
 		pop1 = Pjlw[0] + 1;
 
-		if ((offset = judySearchLeafW(Pjlw + 1, pop1, *PIndex)) >= 0) {	// Index is present.
+		if ((offset = judySearchLeafW(Pjlw + 1, pop1, *PIndex)) >= 0) {	
 			assert(offset < pop1);	// in expected range.
 			return (void **)(JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
 		}
@@ -246,7 +131,7 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #else
 		*PIndex = Pjlw[offset + 1];
 #endif
-		return (void **) (JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
+		return (void **)(JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
 	} else {
 		Pjpm_t Pjpm = P_JPM(PArray);
 		Pjp = &(Pjpm->jpm_JP);

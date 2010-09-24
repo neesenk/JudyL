@@ -12,8 +12,7 @@ extern "C" {
 #endif
 
 /* Judy error numbers */
-typedef enum
-{
+typedef enum {
         JL_ERRNO_NONE           = 0,
         JL_ERRNO_FULL           = 1,
         JL_ERRNO_NFMAX          = JL_ERRNO_FULL,
@@ -35,10 +34,10 @@ typedef enum
 	errno = (JErrno);				\
 } while (0)
 
-#define JERR (-1)                     /* functions returning int or Word_t */
-#define PJERR ((void *)  (~0UL))      /* mainly for use here, see below    */
-#define PPJERR ((void **) (~0UL))      /* functions that return void ***/
-#define JLAP_INVALID    0x1     /* flag to mark pointer "not a Judy array" */
+#define JERR		(-1)			/* functions returning int or Word_t */
+#define PJERR		((void *)(~0UL))	/* mainly for use here, see below    */
+#define PPJERR		((void **)(~0UL))	/* functions that return void ***/
+#define JLAP_INVALID    0x1			/* flag to mark pointer "not a Judy array" */
 
 extern void **	JudyLGet(const void *PArray, uint32_t Index);
 extern void **	JudyLIns(void **PPArray, uint32_t Index);

@@ -2,123 +2,6 @@
 #define _JUDYPRIVATE_INCLUDED
 #include "Judy.h"
 
-/** 
- * A VERY BRIEF EXPLANATION OF A JUDY ARRAY
- *
- * A Judy array is, effectively, a digital tree (or Trie) with 256 element
- * branches (nodes), and with "compression tricks" applied to low-population
- * branches or leaves to save a lot of memory at the cost of relatively little
- * CPU time or cache fills.
- *
- * In the actual implementation, a Judy array is level-less, and traversing the
- * "tree" actually means following the states in a state machine (SM) as
- * directed by the Index.  A Judy array is referred to here as an "SM", rather
- * than as a "tree"; having "states", rather than "levels".
- *
- * Each branch or leaf in the SM decodes a portion ("digit") of the original
- * Index; with 256-way branches there are 8 bits per digit.  There are 3 kinds
- * of branches, called:  Linear, Bitmap and Uncompressed, of which the first 2
- * are compressed to contain no NULL entries.
- *
- * An Uncompressed branch has a 1.0 cache line fill cost to decode 8 bits of
- * (digit, part of an Index), but it might contain many NULL entries, and is
- * therefore inefficient with memory if lightly populated.
- *
- * A Linear branch has a ~1.75 cache line fill cost when at maximum population.
- * A Bitmap branch has ~2.0 cache line fills.  Linear and Bitmap branches are
- * converted to Uncompressed branches when the additional memory can be
- * amortized with larger populations.  Higher-state branches have higher
- * priority to be converted.
- *
- * Linear branches can hold 28 elements (based on detailed analysis) -- thus 28
- * expanses.  A Linear branch is converted to a Bitmap branch when the 29th
- * expanse is required.
- *
- * A Bitmap branch could hold 256 expanses, but is forced to convert to an
- * Uncompressed branch when 185 expanses are required.  Hopefully, it is
- * converted before that because of population growth (again, based on detailed
- * analysis and heuristics in the code).
- *
- * A path through the SM terminates to a leaf when the Index (or key)
- * population in the expanse below a pointer will fit into 1 or 2 cache lines
- * (~31..255 Indexes).  A maximum-population Leaf has ~1.5 cache line fill
- * cost.
- *
- * Leaves are sorted arrays of Indexes, where the Index Sizes (IS) are:  0, 1,
- * 8, 16, 24, 32, [40, 48, 56, 64] bits.  The IS depends on the "density"
- * (population/expanse) of the values in the Leaf.  Zero bits are possible if
- * population == expanse in the SM (that is, a full small expanse).
- *
- * Elements of a branches are called Judy Pointers (JPs).  Each JP object
- * points to the next object in the SM, plus, a JP can decode an additional
- * 2[6] bytes of an Index, but at the cost of "narrowing" the expanse
- * represented by the next object in the SM.  A "narrow" JP (one which has
- * decode bytes/digits) is a way of skipping states in the SM.
- *
- * Although counterintuitive, we think a Judy SM is optimal when the Leaves are
- * stored at MINIMUM compression (narrowing, or use of Decode bytes).  If more
- * aggressive compression was used, decompression of a leaf be required to
- * insert an index.  Additional compression would save a little memory but not
- * help performance significantly.
- *
- * JUDY 32 - BIT STATE MACHINE(SM) EXAMPLE, FOR INDEX = 0x02040103
- * The Index used in this example is purposely chosen to allow small, simple examples 
- * below; each 1 - byte "digit" from the Index has a small numeric value that fits in 
- * one column.In the drawing below:
- *
- * JRP ==
- * Judy Root Pointer;
- * C == 1 byte of a 1. .3 byte Population(count of Indexes)
- * below this pointer.Since this is shared with the Decode field, the combined sizes 
- * must be 3[7], that is, 1 word less 1 byte for the JP Type.The 1 - byte field jp_Type 
- * is represented as:1. .3 == Number of bytes in the population(Pop0) word of the Branch 
- * or Leaf below the pointer(note:1. .7 on 64 - bit);
- *
- * indicates:
- * -number of bytes in Decode field == 3 - this number;
- * -number of bytes remaining to decode.Note:The maximum is 3, not 4, because the 1 st 
- * byte of the Index is always decoded digitally in the top branch.
- * - B - == JP points to a Branch(there are many kinds of Branches).
- * - L - == JP points to a Leaf(there are many kinds of Leaves).
- * (2) == Digit of Index decoded by position offset in branch(really 0. .0 xff).4 * ==
-    Digit of Index necessary for decoding
-	a "narrow" pointer, in a Decode field;
-replaces 1 missing branch(really 0. .0 xff).4 + ==
-    Digit of Index NOT necessary for decoding
-	a "narrow" pointer, but used for fast
-traversal of the SM by Judy1Test()and JudyLGet()
-(see the code) (really 0. .0 xff).0 == Byte in a JPs Pop0 field that is always ignored,
-    because a leaf can never contain more than 256 Indexes(Pop0 <= 255). + ----- ==
-    A Branch or Leaf;
-drawn open - ended to remind you that it could | have up to 256 columns. + -----|| ==
-    Pointer to next Branch or Leaf.V | O ==
-    A state is skipped by using a "narrow" pointer. | <1 > ==
-Digit(Index) shown as an example is not necessarily in the position shown;
-is sorted in order with neighbor Indexes.(Really 0. .0 xff.)
-
-Note that this example shows every possibly topology to reach a leaf in a
-    32 - bit Judy SM, although this is a very subtle point !
-    STATE or `
-    LEVEL
-    +
-    ---++---++---++---++---++---++---++---+|RJP | |RJP | |RJP | |RJP | |RJP | |RJP | |RJP
-    | |RJP | L-- - +B-- - +B-- - +B-- - +B-- - +B-- - +B-- - +B-- -
-    +||||||||||||||||V V(2) V(2) V(2) V(2) V(2) V(2) V(2)
-+ ------+------+------+------+------+------+------+------Four | <2 >
-    |0 | 4 * |C | 4 * |4 * |C | C byte | <4 > |0 | 0 | C | 1 * |C | C | C 4 Index | <1 >
-    |C | C | C | C | C | C | C Leaf | <3 >
-    |3 | 2 | 3 | 1 | 2 | 3 | 3 + ------+--L-- - +--L-- - +--B-- - +--L-- - +--B-- -
-    +--B-- - +--B-- - |||||||/|/||///|/||//|||||||V | V(4) | |V(4) V(4)
-+ ------|+------||+------+------Three | <4 > ||4 + |||4 + |4 + byte Index | <1 >
-    O | 0 O O | 1 * |C 3 Leaf | <3 >
-    ||C | ||C | C + ------||2 | ||1 | 2 / +----L - ||+----L - +----B -
-    /||||||/|///|/|///|/||//|/||//||||||V V | V(1) | V(1)
-+ ------+------|+------|+------Two byte | <1 > |<1 > ||4 + ||4 + Index Leaf | <3 > |<3 >
-    O | 1 + O | 1 + 2 + ------+------/|C | |C / |1 | |1 | +-L-- -- |+-L-- --
-    |||||/|/||||V V V V + ------+------+------+------One byte Index Leaf | <3 > |<3 >
-    |<3 > |<3 > 1 + ------+------+------+------
-*/
-
 /* assert(sizeof(Word_t) == sizeof(void *)) */
 typedef unsigned long Word_t, *PWord_t; 
 
@@ -135,11 +18,13 @@ typedef unsigned long Word_t, *PWord_t;
 // Bits Per Byte:
 #define cJL_BITSPERBYTE 0x8
 
+#define cJL_BYTESPERPTR (sizeof(Word_t))
+
 // Bytes Per Word and Bits Per Word, latter assuming sizeof(byte) is 8 bits:
 // Expect 32 [64] bits per word.
+#define cJL_BYTESPERWORD (sizeof(uint32_t))
 
-#define cJL_BYTESPERWORD (sizeof(Word_t))
-#define cJL_BITSPERWORD  (sizeof(Word_t) * cJL_BITSPERBYTE)
+#define cJL_BITSPERWORD  (sizeof(uint32_t) * cJL_BITSPERBYTE)
 #define JL_BYTESTOWORDS(BYTES) \
         (((BYTES) + cJL_BYTESPERWORD - 1) / cJL_BYTESPERWORD)
 
@@ -153,7 +38,7 @@ typedef unsigned long Word_t, *PWord_t;
 // ROOT STATE:
 // State at the start of the Judy SM, based on 1 byte decoded per state; equal
 // to the number of bytes per Index to decode.
-#define cJL_ROOTSTATE (sizeof(Word_t))
+#define cJL_ROOTSTATE (sizeof(uint32_t))
 
 // SUBEXPANSES PER STATE:
 // Number of subexpanses per state traversed, which is the number of JPs in a
@@ -304,7 +189,7 @@ static inline BITMAPL_t judyCountBits(BITMAPL_t word)
 // of the Word_t .
 // First the read macro:
 #define JL_JPTYPE(PJP)	((PJP)->jp_Type)
-#define JL_JPLEAF_POP0(PJP) ((PJP)->jp_DcdP0[sizeof(Word_t) - 2])
+#define JL_JPLEAF_POP0(PJP) ((PJP)->jp_DcdP0[2])
 #define JL_JPDCDPOP0(PJP) ((Word_t)(PJP)->jp_DcdP0[0] << 16 | \
 			   (Word_t)(PJP)->jp_DcdP0[1] <<  8 | \
 			   (Word_t)(PJP)->jp_DcdP0[2])

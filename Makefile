@@ -1,6 +1,7 @@
 CFLAGS = -I. -fPIC -Wall -O0 -pipe -g
 
 OBJS := JudyLCascade.o 		\
+	JudyDump.o		\
 	JudyLTables.o 		\
 	JudyLCount.o		\
 	JudyLCreateBranch.o 	\

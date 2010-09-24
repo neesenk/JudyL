@@ -7,8 +7,8 @@
 ALLOCLEAF	JudyLInsArray.c	156;"	d	file:
 ALLOCSIZES	JudyL.h	135;"	d
 APPEND_SCL	JudySL.c	47;"	d	file:
-BITMAPB_t	JudyPrivate.h	227;"	d
-BITMAPL_t	JudyPrivate.h	229;"	d
+BITMAPB_t	JudyPrivate.h	112;"	d
+BITMAPL_t	JudyPrivate.h	114;"	d
 BMPJP	JudyLByCount.c	103;"	d	file:
 BMPJP	JudyLCount.c	177;"	d	file:
 BMPJP0	JudyLByCount.c	102;"	d	file:
@@ -18,13 +18,11 @@ BRANCHB_CHECKJPFULL	JudyLNextEmpty.c	418;"	d	file:
 BRANCHB_STARTSUBEXP	JudyLNextEmpty.c	421;"	d	file:
 BRANCHL_CHECK	JudyLNextEmpty.c	360;"	d	file:
 BRANCHU_CHECKJP	JudyLNextEmpty.c	480;"	d	file:
-CDcmp__	JudyLNext.c	195;"	d	file:
+CDcmp__	JudyLNext.c	80;"	d	file:
 CFLAGS	Makefile	/^CFLAGS = -I. -fPIC -Wall -O0 -pipe -g$/;"	m
 CHECKDCD	JudyLCount.c	97;"	d	file:
-CHECKDCD	JudyLNext.c	199;"	d	file:
+CHECKDCD	JudyLNext.c	84;"	d	file:
 CHECKDCD	JudyLNextEmpty.c	56;"	d	file:
-CHECKINDEXNATIVE	JudyLGet.c	229;"	d	file:
-CHECKLEAFNONNAT	JudyLGet.c	233;"	d	file:
 CHECKLEAFORDER	JudyLInsArray.c	221;"	d	file:
 CLEARLEASTDIGITS	JudyLNextEmpty.c	58;"	d	file:
 CLEARLEASTDIGITS_D	JudyLNextEmpty.c	60;"	d	file:
@@ -40,61 +38,60 @@ COPYTOLEAF_ODD_SUB	JudyLInsArray.c	171;"	d	file:
 COPYWORDtoSTRING	JudySL.c	20;"	d	file:
 FREEALLEXIT	JudyLCascade.c	25;"	d	file:
 HEADFILE	Makefile	/^HEADFILE := Judy.h JudyL.h JudyPrivate.h JudyPrivateBranch.h$/;"	m
-HISTNUMMAX	JudyLNext.c	144;"	d	file:
-HISTPOP	JudyLNext.c	157;"	d	file:
-HISTPOPBOFF	JudyLNext.c	165;"	d	file:
-HISTPUSH	JudyLNext.c	149;"	d	file:
-HISTPUSHBOFF	JudyLNext.c	163;"	d	file:
-IMMABOVE	JudyLCount.c	299;"	d	file:
-IMMABOVE_01	JudyLCount.c	306;"	d	file:
+HISTPOP	JudyLNext.c	42;"	d	file:
+HISTPOPBOFF	JudyLNext.c	50;"	d	file:
+HISTPUSH	JudyLNext.c	34;"	d	file:
+HISTPUSHBOFF	JudyLNext.c	48;"	d	file:
+IMMABOVE	JudyLCount.c	298;"	d	file:
+IMMABOVE_01	JudyLCount.c	305;"	d	file:
 IMM_MULTI	JudyLNextEmpty.c	567;"	d	file:
 IS_PLS	JudyHS.c	3;"	d	file:
 IS_PSCL	JudySL.c	5;"	d	file:
 JBB_FOUNDEXPANSE	JudyLByCount.c	104;"	d	file:
 JBU_FOUNDEXPANSE	JudyLByCount.c	164;"	d	file:
-JERR	Judy.h	38;"	d
-JLAP_INVALID	Judy.h	41;"	d
-JL_ALLOC_ERRNO	JudyPrivate.h	571;"	d
-JL_BITMAPCLEARL	JudyPrivate.h	351;"	d
-JL_BITMAPDIGITB	JudyPrivate.h	362;"	d
-JL_BITMAPDIGITL	JudyPrivate.h	371;"	d
-JL_BITMAPSETB	JudyPrivateBranch.h	155;"	d
-JL_BITMAPSETL	JudyPrivate.h	349;"	d
-JL_BITMAPTESTB	JudyPrivateBranch.h	153;"	d
-JL_BITMAPTESTL	JudyPrivate.h	347;"	d
-JL_BITPOSMASKB	JudyPrivate.h	335;"	d
-JL_BITPOSMASKL	JudyPrivate.h	336;"	d
-JL_BITSFROMSFTIDX	JudyPrivateBranch.h	205;"	d
+JERR	Judy.h	37;"	d
+JLAP_INVALID	Judy.h	40;"	d
+JL_ALLOC_ERRNO	JudyPrivate.h	456;"	d
+JL_BITMAPCLEARL	JudyPrivate.h	236;"	d
+JL_BITMAPDIGITB	JudyPrivate.h	247;"	d
+JL_BITMAPDIGITL	JudyPrivate.h	256;"	d
+JL_BITMAPSETB	JudyPrivateBranch.h	170;"	d
+JL_BITMAPSETL	JudyPrivate.h	234;"	d
+JL_BITMAPTESTB	JudyPrivateBranch.h	168;"	d
+JL_BITMAPTESTL	JudyPrivate.h	232;"	d
+JL_BITPOSMASKB	JudyPrivate.h	220;"	d
+JL_BITPOSMASKL	JudyPrivate.h	221;"	d
+JL_BITSFROMSFTIDX	JudyPrivateBranch.h	219;"	d
 JL_BRANCHB	JudyLDel.c	185;"	d	file:
 JL_BRANCHBJPGROWINPLACE	JudyPrivateBranch.h	89;"	d
 JL_BRANCHB_COMPRESS	JudyLDel.c	136;"	d	file:
-JL_BRANCHB_MAX_POP	JudyPrivateBranch.h	200;"	d
-JL_BRANCHB_MIN_POP	JudyPrivateBranch.h	199;"	d
-JL_BRANCHJP_NUMJPSTOWORDS	JudyPrivateBranch.h	168;"	d
+JL_BRANCHB_MAX_POP	JudyPrivateBranch.h	214;"	d
+JL_BRANCHB_MIN_POP	JudyPrivateBranch.h	213;"	d
+JL_BRANCHJP_NUMJPSTOWORDS	JudyPrivateBranch.h	182;"	d
 JL_BRANCHL	JudyLDel.c	98;"	d	file:
 JL_BRANCHL_COMPRESS	JudyLDel.c	64;"	d	file:
-JL_BRANCHL_MAX_POP	JudyPrivateBranch.h	191;"	d
+JL_BRANCHL_MAX_POP	JudyPrivateBranch.h	205;"	d
 JL_BRANCHU	JudyLDel.c	301;"	d	file:
 JL_BRANCHU_COMPRESS	JudyLDel.c	272;"	d	file:
 JL_BRANCH_COPY_IMMED_EVEN	JudyLDel.c	49;"	d	file:
 JL_BRANCH_COPY_IMMED_ODD	JudyLDel.c	56;"	d	file:
 JL_BRANCH_KEEP	JudyLDel.c	41;"	d	file:
-JL_BRANCH_OUTLIER	JudyLIns.c	39;"	d	file:
-JL_BTOU_POP_INCREMENT	JudyPrivateBranch.h	196;"	d
-JL_BYTESTOWORDS	JudyPrivate.h	143;"	d
-JL_CHECKALLOC	JudyPrivate.h	574;"	d
+JL_BRANCH_OUTLIER	JudyLIns.c	37;"	d	file:
+JL_BTOU_POP_INCREMENT	JudyPrivateBranch.h	210;"	d
+JL_BYTESTOWORDS	JudyPrivate.h	28;"	d
+JL_CHECKALLOC	JudyPrivate.h	459;"	d
 JL_CHECK_IF_EXISTS	JudyLIns.c	15;"	d	file:
 JL_CHECK_IF_OUTLIER	JudyLIns.c	11;"	d	file:
-JL_COPY3_LONG_TO_PINDEX	JudyPrivate.h	412;"	d
-JL_COPY3_PINDEX_TO_LONG	JudyPrivate.h	406;"	d
-JL_COPYMEM	JudyPrivate.h	398;"	d
-JL_DCDNOTMATCHINDEX	JudyPrivateBranch.h	93;"	d
-JL_DELETECOPY	JudyPrivate.h	543;"	d
-JL_DELETECOPY_ODD	JudyPrivate.h	558;"	d
-JL_DELETEINPLACE	JudyPrivate.h	486;"	d
-JL_DELETEINPLACE_ODD	JudyPrivate.h	500;"	d
-JL_DIGITATSTATE	JudyPrivateBranch.h	212;"	d
-JL_DIGITTOSTATE	JudyPrivateBranch.h	223;"	d
+JL_COPY3_LONG_TO_PINDEX	JudyPrivate.h	297;"	d
+JL_COPY3_PINDEX_TO_LONG	JudyPrivate.h	291;"	d
+JL_COPYMEM	JudyPrivate.h	283;"	d
+JL_DCDNOTMATCHINDEX	JudyPrivateBranch.h	/^static inline int JL_DCDNOTMATCHINDEX(Word_t INDEX, Pjp_t PJP, int POP0BYTES)$/;"	f
+JL_DELETECOPY	JudyPrivate.h	428;"	d
+JL_DELETECOPY_ODD	JudyPrivate.h	443;"	d
+JL_DELETEINPLACE	JudyPrivate.h	371;"	d
+JL_DELETEINPLACE_ODD	JudyPrivate.h	385;"	d
+JL_DIGITATSTATE	JudyPrivateBranch.h	226;"	d
+JL_DIGITTOSTATE	JudyPrivateBranch.h	237;"	d
 JL_ERRNO_CORRUPT	Judy.h	/^        JL_ERRNO_CORRUPT        = 9	\/\/ Judy detects an impossible value$/;"	e	enum:__anon1
 JL_ERRNO_FULL	Judy.h	/^        JL_ERRNO_FULL           = 1,$/;"	e	enum:__anon1
 JL_ERRNO_NFMAX	Judy.h	/^        JL_ERRNO_NFMAX          = JL_ERRNO_FULL,$/;"	e	enum:__anon1
@@ -109,61 +106,55 @@ JL_ERRNO_NULLPVALUE	Judy.h	/^        JL_ERRNO_NULLPVALUE     = 11,   \/\/ PValue
 JL_ERRNO_OVERRUN	Judy.h	/^        JL_ERRNO_OVERRUN        = 8,	\/\/ Judy detects a not recoverable point$/;"	e	enum:__anon1
 JL_ERRNO_UNSORTED	Judy.h	/^        JL_ERRNO_UNSORTED       = 12,   \/\/ see above.$/;"	e	enum:__anon1
 JL_Errno_t	Judy.h	/^} JL_Errno_t;$/;"	t	typeref:enum:__anon1
-JL_GETSUBEXP	JudyLIns.c	198;"	d	file:
 JL_IMMED	JudyLDel.c	626;"	d	file:
 JL_IMMED_01	JudyLDel.c	591;"	d	file:
 JL_IMMED_02	JudyLDel.c	596;"	d	file:
 JL_IMMED_DEL	JudyLDel.c	609;"	d	file:
-JL_IMMSETCASCADE	JudyLIns.c	526;"	d	file:
-JL_IMMSETINPLACE	JudyLIns.c	494;"	d	file:
-JL_IMMSET_01	JudyLIns.c	557;"	d	file:
-JL_IMMSET_01_CASCADE	JudyLIns.c	466;"	d	file:
-JL_IMMSET_01_COPY	JudyLIns.c	435;"	d	file:
-JL_IMMSET_01_COPY_EVEN	JudyLIns.c	411;"	d	file:
-JL_IMMSET_01_COPY_ODD	JudyLIns.c	423;"	d	file:
-JL_IMMSET_01_ODD	JudyLIns.c	560;"	d	file:
-JL_INSERTCOPY	JudyPrivate.h	512;"	d
-JL_INSERTCOPY3	JudyPrivate.h	523;"	d
-JL_INSERTINPLACE	JudyPrivate.h	461;"	d
-JL_INSERTINPLACE3	JudyPrivate.h	473;"	d
-JL_JBB_BITMAP	JudyPrivateBranch.h	150;"	d
-JL_JBB_PJP	JudyPrivateBranch.h	151;"	d
-JL_JBU_PJP	JudyPrivateBranch.h	172;"	d
-JL_JBU_PJP0	JudyPrivateBranch.h	174;"	d
-JL_JBU_PJP_SUBEXP	JudyLIns.c	199;"	d	file:
+JL_IMMSETCASCADE	JudyLIns.c	512;"	d	file:
+JL_IMMSETINPLACE	JudyLIns.c	480;"	d	file:
+JL_IMMSET_01_CASCADE	JudyLIns.c	452;"	d	file:
+JL_IMMSET_01_COPY	JudyLIns.c	421;"	d	file:
+JL_IMMSET_01_COPY_EVEN	JudyLIns.c	397;"	d	file:
+JL_IMMSET_01_COPY_ODD	JudyLIns.c	409;"	d	file:
+JL_INSERTCOPY	JudyPrivate.h	397;"	d
+JL_INSERTCOPY3	JudyPrivate.h	408;"	d
+JL_INSERTINPLACE	JudyPrivate.h	346;"	d
+JL_INSERTINPLACE3	JudyPrivate.h	358;"	d
+JL_JBB_BITMAP	JudyPrivateBranch.h	165;"	d
+JL_JBB_PJP	JudyPrivateBranch.h	166;"	d
+JL_JBU_PJP	JudyPrivateBranch.h	186;"	d
+JL_JBU_PJP0	JudyPrivateBranch.h	188;"	d
+JL_JBU_PJP_SUBEXP	JudyLIns.c	195;"	d	file:
 JL_JLB_BITMAP	JudyL.h	158;"	d
 JL_JLB_PVALUE	JudyL.h	159;"	d
 JL_JPBRANCH_POP0	JudyPrivateBranch.h	80;"	d
-JL_JPDCDPOP0	JudyPrivate.h	308;"	d
-JL_JPLEAF_POP0	JudyPrivate.h	307;"	d
-JL_JPSETADT	JudyPrivate.h	312;"	d
-JL_JPTYPE	JudyPrivate.h	306;"	d
+JL_JPDCDPOP0	JudyPrivate.h	193;"	d
+JL_JPLEAF_POP0	JudyPrivate.h	192;"	d
+JL_JPSETADT	JudyPrivate.h	197;"	d
+JL_JPTYPE	JudyPrivate.h	191;"	d
 JL_LEAF	JudyLDel.c	469;"	d	file:
-JL_LEAF1GROWINPLACE	JudyL.h	211;"	d
-JL_LEAF1POPTOWORDS	JudyL.h	222;"	d
-JL_LEAF1VALUEAREA	JudyL.h	217;"	d
-JL_LEAF2GROWINPLACE	JudyL.h	212;"	d
-JL_LEAF2POPTOWORDS	JudyL.h	223;"	d
-JL_LEAF2VALUEAREA	JudyL.h	218;"	d
-JL_LEAF3GROWINPLACE	JudyL.h	213;"	d
-JL_LEAF3POPTOWORDS	JudyL.h	224;"	d
-JL_LEAF3VALUEAREA	JudyL.h	219;"	d
-JL_LEAFCASCADE	JudyLIns.c	270;"	d	file:
-JL_LEAFGROW	JudyLIns.c	244;"	d	file:
-JL_LEAFGROWVALUEADD	JudyLIns.c	233;"	d	file:
-JL_LEAFGROWVALUENEW	JudyLIns.c	237;"	d	file:
+JL_LEAF1GROWINPLACE	JudyL.h	208;"	d
+JL_LEAF1POPTOWORDS	JudyL.h	219;"	d
+JL_LEAF1VALUEAREA	JudyL.h	214;"	d
+JL_LEAF2GROWINPLACE	JudyL.h	209;"	d
+JL_LEAF2POPTOWORDS	JudyL.h	220;"	d
+JL_LEAF2VALUEAREA	JudyL.h	215;"	d
+JL_LEAF3GROWINPLACE	JudyL.h	210;"	d
+JL_LEAF3POPTOWORDS	JudyL.h	221;"	d
+JL_LEAF3VALUEAREA	JudyL.h	216;"	d
+JL_LEAFGROW	JudyLIns.c	234;"	d	file:
+JL_LEAFGROWVALUEADD	JudyLIns.c	224;"	d	file:
+JL_LEAFGROWVALUENEW	JudyLIns.c	228;"	d	file:
 JL_LEAFINDEXSIZE	JudyL.h	130;"	d
-JL_LEAFPREP	JudyLIns.c	219;"	d	file:
-JL_LEAFPREPVALUE	JudyLIns.c	217;"	d	file:
-JL_LEAFSET	JudyLIns.c	275;"	d	file:
+JL_LEAFPREP	JudyLIns.c	210;"	d	file:
+JL_LEAFSET	JudyLIns.c	260;"	d	file:
 JL_LEAFTYPE	JudyL.h	131;"	d
-JL_LEAFVALUE	JudyLIns.c	216;"	d	file:
-JL_LEAFVGROWINPLACE	JudyL.h	215;"	d
-JL_LEAFVPOPTOWORDS	JudyL.h	226;"	d
-JL_LEAFWGROWINPLACE	JudyL.h	214;"	d
-JL_LEAFWPOPTOWORDS	JudyL.h	225;"	d
-JL_LEAFWVALUEAREA	JudyL.h	220;"	d
-JL_LEAFW_POP0	JudyPrivate.h	298;"	d
+JL_LEAFVGROWINPLACE	JudyL.h	212;"	d
+JL_LEAFVPOPTOWORDS	JudyL.h	223;"	d
+JL_LEAFWGROWINPLACE	JudyL.h	211;"	d
+JL_LEAFWPOPTOWORDS	JudyL.h	222;"	d
+JL_LEAFWVALUEAREA	JudyL.h	217;"	d
+JL_LEAFW_POP0	JudyPrivate.h	183;"	d
 JL_LEAF_INPLACE	JudyLDel.c	449;"	d	file:
 JL_LEAF_SHRINK	JudyLDel.c	456;"	d	file:
 JL_LEAF_TOIMMED	JudyLDel.c	412;"	d	file:
@@ -171,25 +162,25 @@ JL_LEAF_TOIMMED_01	JudyLDel.c	432;"	d	file:
 JL_LEAF_TOIMMED_23	JudyLDel.c	443;"	d	file:
 JL_LEAF_UPLEVEL	JudyLDel.c	369;"	d	file:
 JL_LEAF_UPLEVEL64	JudyLDel.c	385;"	d	file:
-JL_LEASTBYTES	JudyPrivate.h	218;"	d
-JL_LEASTBYTESMASK	JudyPrivate.h	216;"	d
-JL_MASKHIGHEREXC	JudyPrivate.h	394;"	d
-JL_MASKHIGHERINC	JudyPrivate.h	393;"	d
-JL_MASKLOWEREXC	JudyPrivate.h	391;"	d
-JL_MASKLOWERINC	JudyPrivate.h	392;"	d
-JL_SETDCD	JudyPrivate.h	445;"	d
-JL_SETDIGIT	JudyPrivate.h	422;"	d
-JL_SETDIGIT1	JudyPrivate.h	427;"	d
-JL_SETDIGITS	JudyPrivate.h	430;"	d
-JL_SET_ERRNO	Judy.h	32;"	d
-JL_SUBEXPB	JudyPrivateBranch.h	152;"	d
-JL_SUBEXPL	JudyPrivate.h	346;"	d
+JL_LEASTBYTES	JudyPrivate.h	103;"	d
+JL_LEASTBYTESMASK	JudyPrivate.h	101;"	d
+JL_MASKHIGHEREXC	JudyPrivate.h	279;"	d
+JL_MASKHIGHERINC	JudyPrivate.h	278;"	d
+JL_MASKLOWEREXC	JudyPrivate.h	276;"	d
+JL_MASKLOWERINC	JudyPrivate.h	277;"	d
+JL_SETDCD	JudyPrivate.h	330;"	d
+JL_SETDIGIT	JudyPrivate.h	307;"	d
+JL_SETDIGIT1	JudyPrivate.h	312;"	d
+JL_SETDIGITS	JudyPrivate.h	315;"	d
+JL_SET_ERRNO	Judy.h	31;"	d
+JL_SUBEXPB	JudyPrivateBranch.h	167;"	d
+JL_SUBEXPL	JudyPrivate.h	231;"	d
 JL_TOIMMED_01_EVEN	JudyLDel.c	387;"	d	file:
 JL_TOIMMED_01_ODD	JudyLDel.c	399;"	d	file:
 JL_TRIMTODCDSIZE	JudyPrivateBranch.h	74;"	d
 JPFULL	JudyLNextEmpty.c	40;"	d	file:
 JPFULL_BRANCH	JudyLNextEmpty.c	35;"	d	file:
-JPNULL	JudyLNext.c	177;"	d	file:
+JPNULL	JudyLNext.c	62;"	d	file:
 JPNULL	JudyLNextEmpty.c	34;"	d	file:
 JSLE_EVEN	JudyLNextEmpty.c	195;"	d	file:
 JSLE_ODD	JudyLNextEmpty.c	223;"	d	file:
@@ -214,7 +205,7 @@ JudyFree	JudyHS.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyFree	JudyLMallocIF.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyFree	JudySL.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyHSDel	JudyHS.c	/^int JudyHSDel(void **PPArray, void *Str, size_t Len)$/;"	f
-JudyHSFreeArray	JudyHS.c	/^uint32_t JudyHSFreeArray(void **PPArray)$/;"	f
+JudyHSFreeArray	JudyHS.c	/^size_t JudyHSFreeArray(void **PPArray)$/;"	f
 JudyHSGet	JudyHS.c	/^void **JudyHSGet(const void *PArray, void *Str, size_t Len)$/;"	f
 JudyHSIns	JudyHS.c	/^void **JudyHSIns(void **PPArray, void *Str, size_t Len)$/;"	f
 JudyLByCount	JudyLByCount.c	/^void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)$/;"	f
@@ -249,11 +240,11 @@ JudySLNextSub	JudySL.c	/^static void **JudySLNextSub(const void *PArray, uint8_t
 JudySLPrev	JudySL.c	/^void **JudySLPrev(const void *PArray, uint8_t * Index)$/;"	f
 JudySLPrevSub	JudySL.c	/^static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_t len)$/;"	f	file:
 LASTWORD_BY_VALUE	JudySL.c	8;"	d	file:
-LEAFABOVE	JudyLCount.c	301;"	d	file:
-LEAFB1ABOVE	JudyLCount.c	298;"	d	file:
+LEAFABOVE	JudyLCount.c	300;"	d	file:
+LEAFB1ABOVE	JudyLCount.c	297;"	d	file:
 LEAFB1_CHECKBIT	JudyLNextEmpty.c	519;"	d	file:
 LEAFB1_STARTSUBEXP	JudyLNextEmpty.c	522;"	d	file:
-LEAFLABOVE	JudyLCount.c	294;"	d	file:
+LEAFLABOVE	JudyLCount.c	293;"	d	file:
 LEAF_EDGE	JudyLNextEmpty.c	104;"	d	file:
 LEAF_EDGE_SET	JudyLNextEmpty.c	119;"	d	file:
 LEAF_HOLE_EVEN	JudyLNextEmpty.c	135;"	d	file:
@@ -269,11 +260,9 @@ MALLOC	JudyLMallocIF.c	15;"	d	file:
 NOMEM	JudyLInsArray.c	155;"	d	file:
 N_	main.c	40;"	d	file:
 OBJS	Makefile	/^OBJS := JudyLCascade.o 		\\$/;"	m
-OLDPOP1	JudyLIns.c	589;"	d	file:
-OLDPOP1	JudyLIns.c	591;"	d	file:
-PJERR	Judy.h	39;"	d
-PJI	JudyLNext.c	441;"	d	file:
-PPJERR	Judy.h	40;"	d
+PJERR	Judy.h	38;"	d
+PJI	JudyLNext.c	326;"	d	file:
+PPJERR	Judy.h	39;"	d
 PPSCLVALUE_EQ	JudySL.c	40;"	d	file:
 PPSCLVALUE_GT	JudySL.c	44;"	d	file:
 PPSCLVALUE_LT	JudySL.c	42;"	d	file:
@@ -287,15 +276,15 @@ PREPL_DCD	JudyLByCount.c	203;"	d	file:
 PSCLINDEX	JudySL.c	37;"	d	file:
 PSCLVALUE	JudySL.c	38;"	d	file:
 PWord_t	JudyPrivate.h	/^typedef unsigned long Word_t, *PWord_t; $/;"	t
-P_JBB	JudyPrivate.h	199;"	d
-P_JBL	JudyPrivate.h	198;"	d
-P_JBU	JudyPrivate.h	200;"	d
-P_JLB	JudyPrivate.h	202;"	d
-P_JLL	JudyPrivate.h	201;"	d
-P_JLW	JudyPrivate.h	196;"	d
-P_JP	JudyPrivate.h	203;"	d
-P_JPM	JudyPrivate.h	197;"	d
-P_JV	JudyPrivate.h	204;"	d
+P_JBB	JudyPrivate.h	84;"	d
+P_JBL	JudyPrivate.h	83;"	d
+P_JBU	JudyPrivate.h	85;"	d
+P_JLB	JudyPrivate.h	87;"	d
+P_JLL	JudyPrivate.h	86;"	d
+P_JLW	JudyPrivate.h	81;"	d
+P_JP	JudyPrivate.h	88;"	d
+P_JPM	JudyPrivate.h	82;"	d
+P_JV	JudyPrivate.h	89;"	d
 Pjbb_t	JudyPrivateBranch.h	/^} jbb_t, *Pjbb_t;$/;"	t	typeref:struct:JUDY_BRANCH_BITMAP
 Pjbl_t	JudyPrivateBranch.h	/^} jbl_t, *Pjbl_t;$/;"	t	typeref:struct:JUDY_BRANCH_LINEAR
 Pjbu_t	JudyPrivateBranch.h	/^} jbu_t, *Pjbu_t;$/;"	t	typeref:struct:JUDY_BRANCH_UNCOMPRESSED
@@ -312,39 +301,39 @@ RET_SUCCESS	JudyLNextEmpty.c	45;"	d	file:
 SAMESUBEXP	JudyLInsArray.c	152;"	d	file:
 SCLCMP	JudySL.c	39;"	d	file:
 SCLSIZE	JudySL.c	33;"	d	file:
-SEARCHBITMAPB	JudyLNext.c	179;"	d	file:
+SEARCHBITMAPB	JudyLNext.c	64;"	d	file:
 SEARCHBITMAPB	JudyLNextEmpty.c	47;"	d	file:
-SEARCHBITMAPL	JudyLNext.c	182;"	d	file:
-SEARCHBITMAPMAXB	JudyLNext.c	186;"	d	file:
+SEARCHBITMAPL	JudyLNext.c	67;"	d	file:
+SEARCHBITMAPMAXB	JudyLNext.c	71;"	d	file:
 SEARCHBITMAPMAXB	JudyLNextEmpty.c	52;"	d	file:
-SEARCHBITMAPMAXL	JudyLNext.c	189;"	d	file:
-SEARCHLEAFNATIVE	JudyPrivate.h	232;"	d
-SEARCHLEAFNONNAT	JudyPrivate.h	250;"	d
+SEARCHBITMAPMAXL	JudyLNext.c	74;"	d	file:
+SEARCHLEAFNATIVE	JudyPrivate.h	117;"	d
+SEARCHLEAFNONNAT	JudyPrivate.h	135;"	d
 SETIMMTYPE	JudyLInsArray.c	197;"	d	file:
 SETJPNULL	JudyLInsArray.c	154;"	d	file:
 SETJPNULL_PARENT	JudyLInsArray.c	153;"	d	file:
 SETLEASTDIGITS	JudyLNextEmpty.c	59;"	d	file:
 SETLEASTDIGITS_D	JudyLNextEmpty.c	65;"	d	file:
 SETOFFSET	JudyLByCount.c	55;"	d	file:
-SET_01	JudyLNext.c	428;"	d	file:
+SET_01	JudyLNext.c	313;"	d	file:
 SET_AND_CONTINUE	JudyLNextEmpty.c	75;"	d	file:
 SET_AND_RETURN	JudyLNextEmpty.c	70;"	d	file:
 SET_PLS	JudyHS.c	5;"	d	file:
 SET_PSCL	JudySL.c	7;"	d	file:
 SHORCUTLEAF	JudySL.c	/^typedef struct SHORCUTLEAF {$/;"	s	file:
-SM1IMM	JudyLNext.c	498;"	d	file:
-SM1IMM_01	JudyLNext.c	508;"	d	file:
-SM1IMM_01_SETPOP1	JudyLNext.c	504;"	d	file:
-SM1IMM_SETPOP1	JudyLNext.c	494;"	d	file:
-SM1LEAFL	JudyLNext.c	371;"	d	file:
-SM1PREPB	JudyLNext.c	207;"	d	file:
-SM3IMM	JudyLNext.c	794;"	d	file:
-SM3IMM_OFFSET	JudyLNext.c	790;"	d	file:
-SM3LEAFLDCD	JudyLNext.c	717;"	d	file:
-SM3LEAFLNODCD	JudyLNext.c	724;"	d	file:
-SM3LEAFL_SETPOP1	JudyLNext.c	721;"	d	file:
-SM3PREPB	JudyLNext.c	215;"	d	file:
-SM3PREPB_DCD	JudyLNext.c	212;"	d	file:
+SM1IMM	JudyLNext.c	383;"	d	file:
+SM1IMM_01	JudyLNext.c	393;"	d	file:
+SM1IMM_01_SETPOP1	JudyLNext.c	389;"	d	file:
+SM1IMM_SETPOP1	JudyLNext.c	379;"	d	file:
+SM1LEAFL	JudyLNext.c	256;"	d	file:
+SM1PREPB	JudyLNext.c	92;"	d	file:
+SM3IMM	JudyLNext.c	679;"	d	file:
+SM3IMM_OFFSET	JudyLNext.c	675;"	d	file:
+SM3LEAFLDCD	JudyLNext.c	602;"	d	file:
+SM3LEAFLNODCD	JudyLNext.c	609;"	d	file:
+SM3LEAFL_SETPOP1	JudyLNext.c	606;"	d	file:
+SM3PREPB	JudyLNext.c	100;"	d	file:
+SM3PREPB_DCD	JudyLNext.c	97;"	d	file:
 SMLEAFL	JudyLNextEmpty.c	496;"	d	file:
 SMPREPB	JudyLNextEmpty.c	80;"	d	file:
 SMPREPB2	JudyLNextEmpty.c	88;"	d	file:
@@ -366,24 +355,27 @@ _JUDYPRIVATE_INCLUDED	JudyPrivate.h	2;"	d
 _JUDY_INCLUDED	Judy.h	2;"	d
 _JUDY_PRIVATE_BRANCH_INCLUDED	JudyPrivateBranch.h	2;"	d
 access_counter	main.c	/^void access_counter(unsigned *hi, unsigned *lo)$/;"	f
+bianli	JudyDump.c	/^static void bianli(Pjp_t Pjp)$/;"	f	file:
+bianli2	JudyDump.c	/^void bianli2(const void *PArray)$/;"	f
 branchB_JPtype	JudyLInsArray.c	/^static uint8_t branchB_JPtype[] = {$/;"	v	file:
 branchL_JPtype	JudyLInsArray.c	/^static uint8_t branchL_JPtype[] = {$/;"	v	file:
 branchU_JPtype	JudyLInsArray.c	/^static uint8_t branchU_JPtype[] = {$/;"	v	file:
 buff	main.c	/^int buff[N_];$/;"	v
-cJL_ALLONES	JudyPrivate.h	147;"	d
-cJL_BITSPERBITMAP	JudyPrivate.h	322;"	d
-cJL_BITSPERBYTE	JudyPrivate.h	136;"	d
-cJL_BITSPERSUBEXPB	JudyPrivate.h	325;"	d
-cJL_BITSPERSUBEXPL	JudyPrivate.h	327;"	d
-cJL_BITSPERWORD	JudyPrivate.h	142;"	d
-cJL_BRANCHBMAXJPS	JudyPrivateBranch.h	144;"	d
-cJL_BRANCHLMAXJPS	JudyPrivateBranch.h	111;"	d
-cJL_BRANCHUNUMJPS	JudyPrivateBranch.h	99;"	d
-cJL_BYTESPERCL	JudyPrivate.h	133;"	d
-cJL_BYTESPERWORD	JudyPrivate.h	141;"	d
+cJL_ALLONES	JudyPrivate.h	32;"	d
+cJL_BITSPERBITMAP	JudyPrivate.h	207;"	d
+cJL_BITSPERBYTE	JudyPrivate.h	19;"	d
+cJL_BITSPERSUBEXPB	JudyPrivate.h	210;"	d
+cJL_BITSPERSUBEXPL	JudyPrivate.h	212;"	d
+cJL_BITSPERWORD	JudyPrivate.h	27;"	d
+cJL_BRANCHBMAXJPS	JudyPrivateBranch.h	159;"	d
+cJL_BRANCHLMAXJPS	JudyPrivateBranch.h	126;"	d
+cJL_BRANCHUNUMJPS	JudyPrivateBranch.h	114;"	d
+cJL_BYTESPERCL	JudyPrivate.h	16;"	d
+cJL_BYTESPERPTR	JudyPrivate.h	21;"	d
+cJL_BYTESPERWORD	JudyPrivate.h	25;"	d
 cJL_DCDMASK	JudyPrivateBranch.h	70;"	d
-cJL_FULLBITMAPB	JudyPrivate.h	150;"	d
-cJL_FULLBITMAPL	JudyPrivate.h	151;"	d
+cJL_FULLBITMAPB	JudyPrivate.h	35;"	d
+cJL_FULLBITMAPL	JudyPrivate.h	36;"	d
 cJL_IMMED1_MAXPOP1	JudyL.h	150;"	d
 cJL_IMMED2_MAXPOP1	JudyL.h	151;"	d
 cJL_IMMED3_MAXPOP1	JudyL.h	152;"	d
@@ -396,7 +388,7 @@ cJL_JPBRANCH_L3	JudyL.h	/^	cJL_JPBRANCH_L3,	\/\/ 3[3] bytes Pop0, 0[4] bytes Dcd
 cJL_JPBRANCH_U	JudyL.h	/^	cJL_JPBRANCH_U,		\/\/ note:  DcdPopO field not used.$/;"	e	enum:__anon2
 cJL_JPBRANCH_U2	JudyL.h	/^	cJL_JPBRANCH_U2,	\/\/ 2[2] bytes Pop0, 1[5] bytes Dcd.$/;"	e	enum:__anon2
 cJL_JPBRANCH_U3	JudyL.h	/^	cJL_JPBRANCH_U3,	\/\/ 3[3] bytes Pop0, 0[4] bytes Dcd.$/;"	e	enum:__anon2
-cJL_JPFULLPOPU1_POP0	JudyPrivate.h	299;"	d
+cJL_JPFULLPOPU1_POP0	JudyPrivate.h	184;"	d
 cJL_JPIMMED_1_01	JudyL.h	/^	cJL_JPIMMED_1_01,	\/\/ Index Size = 1, Pop1 = 1.$/;"	e	enum:__anon2
 cJL_JPIMMED_1_02	JudyL.h	/^	cJL_JPIMMED_1_02,	\/\/ Index Size = 1, Pop1 = 2.$/;"	e	enum:__anon2
 cJL_JPIMMED_1_03	JudyL.h	/^	cJL_JPIMMED_1_03,	\/\/ Index Size = 1, Pop1 = 3.$/;"	e	enum:__anon2
@@ -417,15 +409,14 @@ cJL_LEAF2_MAXPOP1	JudyL.h	141;"	d
 cJL_LEAF3_MAXPOP1	JudyL.h	142;"	d
 cJL_LEAFW	JudyLCount.c	3;"	d	file:
 cJL_LEAFW_MAXPOP1	JudyL.h	143;"	d
-cJL_MASKATSTATE	JudyPrivateBranch.h	207;"	d
-cJL_NUMSUBEXPB	JudyPrivate.h	326;"	d
-cJL_NUMSUBEXPL	JudyPrivate.h	328;"	d
+cJL_MASKATSTATE	JudyPrivateBranch.h	221;"	d
+cJL_NUMSUBEXPB	JudyPrivate.h	211;"	d
+cJL_NUMSUBEXPL	JudyPrivate.h	213;"	d
 cJL_POP0MASK	JudyPrivateBranch.h	69;"	d
-cJL_ROOTSTATE	JudyPrivate.h	156;"	d
-cJL_SUBEXPPERSTATE	JudyPrivate.h	161;"	d
-cJL_WORDSPERCL	JudyPrivateBranch.h	185;"	d
-cJL_WORDSPERJP	JudyPrivateBranch.h	184;"	d
-cJL_WORDSPERLEAFB1	JudyL.h	171;"	d
+cJL_ROOTSTATE	JudyPrivate.h	41;"	d
+cJL_SUBEXPPERSTATE	JudyPrivate.h	46;"	d
+cJL_WORDSPERCL	JudyPrivateBranch.h	199;"	d
+cJL_WORDSPERJP	JudyPrivateBranch.h	198;"	d
 cyc_hi	main.c	/^static unsigned cyc_hi = 0;$/;"	v	file:
 cyc_lo	main.c	/^static unsigned cyc_lo = 0;$/;"	v	file:
 delJudyLTree	JudyHS.c	/^static uint32_t delJudyLTree(void **PPValue, uint32_t Len)$/;"	f	file:
@@ -547,6 +538,7 @@ ls_String	JudyHS.c	/^	uint8_t ls_String[WORDSIZE];	\/\/ to fill out to a uint32_
 ls_Value	JudyHS.c	/^	void *ls_Value;	\/\/ Value area (cannot change size)$/;"	m	struct:L_EAFSTRING	file:
 ls_t	JudyHS.c	/^} ls_t, *Pls_t;$/;"	t	typeref:struct:L_EAFSTRING	file:
 main	main.c	/^int main(void)$/;"	f
+random_test	main.c	/^int random_test(void)$/;"	f
 scl_Index	JudySL.c	/^	uint8_t scl_Index[WORDSIZE];	\/\/ base Index string.$/;"	m	struct:SHORCUTLEAF	file:
 scl_Pvalue	JudySL.c	/^	void *scl_Pvalue;	\/\/ callers value area.$/;"	m	struct:SHORCUTLEAF	file:
 scl_t	JudySL.c	/^} scl_t, *Pscl_t;$/;"	t	typeref:struct:SHORCUTLEAF	file:

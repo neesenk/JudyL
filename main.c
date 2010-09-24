@@ -60,6 +60,7 @@ int random_test(void)
 	num = 0;
 	start_counter();
 	for (i=0; i<arrlen; i++) {
+		extern void bianli2(const void *PArray);
 		void **ret = JudyLIns(&root, buff[i]);
 		if (ret == (void **)-1) 
 			abort();

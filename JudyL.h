@@ -131,7 +131,7 @@ typedef enum {
 #define JL_LEAFTYPE(IndexSize)   ((IndexSize) + cJL_JPLEAF1 - 1)
 
 // MAXIMUM POPULATIONS OF LINEAR LEAVES:
-#define J_L_MAXB                (sizeof(Word_t) * 64)
+#define J_L_MAXB                (sizeof(uint32_t) * 64)
 #define ALLOCSIZES { 3, 5, 7, 11, 15, 23, 32, 47, 64, TERMINATOR }	// in words.
 #define cJL_LEAF1_MAXWORDS               (32)	// max Leaf1 size in words.
 

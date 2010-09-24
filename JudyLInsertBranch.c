@@ -10,7 +10,7 @@ int judyInsertBranch(Pjp_t Pjp,	Word_t Index, Word_t BranchLevel, Pjpm_t Pjpm)
 	int Ret;
 
 	DCDMask = cJL_DCDMASK(BranchLevel);
-	XorExp = ((Index ^ JL_JPDCDPOP0(Pjp)) & (cJL_ALLONES >> cJL_BITSPERBYTE))
+	XorExp = ((Index ^ JL_JPDCDPOP0(Pjp)) & 0x00ffffffUL)
 		 >> (BranchLevel * cJL_BITSPERBYTE);
 	assert(XorExp);
 

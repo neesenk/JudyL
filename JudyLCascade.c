@@ -381,8 +381,7 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 			FREEALLEXIT(ExpCnt, StageJP, Pjpm);
 		Pjp->jp_Type = cJL_JPBRANCH_L3;
 	} else {
-		if (judyStageJBBtoJBB(Pjp, &StageJBB, StageJP, SubJPCount, Pjpm)
-		    == -1)
+		if (judyStageJBBtoJBB(Pjp, &StageJBB, StageJP, SubJPCount, Pjpm) == -1)
 			FREEALLEXIT(ExpCnt, StageJP, Pjpm);
 	}
 	return 1;

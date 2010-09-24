@@ -67,11 +67,10 @@ typedef union JUDY_POINTER {	// JP.
  * constant.  Also note cPopBytes == state in the SM.
  */
 #define cJL_POP0MASK(cPopBytes) JL_LEASTBYTESMASK(cPopBytes)
-#define cJL_DCDMASK(cPopBytes) \
-        ((cJL_ALLONES >> cJL_BITSPERBYTE) & (~cJL_POP0MASK(cPopBytes)))
+#define cJL_DCDMASK(cPopBytes) (0x00ffffffUL & (~cJL_POP0MASK(cPopBytes)))
 
 // Mask off the high byte from INDEX to it can be compared to DcdPopO:
-#define JL_TRIMTODCDSIZE(INDEX) ((cJL_ALLONES >> cJL_BITSPERBYTE) & (INDEX))
+#define JL_TRIMTODCDSIZE(INDEX) (0x00ffffffUL & (INDEX))
 
 // Get from jp_DcdPopO the Pop0 for various branch JP Types:
 // Note:  There are no simple macros for cJL_BRANCH* Types because their
@@ -89,9 +88,24 @@ typedef union JUDY_POINTER {	// JP.
 #define JL_BRANCHBJPGROWINPLACE(NumJPs) \
         J__U_GROWCK(NumJPs, cJL_BITSPERSUBEXPB, jL_BranchBJPPopToWords)
 
+#include <stdio.h>
+static inline int JL_DCDNOTMATCHINDEX(Word_t INDEX, Pjp_t PJP, int POP0BYTES)
+{
+	Word_t pop = JL_JPDCDPOP0(PJP);
+	Word_t Xor = INDEX ^ pop;
+	Word_t mask = cJL_DCDMASK(POP0BYTES);
+	Word_t r = Xor & mask;
+
+	if (1255349946 == INDEX)
+	printf("INDEX %lu POP0BYTES %d pop %lx Xor %lx mask %lx r = %lx\n", INDEX, POP0BYTES,  pop, Xor, mask, r);
+
+	return r;
+}
+#if 0
 // DETERMINE IF AN INDEX IS (NOT) IN A JPS EXPANSE:
 #define JL_DCDNOTMATCHINDEX(INDEX,PJP,POP0BYTES) \
         (((INDEX) ^ JL_JPDCDPOP0(PJP)) & cJL_DCDMASK(POP0BYTES))
+#endif
 
 // NUMBER OF JPs IN AN UNCOMPRESSED BRANCH:
 // An uncompressed branch is simply an array of 256 Judy Pointers (JPs).  It is
@@ -180,8 +194,8 @@ typedef struct JUDY_BRANCH_UNCOMPRESSED {
 // Word_ts per various JudyL structures that have constant sizes.
 // cJL_WORDSPERJP should always be 2; this is fundamental to the Judy
 // structures.
-#define cJL_WORDSPERJP (sizeof(jp_t)   / cJL_BYTESPERWORD)
-#define cJL_WORDSPERCL (cJL_BYTESPERCL / cJL_BYTESPERWORD)
+#define cJL_WORDSPERJP (sizeof(jp_t)   / cJL_BYTESPERPTR)
+#define cJL_WORDSPERCL (cJL_BYTESPERCL / cJL_BYTESPERPTR)
 
 // OPPORTUNISTIC UNCOMPRESSION:
 // Define populations at which a BranchL or BranchB must convert to BranchU.

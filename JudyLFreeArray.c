@@ -19,7 +19,7 @@ size_t JudyLFreeArray(void **PPArray)
 
 		judyLFreeJLW(Pjlw, Pjlw[0] + 1, &jpm);
 		*PPArray = NULL;
-		return (-(jpm.jpm_TotalMemWords * cJL_BYTESPERWORD));
+		return (-(jpm.jpm_TotalMemWords * cJL_BYTESPERPTR));
 	} else {
 		Pjpm_t Pjpm = P_JPM(*PPArray);
 		Word_t TotalMem = Pjpm->jpm_TotalMemWords;
@@ -33,7 +33,7 @@ size_t JudyLFreeArray(void **PPArray)
 		}
 
 		*PPArray = NULL;
-		return TotalMem * cJL_BYTESPERWORD;
+		return TotalMem * cJL_BYTESPERPTR;
 	}
 }
 
