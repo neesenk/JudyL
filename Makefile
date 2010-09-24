@@ -1,7 +1,6 @@
 CFLAGS = -I. -fPIC -Wall -O0 -pipe -g
 
 OBJS := JudyLCascade.o 		\
-	JudyDump.o		\
 	JudyLTables.o 		\
 	JudyLCount.o		\
 	JudyLCreateBranch.o 	\
@@ -15,11 +14,10 @@ OBJS := JudyLCascade.o 		\
 	JudyLMallocIF.o		\
 	JudyLNext.o		\
 	JudyLPrev.o		\
-	JudyLPrevEmpty.o	\
-	JudyLNextEmpty.o	\
 	JudyLByCount.o		\
 	JudySL.o		\
 	JudyHS.o
+
 HEADFILE := Judy.h JudyL.h JudyPrivate.h JudyPrivateBranch.h
 
 all: libjudy.so test
@@ -38,10 +36,6 @@ JudyLNext.o : JudyLNext.c
 	$(CC) $(CFLAGS) -DJUDYNEXT -c -o JudyLNext.o JudyLNext.c
 JudyLPrev.o : JudyLNext.c
 	$(CC) $(CFLAGS) -DJUDYPREV -c -o JudyLPrev.o JudyLNext.c
-JudyLNextEmpty.o : JudyLNextEmpty.c
-	$(CC) $(CFLAGS) -DJUDYNEXT -c -o JudyLNextEmpty.o JudyLNextEmpty.c
-JudyLPrevEmpty.o : JudyLNextEmpty.c
-	$(CC) $(CFLAGS) -DJUDYPREV -c -o JudyLPrevEmpty.o JudyLNextEmpty.c
 
 clean:
 	rm -f $(OBJS) libjudy.so test main.o

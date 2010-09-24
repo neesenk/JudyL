@@ -6,11 +6,21 @@
 
 #include "JudyL.h"
 
+static void **JudyIter(const void *PArray, Word_t *PIndex);
+
 #ifdef JUDYPREV
 void **JudyLPrev(const void *PArray, uint32_t *PIndex)
 #else
 void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #endif
+{
+	Word_t Index = *PIndex;
+	void **ret = JudyIter(PArray, &Index);
+	*PIndex = Index;
+	return ret;
+}
+
+static void **JudyIter(const void *PArray, PWord_t PIndex)
 {
 	Pjp_t Pjp, Pjp2;	// current JPs.
 	Pjbl_t Pjbl;		// Pjp->jp_Addr masked and cast to types:
@@ -658,24 +668,23 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #endif
 		JL_BITMAPDIGITL(digit, subexp, JL_JLB_BITMAP(Pjlb, subexp), offset);
 		JL_SETDIGIT1(*PIndex, digit);
+		return ((void **)(P_JV(JL_JLB_PVALUE(Pjlb, subexp)) + offset));
 	}
-
 	case cJL_JPIMMED_1_01:
 		SET_01(1);
-		goto SM3Imm_01;
+		return (void **)(&Pjp->jp_Addr);
 	case cJL_JPIMMED_2_01:
 		SET_01(2);
-		goto SM3Imm_01;
+		return (void **)(&Pjp->jp_Addr);
 	case cJL_JPIMMED_3_01:
 		SET_01(3);
-		goto SM3Imm_01;
-      SM3Imm_01:
 		return (void **)(&Pjp->jp_Addr);
 #ifdef JUDYPREV
 #define	SM3IMM_OFFSET(cPop1)  (cPop1) - 1	// highest.
 #else
 #define	SM3IMM_OFFSET(cPop1)  0	// lowest.
 #endif
+
 #define	SM3IMM(cPop1,Next)		\
 	offset = SM3IMM_OFFSET(cPop1);	\
 	goto Next

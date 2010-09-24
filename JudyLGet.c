@@ -30,36 +30,6 @@ void **JudyLLast(const void *PArray, uint32_t *PIndex)
 	return JudyLPrev(PArray, PIndex);
 }
 
-int JudyLFirstEmpty(const void *PArray, uint32_t *PIndex)
-{
-	void **PValue;
-	if (PIndex == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
-		return JERR;
-	}
-
-	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
-		return JERR;
-	if (PValue == NULL)
-		return 1;
-	return JudyLNextEmpty(PArray, PIndex);
-}
-
-int JudyLLastEmpty(const void *PArray, uint32_t *PIndex)
-{
-	void **PValue;
-	if (PIndex == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);	// caller error.
-		return JERR;
-	}
-
-	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
-		return JERR;
-	if (PValue == NULL)
-		return 1;	// found *PIndex.
-	return JudyLPrevEmpty(PArray, PIndex);
-}
-
 void **JudyLGet(const void *PArray, uint32_t Index)
 {
 	Pjp_t Pjp;		// current JP while walking the tree.

@@ -52,10 +52,6 @@ extern void **	JudyLFirst(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLNext(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLLast(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLPrev(const void *PArray, uint32_t *PIndex);
-extern int      JudyLFirstEmpty(const void *PArray, uint32_t *PIndex);
-extern int      JudyLNextEmpty(const void *PArray, uint32_t *PIndex);
-extern int      JudyLLastEmpty(const void *PArray, uint32_t *PIndex);
-extern int      JudyLPrevEmpty(const void *PArray, uint32_t *PIndex);
 
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);
