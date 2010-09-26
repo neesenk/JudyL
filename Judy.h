@@ -1,8 +1,8 @@
 #ifndef _JUDY_INCLUDED
 #define _JUDY_INCLUDED
 #include <stdint.h>
-#include <stdlib.h>  
-#include <limits.h>  
+#include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>

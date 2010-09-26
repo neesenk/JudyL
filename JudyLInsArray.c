@@ -17,7 +17,7 @@ static Word_t subexp_mask[] = { 0, ~cJL_POP0MASK(1), ~cJL_POP0MASK(2), ~cJL_POP0
  * @PValue	list of corresponding values.
  * @Pjpm	for memory and errors.
  */
-static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1, 
+static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 			const uint32_t *PIndex, Pjv_t PValue, Pjpm_t Pjpm)
 {
 	Pjp_t Pjp;		// lower-level JP.
@@ -136,7 +136,7 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 		if (Level == 1) {
 			COPYTOLEAF_EVEN(Pjll, uint8_t);
 			SETIMMTYPE(cJL_JPIMMED_1_02);
-		} else 
+		} else
 			assert(0);
 
 		return 1;
@@ -350,7 +350,7 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 		Pjbany = (Word_t) PjblRaw;
 		JPtype = branchL_JPtype[levelsub];
 	} else {
-		Pjbb_t PjbbRaw = NULL;	
+		Pjbb_t PjbbRaw = NULL;
 		Pjbb_t Pjbb;
 		Pjp_t Pjp2;	// in BranchU.
 
@@ -410,13 +410,13 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 	return retval;
 }
 
-/** 
+/**
  * @PPArray	in which to insert, initially empty.
  * @Count	number of indexes (and values) to insert.
  * @PIndex	list of indexes to insert.
  * @PValue	list of corresponding values.
  */
-int JudyLInsArray(void **PPArray, size_t Count, 
+int JudyLInsArray(void **PPArray, size_t Count,
 		  const uint32_t *PIndex, const void **Value)
 {
 	Pjlw_t Pjlw;		// new root-level leaf.

@@ -23,7 +23,7 @@ extern Word_t judyLeaf3ToLeafW(Pjlw_t, Pjv_t, Pjp_t, Word_t, void *);
  *  2 same as 1, but in addition the JP now points to a BranchL containing a
  *    single JP, which should be compressed into the parent branch (if there
  *    is one, which is not the case for a top-level branch under a JPM) */
-static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)	
+static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 {
 	Word_t pop1;		// of a leaf.
 	Word_t level;		// of a leaf.
@@ -475,7 +475,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 		JL_LEAF(3, JL_LEAF_UPLEVEL64, uint32_t *, cJL_LEAF4_MAXPOP1,
 			cJL_JPLEAF4, judyLLeaf3ToLeaf4, judyLAllocJLL4, JL_LEAF4VALUEAREA,
 			JL_LEAF_TOIMMED_23, JL_TOIMMED_01_ODD, JL_COPY3_PINDEX_TO_LONG,
-			uint8_t *, cJL_IMMED3_MAXPOP1, cJL_JPIMMED_3_02, cJL_JPIMMED_3_01, 
+			uint8_t *, cJL_IMMED3_MAXPOP1, cJL_JPIMMED_3_02, cJL_JPIMMED_3_01,
 			judySearchLeaf3, JL_LEAF3GROWINPLACE, JL_DELETEINPLACE_ODD,
 			JL_DELETECOPY_ODD, judyLAllocJLL3, judyLFreeJLL3, JL_LEAF3VALUEAREA);
 	case cJL_JPLEAF_B1: {
@@ -632,11 +632,11 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 	return retcode;
 }
 
-int JudyLDel(void **PPArray, uint32_t Index) 
+int JudyLDel(void **PPArray, uint32_t Index)
 {
 	Word_t pop1;
 	int offset;
-	void **PPvalue;	
+	void **PPvalue;
 
 	if (PPArray == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
@@ -652,7 +652,7 @@ int JudyLDel(void **PPArray, uint32_t Index)
 		Pjv_t Pjv;
 		Pjv_t Pjvnew;
 		Pjlw_t Pjlw = P_JLW(*PPArray);
-		Pjlw_t Pjlwnew;	
+		Pjlw_t Pjlwnew;
 		pop1 = Pjlw[0] + 1;
 
 		if (pop1 == 1) {
@@ -720,7 +720,7 @@ int JudyLDel(void **PPArray, uint32_t Index)
 			Pjbl_t Pjbl = P_JBL(PjblRaw);
 
 			for (offset = 0; offset < Pjbl->jbl_NumJPs; ++offset) {
-				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, (Pjbl->jbl_jp) + offset, 
+				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, (Pjbl->jbl_jp) + offset,
 					JL_DIGITTOSTATE(Pjbl->jbl_Expanse [offset],
 					cJL_BYTESPERWORD), (void *) Pjpm);
 				Pjlwnew += pop1;

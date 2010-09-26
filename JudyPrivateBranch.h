@@ -14,7 +14,7 @@
  * Note:  The jpo_u union is not required by HP-UX or Linux but Win32 because
  * the cl.exe compiler otherwise refuses to pack a bitfield (DcdPopO) with
  * anything else, even with the -Zp option.  This is pretty ugly, but
- * fortunately portable, and its all hide-able by macros (see below). 
+ * fortunately portable, and its all hide-able by macros (see below).
  */
 typedef struct JUDY_POINTER_OTHERS {
 	Word_t j_po_Addr;				// first word:  Pjp_t, Word_t, etc.
@@ -57,7 +57,7 @@ typedef union JUDY_POINTER {	// JP.
 #define jp_Type    j_po.jpo_u.j_po_Bytes[sizeof(Word_t) - 1]
 #define jp_DcdP0   j_po.jpo_u.j_po_DcdP0
 
-/** 
+/**
  * EXTRACT VALUES FROM JP:
  * Masks for the bytes in the Dcd and Pop0 parts of jp_DcdPopO:
  * cJL_DCDMASK() consists of a mask that excludes the (LSb) Pop0 bytes and
@@ -189,7 +189,7 @@ typedef struct JUDY_BRANCH_UNCOMPRESSED {
 #define JL_BRANCHL_MAX_POP      1000
 
 // Minimum global population increment before next conversion of a BranchB to a
-// BranchU: This is was done to allow malloc() to coalesce memory before the 
+// BranchU: This is was done to allow malloc() to coalesce memory before the
 // next big (~512 words) allocation.
 #define JL_BTOU_POP_INCREMENT    300
 

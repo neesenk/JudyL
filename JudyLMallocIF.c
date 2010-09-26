@@ -26,7 +26,7 @@ Pjpm_t judyLAllocJPM(void)
 	Pjpm_t Pjpm = JudyMalloc(Words);
 	assert((Words * cJL_BYTESPERPTR) == sizeof(jLpm_t));
 
-	if (Pjpm) 
+	if (Pjpm)
 		Pjpm->jpm_TotalMemWords = Words;
 	return Pjpm;
 }
@@ -41,10 +41,10 @@ void judyLFreeJPM(Pjpm_t PjpmFree, Pjpm_t PjpmStats)
 
 Pjbl_t judyLAllocJBL(Pjpm_t Pjpm)
 {
-	Pjbl_t PjblRaw = NULL; 
+	Pjbl_t PjblRaw = NULL;
 	Word_t Words = sizeof(jbl_t) / cJL_BYTESPERPTR;
 	assert((Words * cJL_BYTESPERPTR) == sizeof(jbl_t));
-	
+
 	MALLOC(PjblRaw, Words, Pjpm);
 	return PjblRaw;
 }
@@ -59,7 +59,7 @@ void judyLFreeJBL(Pjbl_t Pjbl, Pjpm_t Pjpm)
 Pjbb_t judyLAllocJBB(Pjpm_t Pjpm)
 {
 	Word_t Words = sizeof(jbb_t) / cJL_BYTESPERPTR;
-	Pjbb_t PjbbRaw = NULL; 
+	Pjbb_t PjbbRaw = NULL;
 	assert((Words * cJL_BYTESPERPTR) == sizeof(jbb_t));
 
 	MALLOC(PjbbRaw, Words, Pjpm);
@@ -92,7 +92,7 @@ void judyLFreeJBBJP(Pjp_t Pjp, Word_t NumJPs, Pjpm_t Pjpm)
 Pjbu_t judyLAllocJBU(Pjpm_t Pjpm)
 {
 	Word_t Words = sizeof(jbu_t) / cJL_BYTESPERPTR;
-	Pjbu_t PjbuRaw = NULL; 
+	Pjbu_t PjbuRaw = NULL;
 	assert((Words * cJL_BYTESPERPTR) == sizeof(jbu_t));
 
 	MALLOC(PjbuRaw, Words, Pjpm);
@@ -210,7 +210,7 @@ static Word_t judyLGetMemActive(Pjp_t Pjp)
 	Word_t Bytes = 0;	// actual bytes used at this level.
 
 	switch (JL_JPTYPE(Pjp)) {
-	case cJL_JPBRANCH_L2: case cJL_JPBRANCH_L3: case cJL_JPBRANCH_L: 
+	case cJL_JPBRANCH_L2: case cJL_JPBRANCH_L3: case cJL_JPBRANCH_L:
 	{
 		Pjbl_t Pjbl = P_JBL(Pjp->jp_Addr);
 
@@ -219,7 +219,7 @@ static Word_t judyLGetMemActive(Pjp_t Pjp)
 
 		return (Bytes + sizeof(jbl_t));
 	}
-	case cJL_JPBRANCH_B2: case cJL_JPBRANCH_B3: case cJL_JPBRANCH_B: 
+	case cJL_JPBRANCH_B2: case cJL_JPBRANCH_B3: case cJL_JPBRANCH_B:
 	{
 		Word_t subexp;
 		Word_t jpcount;
@@ -237,7 +237,7 @@ static Word_t judyLGetMemActive(Pjp_t Pjp)
 
 		return (Bytes + sizeof(jbb_t));
 	}
-	case cJL_JPBRANCH_U2: case cJL_JPBRANCH_U3: case cJL_JPBRANCH_U: 
+	case cJL_JPBRANCH_U2: case cJL_JPBRANCH_U3: case cJL_JPBRANCH_U:
 	{
 		Pjbu_t Pjbu = P_JBU(Pjp->jp_Addr);
 
@@ -267,7 +267,7 @@ static Word_t judyLGetMemActive(Pjp_t Pjp)
 	return 0;
 }
 
-size_t JudyLMemActive(const void *PArray) 
+size_t JudyLMemActive(const void *PArray)
 {
 	if (PArray == NULL)
 		return 0;
@@ -282,13 +282,13 @@ size_t JudyLMemActive(const void *PArray)
 	}
 }
 
-size_t JudyLMemUsed(const void *PArray) 
+size_t JudyLMemUsed(const void *PArray)
 {
 	Word_t Words = 0;
 
         if (PArray == NULL) return 0;
 
-	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) { 
+	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
 	    Pjlw_t Pjlw = P_JLW(PArray);
 	    Words = JL_LEAFWPOPTOWORDS(Pjlw[0] + 1);
 	} else {
@@ -296,5 +296,5 @@ size_t JudyLMemUsed(const void *PArray)
 	    Words = Pjpm->jpm_TotalMemWords;
 	}
 
-	return (Words * sizeof(Word_t));	
+	return (Words * sizeof(Word_t));
 }

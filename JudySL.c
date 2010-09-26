@@ -237,7 +237,7 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 		return retcode;
 	}
 
-	PPValue = JudyLGet(*PPArray, indexword); 
+	PPValue = JudyLGet(*PPArray, indexword);
 	if (PPValue == NULL)
 		return 0;
 	if ((retcode = JudySLDelSub(PPValue, PPArrayOrig, Index + WORDSIZE,
@@ -357,7 +357,7 @@ static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t
 				if (PPValue == PPJERR)
 					return PPJERR;
 				if (PPValue != NULL)
-					return PPValue;	
+					return PPValue;
 			}
 		}
 

@@ -45,7 +45,7 @@ int judyCreateBranchL(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
  */
 int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void *Pjpm)
 {
-	Pjbb_t PjbbRaw, Pjbb;	
+	Pjbb_t PjbbRaw, Pjbb;
 	Word_t ii, jj;
 	uint8_t CurrSubExp;	// Current sub expanse for BM
 

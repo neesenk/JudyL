@@ -244,7 +244,7 @@ Word_t judyLeaf2ToLeaf3(uint8_t *PLeaf3, Pjv_t Pjv3, Pjp_t Pjp, Word_t MSByte,	v
 	return 0;
 }
 
-/** 
+/**
  * @Pjlw	destination Index part of leaf.
  * @PjvW	destination value part of leaf.
  * @Pjp		3-byte-index object from which to copy.

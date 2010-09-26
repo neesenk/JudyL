@@ -110,7 +110,7 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 		Pjlw_t Pjlw = P_JLW(PArray);
 		pop1 = Pjlw[0] + 1;
 
-		if ((offset = judySearchLeafW(Pjlw + 1, pop1, *PIndex)) >= 0) {	
+		if ((offset = judySearchLeafW(Pjlw + 1, pop1, *PIndex)) >= 0) {
 			assert(offset < pop1);	// in expected range.
 			return (void **)(JL_LEAFWVALUEAREA(Pjlw, pop1) + offset);
 		}

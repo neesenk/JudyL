@@ -41,7 +41,7 @@ static void judyCopyWto3(uint8_t *PDest, PWord_t PSrc, Word_t LeafIndexes)
 static int judyStageJBBtoJBB(Pjp_t PjpLeaf, Pjbb_t PStageJBB, Pjp_t PjpArray,
 			     uint8_t * PSubCount, Pjpm_t Pjpm)
 {
-	Pjbb_t PjbbRaw, Pjbb;	
+	Pjbb_t PjbbRaw, Pjbb;
 	Word_t subexp;
 
 	if ((PjbbRaw = judyLAllocJBB(Pjpm)) == NULL)
@@ -110,7 +110,7 @@ static Pjlb_t judyJLL2toJLB1(uint16_t * Pjll, Pjv_t Pjv, Word_t LeafPop1, void *
 			if (pv[subexp].pv_Pjv == NULL) {
 				while (subexp--) {
 					if (pv[subexp].pv_Pop1)
-						judyLFreeJV(pv[subexp].pv_Pjv, 
+						judyLFreeJV(pv[subexp].pv_Pjv,
 							    pv[subexp].pv_Pop1, Pjpm);
 				}
 				judyLFreeJLB1(PjlbRaw, Pjpm);
@@ -293,7 +293,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 
 int judyCascade3(Pjp_t Pjp, void *Pjpm)
 {
-	uint8_t *PLeaf;	
+	uint8_t *PLeaf;
 	Word_t End, Start, ExpCnt, CIndex;
 	Pjv_t Pjv;
 	jp_t StageJP[cJL_LEAF3_MAXPOP1];	// JPs of new leaves

@@ -64,13 +64,13 @@ int insert(void **root)
 		if (buff[i].nums == 0)
 			continue;
 		ret = JudyLIns(root, buff[i].nums);
-		if (ret == (void **)-1) 
+		if (ret == (void **)-1)
 			abort();
 		if (*ret == NULL) {
 			*ret = (void *)(buff + i);
 			buff[i].state |= INSERT;
 			num++;
-		} else { 
+		} else {
 			struct object *p = *ret;
 			assert(p->nums = buff[i].nums);
 			buff[i].nums = 0;
@@ -138,7 +138,7 @@ void next(void *root, int num)
 	double count = 0;
 	int i = 0;
 	start_counter();
-	for (ret = (struct object **)JudyLFirst(root, &p); 
+	for (ret = (struct object **)JudyLFirst(root, &p);
 	     (ret != (struct object **)-1 && ret != NULL);
 	     ret = (struct object **)JudyLNext(root, &p)) {
 		n++;
@@ -152,7 +152,7 @@ void next(void *root, int num)
 		else
 			(*ret)->rank = n;
 		pp = p;
-	}	
+	}
 
 	for (i = 0; i < N_; i++)
 		assert(!(buff[i].state & INSERT) || (buff[i].state & NEXTITER));
@@ -171,7 +171,7 @@ void prev(void *root, int num)
 	int n = 0;
 	uint32_t pp = ~0;
 	int i = 0;
-	for (ret = (struct object **)JudyLLast(root, &p); 
+	for (ret = (struct object **)JudyLLast(root, &p);
 	     (ret != (struct object **)-1 && ret != NULL);
 	     ret = (struct object **)JudyLPrev(root, &p)) {
 		n++;
@@ -193,7 +193,7 @@ void prev(void *root, int num)
 
 	assert(n == num);
 	count += get_counter();
-	printf("prev count %lf\n", count); 
+	printf("prev count %lf\n", count);
 }
 
 void bycount(void *root)

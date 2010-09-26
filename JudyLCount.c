@@ -64,7 +64,7 @@ uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 		return pop1above1;
 	if ((PPvalue = JudyLFirst(PArray, &Index2)) == PPJERR)
 		return 0;
-	retcode = (PPvalue != NULL);	
+	retcode = (PPvalue != NULL);
 	if (retcode == 0)
 		return pop1above1;
 	if ((pop1above2 = judyLCountSM(Pjp, Index2, Pjpm)) == 0)

@@ -1,6 +1,6 @@
 #include "JudyL.h"
 
-void **JudyLFirst(const void *PArray, uint32_t *PIndex) 
+void **JudyLFirst(const void *PArray, uint32_t *PIndex)
 {
 	void **PValue;
 	if (PIndex == NULL) {
@@ -15,7 +15,7 @@ void **JudyLFirst(const void *PArray, uint32_t *PIndex)
 	return JudyLNext(PArray, PIndex);
 }
 
-void **JudyLLast(const void *PArray, uint32_t *PIndex) 
+void **JudyLLast(const void *PArray, uint32_t *PIndex)
 {
 	void **PValue;
 	if (PIndex == NULL) {

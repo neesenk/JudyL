@@ -119,7 +119,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 		}
 		if (numJPs < cJL_BRANCHLMAXJPS) {
 			offset = ~offset;
-			JL_JPSETADT(&newJP, 0, Index, 
+			JL_JPSETADT(&newJP, 0, Index,
 				    JL_JPTYPE(Pjp) + cJL_JPIMMED_1_01 - cJL_JPBRANCH_L2);
 
 			JL_INSERTINPLACE(Pjbl->jbl_Expanse, numJPs, offset, digit);
@@ -590,7 +590,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 
 	// (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL)
 	case cJL_JPIMMED_1_01:
-		JL_IMMSET_01_COPY(1, uint8_t *, cJL_JPIMMED_1_02, 
+		JL_IMMSET_01_COPY(1, uint8_t *, cJL_JPIMMED_1_02,
 				  JL_IMMSET_01_COPY_EVEN, ignore);
 	// 2_01 leads to 2_02, and 3_01 leads to 3_02, except for JudyL 32-bit, where
 	// they lead to a leaf:
@@ -656,7 +656,7 @@ void **JudyLIns(void **PPArray, uint32_t Index)
 		Pjlwnew[1] = Index;
 
 		*PPArray = (void *) Pjlwnew;
-		Pjlwnew[2] = 0;	
+		Pjlwnew[2] = 0;
 		return (void **)(Pjlwnew + 2);
 	}
 
@@ -664,7 +664,7 @@ void **JudyLIns(void **PPArray, uint32_t Index)
 		Pjlw_t Pjlwnew;
 		Word_t pop1;
 
-		Pjlw = P_JLW(*PPArray);	
+		Pjlw = P_JLW(*PPArray);
 		pop1 = Pjlw[0] + 1;
 
 		Pjv = JL_LEAFWVALUEAREA(Pjlw, pop1);

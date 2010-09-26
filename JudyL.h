@@ -84,7 +84,7 @@ typedef struct JUDYL_LEAF_BITMAP {
  * jp_DcdPopO field in jpm_JP, being one byte too small, is not used.
  * Note:  Struct fields are ordered to keep "hot" data in the first 8 words
  * (see left-margin comments) for machines with 8-word cache lines, and to keep
- * sub-word fields together for efficient packing. 
+ * sub-word fields together for efficient packing.
  */
 typedef struct JUDYL_POPULATION_AND_MEMORY {
 	Word_t jpm_Pop0;

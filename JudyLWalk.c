@@ -7,7 +7,7 @@
 #define JL_SETINDEX(INDEX, State, V)			\
 	(((INDEX) & ~(cJL_MASKATSTATE(State))) |	\
 	(((uint8_t)(V)) << (((State) - 1) * cJL_BITSPERBYTE)))
-	
+
 static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 {
 	int i, mask, ret = 0, state = 0;
@@ -16,14 +16,14 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		return 0;
-	case cJL_JPBRANCH_L2: 
+	case cJL_JPBRANCH_L2:
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_L;
-	case cJL_JPBRANCH_L3: 
+	case cJL_JPBRANCH_L3:
 		state = 3;
 		goto JPBRANCH_L;
-	case cJL_JPBRANCH_L: 
+	case cJL_JPBRANCH_L:
 		state = cJL_ROOTSTATE;
 		goto JPBRANCH_L;
 	JPBRANCH_L:
@@ -39,14 +39,14 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 
 		return 0;
 	}
-	case cJL_JPBRANCH_B2: 
+	case cJL_JPBRANCH_B2:
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_B;
 	case cJL_JPBRANCH_B3:
 		state = 3;
 		goto JPBRANCH_B;
-	case cJL_JPBRANCH_B: 
+	case cJL_JPBRANCH_B:
 		state = cJL_ROOTSTATE;
 		goto JPBRANCH_B;
 	JPBRANCH_B:
@@ -75,14 +75,14 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 		}
 		return 0;
 	}
-	case cJL_JPBRANCH_U: 
+	case cJL_JPBRANCH_U:
 		state = cJL_ROOTSTATE;
 		goto JPBRANCH_U;
-	case cJL_JPBRANCH_U3:  
+	case cJL_JPBRANCH_U3:
 		state = 3;
 		goto JPBRANCH_U;
 	case cJL_JPBRANCH_U2:
-		state = 2;	
+		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_U;
 	JPBRANCH_U:
@@ -108,7 +108,7 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		prefix = JL_SETINDEX(prefix, 2, Pjp->jp_DcdP0[1]);
 		for (i = 0; i < Pop1; i++) {
-			Index = (prefix & 0xffffff00) | Pjll[i]; 
+			Index = (prefix & 0xffffff00) | Pjll[i];
 			ret = fn(ctx, Index, (void **)(Pjv + i));
 			if (ret != 0)
 				return ret;
@@ -163,7 +163,7 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 					continue;
 				Pjv2 = Pjv + judyCountBits(BitMap & (BitMask - 1));
 
-				Index = (prefix & 0xffffff00) | 
+				Index = (prefix & 0xffffff00) |
 					(i * cJL_BITSPERSUBEXPB + mask);
 				ret = fn(ctx, Index, (void **)Pjv2);
 				if (ret != 0)
@@ -204,7 +204,7 @@ int JudyLWalk(void *PArray, walk_fn_t fn, void *ctx)
 	Pjpm_t Pjpm = NULL;
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
 		int i = 0, ret;
-		Pjlw_t Pjlw = P_JLW(PArray);	
+		Pjlw_t Pjlw = P_JLW(PArray);
 		Word_t pop1 = Pjlw[0] + 1;
 		Pjv_t Pjv = JL_LEAFWVALUEAREA(Pjlw, pop1);
 

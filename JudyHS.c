@@ -329,7 +329,7 @@ size_t JudyHSFreeArray(void **PPArray)
 	bytes_total = 0;
 	Len = 0;
 
-	for (PPHtble = JudyLFirst(*PPArray, &Len); 
+	for (PPHtble = JudyLFirst(*PPArray, &Len);
 	     (PPHtble != NULL) && (PPHtble != PPJERR);
 	     PPHtble = JudyLNext(*PPArray, &Len)) {
 		void **PPValueH;

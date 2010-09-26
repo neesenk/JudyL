@@ -3,7 +3,7 @@
 #include "Judy.h"
 
 /* assert(sizeof(Word_t) == sizeof(void *)) */
-typedef unsigned long Word_t, *PWord_t; 
+typedef unsigned long Word_t, *PWord_t;
 
 // Machine (CPU) cache line size:
 // NOTE:  A leaf size of 2 cache lines maximum is the target (optimal) for
