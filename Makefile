@@ -32,11 +32,11 @@ test : $(OBJS) main.o
 
 $(OBJS) : $(HEADFILE)
 
-JudyLNext.o : JudyLNext.c
-	$(CC) $(CFLAGS) -DJUDYNEXT -c -o JudyLNext.o JudyLNext.c
+JudyLNext.o : JudyIter.c 
+	$(CC) $(CFLAGS) -DJUDYNEXT -c -o JudyLNext.o JudyIter.c
 
-JudyLPrev.o : JudyLNext.c
-	$(CC) $(CFLAGS) -DJUDYPREV -c -o JudyLPrev.o JudyLNext.c
+JudyLPrev.o : JudyIter.c
+	$(CC) $(CFLAGS) -DJUDYPREV -c -o JudyLPrev.o JudyIter.c
 
 clean:
 	rm -f $(OBJS) libjudy.so test main.o

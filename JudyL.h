@@ -87,7 +87,7 @@ typedef struct JUDYL_LEAF_BITMAP {
  * sub-word fields together for efficient packing.
  */
 typedef struct JUDYL_POPULATION_AND_MEMORY {
-	Word_t jpm_Pop0;
+	Word_t jpm_Pop0;	/* Must be first */
 	jp_t jpm_JP;
 	Word_t jpm_LastUPop0;
 	Pjv_t jpm_PValue;

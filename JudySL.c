@@ -324,7 +324,7 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 	return (JudySLPrevSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE));
 }
 
-void **JudySLNext(const void *PArray, uint8_t * Index)
+void **JudySLNext(const void *PArray, uint8_t *Index)
 {
 	if (Index == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
@@ -424,45 +424,34 @@ void **JudySLLast(const void *PArray, uint8_t * Index)
 	return PPValue;
 }
 
-size_t JudySLFreeArray(void **PPArray)
+void JudySLFreeArray(void **PPArray)
 {
 	void **PPArrayOrig = PPArray;	// for error reporting.
 	uint32_t indexword = 0;		// word just found.
 	void **PPValue;			// from Judy array.
-	uint32_t bytes_freed = 0;	// bytes freed at this level.
-	uint32_t bytes_total = 0;	// bytes freed at all levels.
-	if (PPArray == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
-		return JERR;
-	}
+
+	if (PPArray == NULL)
+		return;
 
 	if (IS_PSCL(*PPArray)) {
 		Pscl_t Pscl = CLEAR_PSCL(*PPArray);
 		uint32_t freewords = SCLSIZE(STRLEN(Pscl->scl_Index));
 		JudyFree((void *)Pscl, freewords);
 		*PPArray = NULL;
-		return freewords * WORDSIZE;
+		return;
 	}
 
 	for (PPValue = JudyLFirst(*PPArray, &indexword);
 	     (PPValue != NULL) && (PPValue != PPJERR);
 	     PPValue = JudyLNext(*PPArray, &indexword)) {
-		if (!LASTWORD_BY_VALUE(indexword)) {
-			if ((bytes_freed = JudySLFreeArray(PPValue)) == JERR)
-				return JERR;	// propagate serious error.
-			bytes_total += bytes_freed;
-		}
+		if (!LASTWORD_BY_VALUE(indexword))
+			JudySLFreeArray(PPValue);
 	}
 
 	if (PPValue == PPJERR) {
 		JudySLModifyErrno(*PPArray, *PPArrayOrig);
-		return JERR;
+		return;
 	}
 
-	if ((bytes_freed = JudyLFreeArray(PPArray)) == JERR) {
-		JudySLModifyErrno(*PPArray, *PPArrayOrig);
-		return JERR;
-	}
-
-	return bytes_total + bytes_freed;
+	JudyLFreeArray(PPArray);
 }

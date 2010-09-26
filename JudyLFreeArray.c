@@ -1,25 +1,20 @@
 #include "JudyL.h"
 
-size_t JudyLFreeArray(void **PPArray)
+void JudyLFreeArray(void **PPArray)
 {
 	jLpm_t jpm;
 
-	if (PPArray == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
-		return JERR;
-	}
+	if (PPArray == NULL || P_JLW(*PPArray) == NULL)
+		return ;
+
 	jpm.jpm_Pop0 = 0;
 	jpm.jpm_TotalMemWords = 0;
-
-	if (P_JLW(*PPArray) == NULL)
-		return 0;
 
 	if (JL_LEAFW_POP0(*PPArray) < cJL_LEAFW_MAXPOP1) {
 		Pjlw_t Pjlw = P_JLW(*PPArray);
 
 		judyLFreeJLW(Pjlw, Pjlw[0] + 1, &jpm);
 		*PPArray = NULL;
-		return (-(jpm.jpm_TotalMemWords * cJL_BYTESPERPTR));
 	} else {
 		Pjpm_t Pjpm = P_JPM(*PPArray);
 		Word_t TotalMem = Pjpm->jpm_TotalMemWords;
@@ -27,13 +22,8 @@ size_t JudyLFreeArray(void **PPArray)
 		judyLFreeSM(&(Pjpm->jpm_JP), &jpm);
 		judyLFreeJPM(Pjpm, &jpm);
 
-		if (TotalMem + jpm.jpm_TotalMemWords) {
-			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
-			return JERR;
-		}
-
+		assert((TotalMem + jpm.jpm_TotalMemWords) == 0);
 		*PPArray = NULL;
-		return TotalMem * cJL_BYTESPERPTR;
 	}
 }
 
@@ -42,9 +32,7 @@ void judyLFreeSM(Pjp_t Pjp, Pjpm_t Pjpm)
 	Word_t Pop1;
 
 	switch (JL_JPTYPE(Pjp)) {
-	case cJL_JPBRANCH_L:
-	case cJL_JPBRANCH_L2:
-	case cJL_JPBRANCH_L3: {
+	case cJL_JPBRANCH_L: case cJL_JPBRANCH_L2: case cJL_JPBRANCH_L3: {
 		Pjbl_t Pjbl = P_JBL(Pjp->jp_Addr);
 		Word_t offset;
 
@@ -54,9 +42,7 @@ void judyLFreeSM(Pjp_t Pjp, Pjpm_t Pjpm)
 		judyLFreeJBL((Pjbl_t) (Pjp->jp_Addr), Pjpm);
 		break;
 	}
-	case cJL_JPBRANCH_B:
-	case cJL_JPBRANCH_B2:
-	case cJL_JPBRANCH_B3: {
+	case cJL_JPBRANCH_B: case cJL_JPBRANCH_B2: case cJL_JPBRANCH_B3: {
 		Word_t subexp, offset, jpcount;
 		Pjbb_t Pjbb = P_JBB(Pjp->jp_Addr);
 		for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
@@ -71,9 +57,7 @@ void judyLFreeSM(Pjp_t Pjp, Pjpm_t Pjpm)
 		judyLFreeJBB((Pjbb_t) (Pjp->jp_Addr), Pjpm);
 		break;
 	}
-	case cJL_JPBRANCH_U:
-	case cJL_JPBRANCH_U2:
-	case cJL_JPBRANCH_U3: {
+	case cJL_JPBRANCH_U: case cJL_JPBRANCH_U2: case cJL_JPBRANCH_U3: {
 		Word_t offset;
 		Pjbu_t Pjbu = P_JBU(Pjp->jp_Addr);
 		for (offset = 0; offset < cJL_BRANCHUNUMJPS; ++offset)
@@ -107,8 +91,7 @@ void judyLFreeSM(Pjp_t Pjp, Pjpm_t Pjpm)
 		judyLFreeJLB1((Pjlb_t) (Pjp->jp_Addr), Pjpm);
 		break;
 	}
-	case cJL_JPIMMED_1_02:
-	case cJL_JPIMMED_1_03:
+	case cJL_JPIMMED_1_02: case cJL_JPIMMED_1_03:
 		Pop1 = JL_JPTYPE(Pjp) - cJL_JPIMMED_1_02 + 2;
 		judyLFreeJV((Pjv_t) (Pjp->jp_Addr), Pop1, Pjpm);
 		break;

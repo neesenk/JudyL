@@ -278,7 +278,6 @@ void do_test(int m_dup)
 	if (m_dup == 0)
 		assert(num == N_);
 	printf("memory count %u\n", JudyLMemUsed(root));
-	printf("memory active %u\n", JudyLMemActive(root));
 	search(root);
 	if (N_ == 128)
 		JudyLGet(root, 1804289582);
@@ -286,7 +285,7 @@ void do_test(int m_dup)
 	prev(root, num);
 	next(root, num);
 	ccount(root, num);
-	//bycount(root);
+	bycount(root);
 	delete(&root);
 }
 

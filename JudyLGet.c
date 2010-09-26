@@ -56,8 +56,6 @@ void **JudyLGet(const void *PArray, uint32_t Index)
 
 ContinueWalk:	// for going down one level; come here with Pjp set.
 	switch (JL_JPTYPE(Pjp)) {
-	case 0:
-		goto ReturnCorrupt;	// save a little code.
 	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		return NULL;
 	case cJL_JPBRANCH_L2:
@@ -151,9 +149,8 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		return ((void **)(JL_LEAF3VALUEAREA(Pjll, Pop1) + posidx));
 	case cJL_JPLEAF_B1:{
 		Pjlb_t Pjlb;
-		Word_t subexp;	// in bitmap, 0..7.
-		BITMAPL_t BitMap;	// for one subexpanse.
-		BITMAPL_t BitMask;	// bit in BitMap for Indexs Digit.
+		Word_t subexp;
+		BITMAPL_t BitMap, BitMask;
 		Pjv_t Pjv;
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 1)) break;
 
@@ -187,7 +184,6 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 			return (void **)(P_JV(Pjp->jp_Addr) + 0);
 		break;
 	default:
-	      ReturnCorrupt:
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 		return PPJERR;
 	}

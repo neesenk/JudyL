@@ -5,7 +5,7 @@ static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjp
 static int judyCountLeafB1(const Pjll_t Pjll, const Word_t Pop1, const Word_t Index);
 Word_t judyLJPPop1(const Pjp_t Pjp);
 
-uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
+size_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 {
 	jLpm_t fakejpm;		// local temporary for small arrays.
 	Pjpm_t Pjpm;		// top JPM or local temporary for error info.
@@ -15,9 +15,9 @@ uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 	Word_t pop1above1;	// indexes at or above Index1, inclusive.
 	Word_t pop1above2;	// indexes at or above Index2, exclusive.
 	int retcode;		// from Judy*First() calls.
-	void **PPvalue;	// from JudyLFirst() calls.
+	void **PPvalue;		// from JudyLFirst() calls.
 
-	if ((PArray == NULL) || (Index1 > Index2))
+	if (PArray == NULL || Index1 > Index2)
 		return 0;
 
 	if (Index1 == Index2) {
@@ -42,7 +42,7 @@ uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)
 		Pjpm = P_JPM(PArray);
 		Pjp = &(Pjpm->jpm_JP);
 		pop1 = (Pjpm->jpm_Pop0) + 1;
-		assert(pop1);	// JudyL or 64-bit cannot create a full array!
+		assert(pop1);
 	}
 
 	assert(pop1);		// just to be safe.
