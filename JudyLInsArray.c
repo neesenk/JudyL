@@ -1,122 +1,13 @@
 #include "JudyL.h"
 
 static uint8_t immed_maxpop1[] = {
-	0,
-	cJL_IMMED1_MAXPOP1,
-	cJL_IMMED2_MAXPOP1,
-	cJL_IMMED3_MAXPOP1,
+	0, cJL_IMMED1_MAXPOP1, cJL_IMMED2_MAXPOP1, cJL_IMMED3_MAXPOP1,
 };
-
-static uint8_t leaf_maxpop1[] = {
-	0,
-	0,			// 64-bit Judy1 has no Leaf1.
-	cJL_LEAF2_MAXPOP1,
-	cJL_LEAF3_MAXPOP1,
-};
-
-static uint8_t branchL_JPtype[] = {
-	0,
-	0,
-	cJL_JPBRANCH_L2,
-	cJL_JPBRANCH_L3,
-	cJL_JPBRANCH_L,
-};
-
-static uint8_t branchB_JPtype[] = {
-	0,
-	0,
-	cJL_JPBRANCH_B2,
-	cJL_JPBRANCH_B3,
-	cJL_JPBRANCH_B,
-};
-
-static uint8_t branchU_JPtype[] = {
-	0,
-	0,
-	cJL_JPBRANCH_U2,
-	cJL_JPBRANCH_U3,
-	cJL_JPBRANCH_U,
-};
-
-// Subexpanse masks are similer to JL_DCDMASK() but without the need to clear
-// the first digits bits.  Avoid doing variable shifts by precomputing a
-// lookup array.
-static Word_t subexp_mask[] = {
-	0,
-	~cJL_POP0MASK(1),
-	~cJL_POP0MASK(2),
-	~cJL_POP0MASK(3),
-};
-
-static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
-			const uint32_t *PIndex, Pjv_t PValue, Pjpm_t Pjpm);
-
-/** 
- * @PPArray	in which to insert, initially empty.
- * @Count	number of indexes (and values) to insert.
- * @PIndex	list of indexes to insert.
- * @PValue	list of corresponding values.
- */
-int JudyLInsArray(void **PPArray, size_t Count, 
-		  const uint32_t *PIndex, const void **Value)
-{
-	Pjlw_t Pjlw;		// new root-level leaf.
-	Pjlw_t Pjlwindex;	// first index in root-level leaf.
-	int offset;		// in PIndex.
-	Pjv_t PValue = (Pjv_t)Value;
-
-	if (!PPArray || !PIndex || !PValue) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
-		return JERR;
-	}
-
-	if (*PPArray != NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NONNULLPARRAY);
-		return JERR;
-	}
-
-	if (Count > cJL_LEAFW_MAXPOP1) {	// too big for root-level leaf.
-		Word_t tmp = Count;
-		Pjpm_t Pjpm;	// new, to allocate.
-		Pjpm = judyLAllocJPM();
-		JL_CHECKALLOC(Pjpm_t, Pjpm, JERR);
-		*PPArray = (void *) Pjpm;
-		Pjpm->jpm_Pop0 = Count - 1;
-		if (!judyInsArray(&(Pjpm->jpm_JP), cJL_ROOTSTATE, &tmp,
-				  PIndex, PValue, Pjpm)) {
-			if (Count) {	// partial success, adjust pop0:
-				(Pjpm->jpm_Pop0) = Count - 1;
-			} else {	// total failure, free JPM:
-				judyLFreeJPM(Pjpm, NULL);
-				*PPArray = NULL;
-			}
-
-			return JERR;
-		}
-		return 1;
-	}
-
-	for (offset = 1; offset < Count; ++offset) {
-		if (PIndex[offset - 1] >= PIndex[offset]) {
-			JL_SET_ERRNO(JL_ERRNO_UNSORTED);
-			return JERR;
-		}
-	}
-
-	if (Count == 0)
-		return 1;
-
-	Pjlw = judyLAllocJLW(Count + 1);
-	JL_CHECKALLOC(Pjlw_t, Pjlw, JERR);
-	*PPArray = (void *) Pjlw;
-	Pjlw[0] = Count - 1;	// set pop0.
-	Pjlwindex = Pjlw + 1;
-
-	JL_COPYMEM(Pjlwindex, PIndex, Count);
-	JL_COPYMEM(JL_LEAFWVALUEAREA(Pjlw, Count), PValue, Count);
-
-	return 1;
-}
+static uint8_t leaf_maxpop1[] = { 0, 0, cJL_LEAF2_MAXPOP1, cJL_LEAF3_MAXPOP1 };
+static uint8_t branchL_JPtype[] = { 0, 0, cJL_JPBRANCH_L2, cJL_JPBRANCH_L3, cJL_JPBRANCH_L };
+static uint8_t branchB_JPtype[] = { 0, 0, cJL_JPBRANCH_B2, cJL_JPBRANCH_B3, cJL_JPBRANCH_B };
+static uint8_t branchU_JPtype[] = { 0, 0, cJL_JPBRANCH_U2, cJL_JPBRANCH_U3, cJL_JPBRANCH_U };
+static Word_t subexp_mask[] = { 0, ~cJL_POP0MASK(1), ~cJL_POP0MASK(2), ~cJL_POP0MASK(3) };
 
 /**
  * @PjpParent	parent JP in/under which to store.
@@ -156,57 +47,49 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 #define ALLOCLEAF(AllocLeaf) \
         if ((PjllRaw = AllocLeaf(pop1, Pjpm)) == NULL) NOMEM; \
         Pjll = P_JLL(PjllRaw);
-#define COPYTOLEAF_EVEN_SUB(Pjll,LeafType)              \
-        {                                               \
-            LeafType * P_leaf  = (LeafType *) (Pjll);   \
-            Word_t p_op1   = pop1;			\
-            const uint32_t *P_Index = PIndex;           \
-                                                        \
-            assert(pop1 > 0);                           \
-                                                        \
-            do { *P_leaf++ = *P_Index++; /* truncates */\
-            } while (--(p_op1));                        \
-        }
 
-#define COPYTOLEAF_ODD_SUB(cLevel,Pjll,Copy)            \
-        {                                               \
-            uint8_t * P_leaf  = (uint8_t *) (Pjll);     \
-            Word_t p_op1   = pop1;			\
-            const uint32_t *P_Index = PIndex;           \
-                                                        \
-            assert(pop1 > 0);                           \
-                                                        \
-            do {                                        \
-                Copy(P_leaf, *P_Index);                 \
+#define COPYTOLEAF_EVEN_SUB(Pjll,LeafType) do {         \
+        LeafType * P_leaf  = (LeafType *) (Pjll);	\
+        Word_t p_op1   = pop1;				\
+        const uint32_t *P_Index = PIndex;		\
+        assert(pop1 > 0);				\
+        do { *P_leaf++ = *P_Index++; /* truncates */	\
+        } while (--(p_op1));				\
+} while (0)
+
+#define COPYTOLEAF_ODD_SUB(cLevel,Pjll,Copy) do {       \
+        uint8_t * P_leaf  = (uint8_t *) (Pjll);		\
+        Word_t p_op1   = pop1;				\
+        const uint32_t *P_Index = PIndex;		\
+        assert(pop1 > 0);				\
+        do {						\
+		Copy(P_leaf, *P_Index);                 \
                 P_leaf += (cLevel); ++P_Index;          \
-            } while (--(p_op1));                        \
-        }
+        } while (--(p_op1));				\
+} while (0)
 
-#define COPYTOLEAF_EVEN(Pjll,LeafType)                  \
-        {                                               \
-            COPYTOLEAF_EVEN_SUB(Pjll,LeafType)          \
-            JL_COPYMEM(Pjv, PValue, pop1);              \
-        }
+#define COPYTOLEAF_EVEN(Pjll,LeafType) do {             \
+        COPYTOLEAF_EVEN_SUB(Pjll,LeafType);		\
+        JL_COPYMEM(Pjv, PValue, pop1);			\
+} while (0)
 
-#define COPYTOLEAF_ODD(cLevel,Pjll,Copy)                \
-        {                                               \
-            COPYTOLEAF_ODD_SUB( cLevel,Pjll,Copy)       \
-            JL_COPYMEM(Pjv, PValue, pop1);              \
-        }
+#define COPYTOLEAF_ODD(cLevel,Pjll,Copy) do {		\
+        COPYTOLEAF_ODD_SUB(cLevel,Pjll,Copy);		\
+        JL_COPYMEM(Pjv, PValue, pop1);			\
+} while (0)
 
 #define SETIMMTYPE(BaseJPType)  (PjpParent->jp_Type) = (BaseJPType) + pop1 - 2
 
-#define MAKELEAF_SUB1(AllocLeaf,ValueArea,LeafType)                     \
-        ALLOCLEAF(AllocLeaf);                                           \
+#define MAKELEAF_SUB1(AllocLeaf,ValueArea,LeafType)     \
+        ALLOCLEAF(AllocLeaf);                           \
         Pjv = ValueArea(Pjll, pop1)
 
-#define MAKELEAF_SUB2(cLevel,JPType)                                    \
-{                                                                       \
+#define MAKELEAF_SUB2(cLevel,JPType) do {				\
         Word_t D_cdP0;                                                  \
         assert(pop1 - 1 <= cJL_POP0MASK(cLevel));                       \
         D_cdP0 = (*PIndex & cJL_DCDMASK(cLevel)) | (pop1 - 1);          \
         JL_JPSETADT(PjpParent, (Word_t)PjllRaw, D_cdP0, JPType);        \
-}
+} while (0)
 
 #define MAKELEAF_EVEN(cLevel,JPType,AllocLeaf,ValueArea,LeafType)       \
         MAKELEAF_SUB1(AllocLeaf,ValueArea,LeafType);                    \
@@ -447,11 +330,10 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 		Pjbl_t PjblRaw = NULL;	// new BranchL; init for cc.
 		Pjbl_t Pjbl;
 
-		if ((*PPop1 > JL_BRANCHL_MAX_POP) || ((PjblRaw = judyLAllocJBL(Pjpm)) == NULL))
+		if (*PPop1 > JL_BRANCHL_MAX_POP || (PjblRaw = judyLAllocJBL(Pjpm)) == NULL)
 			goto SetParent;	// just keep BranchU.
 
 		Pjbl = P_JBL(PjblRaw);
-
 		(Pjbl->jbl_NumJPs) = numJPs;
 		offset = 0;
 
@@ -472,10 +354,8 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 		Pjbb_t Pjbb;
 		Pjp_t Pjp2;	// in BranchU.
 
-		if ((*PPop1 > JL_BRANCHB_MAX_POP)
-		    || ((PjbbRaw = judyLAllocJBB(Pjpm)) == NULL)) {	// cant alloc BranchB.
-			goto SetParent;	// just keep BranchU.
-		}
+		if (*PPop1 > JL_BRANCHB_MAX_POP || (PjbbRaw = judyLAllocJBB(Pjpm)) == NULL)
+			goto SetParent;
 
 		Pjbb = P_JBB(PjbbRaw);
 
@@ -489,7 +369,7 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 			Pjp_t Pjparray;
 
 			if (!(numJPs = judyCountBits(JL_JBB_BITMAP(Pjbb, offset))))
-				continue;	// skip empty subexpanse.
+				continue;
 
 			if ((PjparrayRaw = judyLAllocJBBJP(numJPs, Pjpm)) == NULL) {
 				while (offset-- > 0) {
@@ -500,7 +380,7 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 						      Pjpm);
 				}
 				judyLFreeJBB(PjbbRaw, Pjpm);
-				goto SetParent;	// keep BranchU.
+				goto SetParent;
 			}
 
 			JL_JBB_PJP(Pjbb, offset) = PjparrayRaw;
@@ -528,4 +408,71 @@ static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,
 	}
 
 	return retval;
+}
+
+/** 
+ * @PPArray	in which to insert, initially empty.
+ * @Count	number of indexes (and values) to insert.
+ * @PIndex	list of indexes to insert.
+ * @PValue	list of corresponding values.
+ */
+int JudyLInsArray(void **PPArray, size_t Count, 
+		  const uint32_t *PIndex, const void **Value)
+{
+	Pjlw_t Pjlw;		// new root-level leaf.
+	Pjlw_t Pjlwindex;	// first index in root-level leaf.
+	int offset;		// in PIndex.
+	Pjv_t PValue = (Pjv_t)Value;
+
+	if (!PPArray || !PIndex || !PValue) {
+		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
+		return JERR;
+	}
+
+	if (*PPArray != NULL) {
+		JL_SET_ERRNO(JL_ERRNO_NONNULLPARRAY);
+		return JERR;
+	}
+
+	if (Count > cJL_LEAFW_MAXPOP1) {
+		Word_t tmp = Count;
+		Pjpm_t Pjpm;
+		Pjpm = judyLAllocJPM();
+		JL_CHECKALLOC(Pjpm_t, Pjpm, JERR);
+		*PPArray = (void *) Pjpm;
+		Pjpm->jpm_Pop0 = Count - 1;
+		if (!judyInsArray(&Pjpm->jpm_JP, cJL_ROOTSTATE, &tmp,
+				  PIndex, PValue, Pjpm)) {
+			if (Count) {
+				(Pjpm->jpm_Pop0) = Count - 1;
+			} else {
+				judyLFreeJPM(Pjpm, NULL);
+				*PPArray = NULL;
+			}
+
+			return JERR;
+		}
+		return 1;
+	}
+
+	for (offset = 1; offset < Count; ++offset) {
+		if (PIndex[offset - 1] >= PIndex[offset]) {
+			JL_SET_ERRNO(JL_ERRNO_UNSORTED);
+			return JERR;
+		}
+	}
+
+	if (Count == 0)
+		return 1;
+
+	Pjlw = judyLAllocJLW(Count + 1);
+	JL_CHECKALLOC(Pjlw_t, Pjlw, JERR);
+	*PPArray = (void *) Pjlw;
+	Pjlw[0] = Count - 1;	// set pop0.
+	Pjlwindex = Pjlw + 1;
+
+	JL_COPYMEM(Pjlwindex, PIndex, Count);
+	JL_COPYMEM(JL_LEAFWVALUEAREA(Pjlw, Count), PValue, Count);
+
+	return 1;
 }

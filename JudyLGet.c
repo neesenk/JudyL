@@ -113,8 +113,8 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		Pjp += judyCountBits(BitMap & (BitMask - 1));
 		goto ContinueWalk;
 	}
-		// Notice the reverse order of the cases, and falling through to the next case,
-		// for performance.
+	// Notice the reverse order of the cases, and falling through to the next case,
+	// for performance.
 	case cJL_JPBRANCH_U:
 		Pjp = JL_JBU_PJP(Pjp, Index, cJL_ROOTSTATE);
 		if (JL_JPTYPE(Pjp) != cJL_JPBRANCH_U3)

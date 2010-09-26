@@ -40,15 +40,18 @@ double get_counter(void)
 #define INSERT		0x100
 #define NEXTITER	0x010
 #define PREVITER	0x001
+#define CALL		0x200
 
-#define N_ 10000000
+#define SN_ 10000000
 struct object {
 	int nums;
 	unsigned long state;
 	int rank;
-} buff[N_];
+} buff[SN_];
 
-int nums[N_];
+int nums[SN_];
+
+int N_ = SN_;
 
 int insert(void **root)
 {
@@ -230,29 +233,78 @@ void ccount(void *root, int num)
 	printf("count count %lf\n", count);
 }
 
+struct walk_ctx {
+	int nums;
+	int calls;
+	int prev;
+};
+
+int walk_fn(void *ctx, uint32_t idx, void **value)
+{
+	struct object *ret = *value;
+	struct walk_ctx *c = ctx;
+	assert(ret < buff + N_ && ret >= buff);
+	assert(ret->nums == idx);
+	assert(ret->nums != 0);
+	assert((ret->state & CALL) == 0);
+	assert(c->prev <= idx);
+	ret->state |= CALL;
+	c->prev = idx;
+	c->calls++;
+	return 0;
+}
+
+void walk(void *root, int nums)
+{
+	struct walk_ctx ctx = { 0, 0, 0};
+	int ret = 0;
+
+	double count = 0;
+	start_counter();
+
+	ret = JudyLWalk(root, walk_fn, &ctx);
+	assert(ret == 0);
+	assert(ctx.calls == nums);
+	count += get_counter();
+	printf("walk count %lf\n", count);
+}
+
+void do_test(int m_dup)
+{
+	int num = 0;
+	void *root = NULL;
+
+	num = insert(&root);
+	if (m_dup == 0)
+		assert(num == N_);
+	printf("memory count %u\n", JudyLMemUsed(root));
+	printf("memory active %u\n", JudyLMemActive(root));
+	search(root);
+	if (N_ == 128)
+		JudyLGet(root, 1804289582);
+	walk(root, num);
+	prev(root, num);
+	next(root, num);
+	ccount(root, num);
+	//bycount(root);
+	delete(&root);
+}
+
 void random_test(void)
 {
 	int i = 0;
-	int num = 0;
-	void *root = NULL;
 
 	printf("RANDOM TEST:\n");
 	memset(buff, 0, sizeof(buff));
 	memset(nums, 0, sizeof(nums));
-	srand(0);
+	// srand(0);
 	for (i = 0; i< N_; i++) {
 		buff[i].nums = random();
 		if (buff[i].nums == 0)
 			buff[i].nums = 1;
 	}
-	num = insert(&root);
-	printf("memory count %u\n", JudyLMemUsed(root));
-	search(root);
-	prev(root, num);
-	next(root, num);
-	ccount(root, num);
-	bycount(root);
-	delete(&root);
+
+	do_test(1);
 }
 
 void loop_test(void)
@@ -260,57 +312,39 @@ void loop_test(void)
 	int i = 0;
 	int num = 0;
 	int loop = 0;
-	void *root = NULL;
 
 	printf("LOOP TEST:\n");
 	memset(buff, 0, sizeof(buff));
 	memset(nums, 0, sizeof(nums));
-	srand(0);
+	// srand(0);
 	num = random();
 	loop = random() % 256 + 1;
 	for (i = 0; i< N_; i++)
 		buff[i].nums = num + i * loop;
 
-	num = insert(&root);
-	assert(num == N_);
-	printf("memory count %u\n", JudyLMemUsed(root));
-	search(root);
-	prev(root, num);
-	next(root, num);
-	ccount(root, num);
-	bycount(root);
-	delete(&root);
+	do_test(0);
 }
 
 void line_test(void)
 {
 	int i = 0;
-	int num = 0;
-	void *root = NULL;
 
 	printf("LINE TEST:\n");
 	memset(buff, 0, sizeof(buff));
 	memset(nums, 0, sizeof(nums));
-	srand(0);
-	num = 1;
 	for (i = 0; i< N_; i++)
-		buff[i].nums = num + i;
+		buff[i].nums = 1 + i;
 
-	num = insert(&root);
-	assert(num == N_);
-	printf("memory count %u\n", JudyLMemUsed(root));
-	search(root);
-	prev(root, num);
-	next(root, num);
-	ccount(root, num);
-	bycount(root);
-	delete(&root);
+	do_test(0);
 }
 
 int main(void)
 {
-	line_test();
-	random_test();
-	loop_test();
+	for (N_ = 16; N_ <= SN_; N_ *= 2) {
+		printf("TEST NUMs = %d\n", N_);
+		line_test();
+		random_test();
+		loop_test();
+	}
 	return 0;
 }

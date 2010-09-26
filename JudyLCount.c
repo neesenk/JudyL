@@ -176,7 +176,6 @@ static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjp
 #define	BMPJP0(Subexp)       (P_JP(JL_JBB_PJP(Pjbb, Subexp)))
 #define	BMPJP(Subexp,JPnum)  (BMPJP0(Subexp) + (JPnum))
 #define	CLPERJPS(jpcount)    ((((jpcount) * cJL_WORDSPERJP) + cJL_WORDSPERCL - 1) / cJL_WORDSPERCL)
-
 		for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
 			jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp));
 			if (subexp < findsub)
@@ -294,9 +293,6 @@ static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjp
 	Pjll = P_JLL(Pjp->jp_Addr);			\
 	pop1 = JL_JPLEAF_POP0(Pjp) + 1;	                \
 	LEAFABOVE(Func, Pjll, pop1)
-#define	LEAFB1ABOVE(Func) LEAFLABOVE(Func)
-#define	IMMABOVE(Func,Pop1) \
-	LEAFABOVE(Func, (Pjll_t) (Pjp->jp_LIndex), Pop1)
 #define	LEAFABOVE(Func,Pjll,Pop1)		\
 	offset = Func(Pjll, Pop1, Index);	\
 	assert(offset >= 0);			\
@@ -308,12 +304,12 @@ static Word_t judyLCountSM(const Pjp_t Pjp, const Word_t Index, const Pjpm_t Pjp
 	case cJL_JPLEAF1: LEAFLABOVE(judySearchLeaf1);
 	case cJL_JPLEAF2: LEAFLABOVE(judySearchLeaf2);
 	case cJL_JPLEAF3: LEAFLABOVE(judySearchLeaf3);
-	case cJL_JPLEAF_B1: LEAFB1ABOVE(judyCountLeafB1);
+	case cJL_JPLEAF_B1: LEAFLABOVE(judyCountLeafB1);
 	case cJL_JPIMMED_1_01: IMMABOVE_01;
 	case cJL_JPIMMED_2_01: IMMABOVE_01;
 	case cJL_JPIMMED_3_01: IMMABOVE_01;
-	case cJL_JPIMMED_1_02: IMMABOVE(judySearchLeaf1, 2);
-	case cJL_JPIMMED_1_03: IMMABOVE(judySearchLeaf1, 3);
+	case cJL_JPIMMED_1_02: LEAFABOVE(judySearchLeaf1, (Pjll_t)(Pjp->jp_LIndex), 2);
+	case cJL_JPIMMED_1_03: LEAFABOVE(judySearchLeaf1, (Pjll_t)(Pjp->jp_LIndex), 3);
 	default:
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 		return 0;

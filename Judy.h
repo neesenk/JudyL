@@ -53,6 +53,10 @@ extern void **	JudyLNext(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLLast(const void *PArray, uint32_t *PIndex);
 extern void **	JudyLPrev(const void *PArray, uint32_t *PIndex);
 
+/* if return not 0, then walk stop */
+typedef int (*walk_fn_t)(void *ctx, uint32_t Index, void **Value);
+extern int JudyLWalk(void *PArray, walk_fn_t fn, void *ctx);
+
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);
 extern int      JudySLDel(void **, const uint8_t *Index);

@@ -208,12 +208,11 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 	case cJL_JPLEAF1:
 		PREPL_DCD(1);
 		JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjll)[offset]);
-
 		return (void **)(JL_LEAF1VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF2:
 		PREPL_DCD(2);
 		*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(2)))
-		    | ((uint16_t *) Pjll)[offset];
+			  | ((uint16_t *) Pjll)[offset];
 		return (void **)(JL_LEAF2VALUEAREA(Pjll, pop1) + offset);
 	case cJL_JPLEAF3: {
 		Word_t lsb;

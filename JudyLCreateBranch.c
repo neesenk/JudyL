@@ -14,8 +14,8 @@
  */
 int judyCreateBranchL(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void *Pjpm)
 {
-	Pjbl_t PjblRaw;		// pointer to linear branch.
-	Pjbl_t Pjbl;
+	Pjbl_t PjblRaw, Pjbl;
+
 	assert(ExpCnt <= cJL_BRANCHLMAXJPS);
 	PjblRaw = judyLAllocJBL(Pjpm);
 	if (PjblRaw == NULL)
@@ -45,18 +45,10 @@ int judyCreateBranchL(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
  */
 int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void *Pjpm)
 {
-	Pjbb_t PjbbRaw;		// pointer to bitmap branch.
-	Pjbb_t Pjbb;
+	Pjbb_t PjbbRaw, Pjbb;	
 	Word_t ii, jj;
 	uint8_t CurrSubExp;	// Current sub expanse for BM
 
-	/* This assertion says the number of populated subexpanses is not too large.
-	 * This function is only called when a BranchL overflows to a BranchB or when a
-	 * cascade occurs, meaning a leaf overflows.  Either way ExpCnt cant be very
-	 * large, in fact a lot smaller than cJL_BRANCHBMAXJPS.  (Otherwise a BranchU
-	 * would be used.)  Popping this assertion means something (unspecified) has
-	 * gone very wrong, or else Judys design criteria have changed, although in
-	 * fact there should be no HARM in creating a BranchB with higher actual fanout. */
 	assert(ExpCnt <= cJL_BRANCHBMAXJPS);
 
 	PjbbRaw = judyLAllocJBB(Pjpm);
@@ -77,8 +69,7 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 		}
 		if (SubExp != CurrSubExp) {
 			Word_t NumJP = ii - jj;
-			Pjp_t PjpRaw;
-			Pjp_t Pjp;
+			Pjp_t PjpRaw, Pjp;
 
 			PjpRaw = judyLAllocJBBJP(NumJP, Pjpm);
 			Pjp = P_JP(PjpRaw);
@@ -86,10 +77,9 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 			if (PjpRaw == NULL) {
 				while (CurrSubExp--) {
 					NumJP = judyCountBits(JL_JBB_BITMAP(Pjbb, CurrSubExp));
-					if (NumJP) {
-						judyLFreeJBBJP(JL_JBB_PJP(Pjbb, CurrSubExp),
-							      NumJP, Pjpm);
-					}
+					if (NumJP == 0)
+						continue;
+					judyLFreeJBBJP(JL_JBB_PJP(Pjbb, CurrSubExp), NumJP, Pjpm);
 				}
 				judyLFreeJBB(PjbbRaw, Pjpm);
 				return -1;
@@ -105,9 +95,6 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 	return 1;
 }
 
-// Build a BranchU from a BranchB.  Return with Pjp pointing to the BranchU.
-// Free the BranchB and its JP subarrays.
-// Return -1 if error (details in Pjpm), otherwise return 1.
 int judyCreateBranchU(Pjp_t Pjp, void *Pjpm)
 {
 	jp_t JPNull;
@@ -154,7 +141,7 @@ int judyCreateBranchU(Pjp_t Pjp, void *Pjpm)
 				else
 					*PDstJP = JPNull;
 
-				PDstJP++;	// advance to next JP
+				PDstJP++;
 				BitMap >>= 1;
 			}
 			jj = PjpA - PjpB;

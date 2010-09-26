@@ -14,8 +14,6 @@ typedef unsigned long Word_t, *PWord_t;
 // 64-byte cache lines, and the assumed 64-bit system has 16-word = 128-byte
 // cache lines.
 #define cJL_BYTESPERCL  64	// cache line size in bytes.
-
-// Bits Per Byte:
 #define cJL_BITSPERBYTE 0x8
 
 #define cJL_BYTESPERPTR (sizeof(Word_t))
@@ -23,10 +21,7 @@ typedef unsigned long Word_t, *PWord_t;
 // Bytes Per Word and Bits Per Word, latter assuming sizeof(byte) is 8 bits:
 // Expect 32 [64] bits per word.
 #define cJL_BYTESPERWORD (sizeof(uint32_t))
-
 #define cJL_BITSPERWORD  (sizeof(uint32_t) * cJL_BITSPERBYTE)
-#define JL_BYTESTOWORDS(BYTES) \
-        (((BYTES) + cJL_BYTESPERWORD - 1) / cJL_BYTESPERWORD)
 
 // A word that is all-ones, normally equal to -1UL, but safer with ~0:
 #define cJL_ALLONES  (~0UL)

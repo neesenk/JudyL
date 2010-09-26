@@ -10,11 +10,11 @@ OBJS := JudyLCascade.o 		\
 	JudyLGet.o		\
 	JudyLInsArray.o		\
 	JudyLIns.o		\
-	JudyLInsertBranch.o	\
 	JudyLMallocIF.o		\
 	JudyLNext.o		\
 	JudyLPrev.o		\
 	JudyLByCount.o		\
+	JudyLWalk.o		\
 	JudySL.o		\
 	JudyHS.o
 
@@ -34,6 +34,7 @@ $(OBJS) : $(HEADFILE)
 
 JudyLNext.o : JudyLNext.c
 	$(CC) $(CFLAGS) -DJUDYNEXT -c -o JudyLNext.o JudyLNext.c
+
 JudyLPrev.o : JudyLNext.c
 	$(CC) $(CFLAGS) -DJUDYPREV -c -o JudyLPrev.o JudyLNext.c
 

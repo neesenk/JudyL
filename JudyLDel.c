@@ -37,7 +37,6 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 
       ContinueDelWalk:		// for modifying state without recursing.
 	switch (JL_JPTYPE(Pjp)) {
-
 #define JL_BRANCH_KEEP(cLevel,MaxPop1,Next)             \
         if (pop1 > (MaxPop1)) {  /* hysteresis = 1 */    \
             assert((cLevel) >= 2);                      \
@@ -218,14 +217,14 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 		subexp = digit / cJL_BITSPERSUBEXPB;
 		bitmap = JL_JBB_BITMAP(Pjbb, subexp);
 		bitmask = JL_BITPOSMASKB(digit);
-		assert(bitmap & bitmask);	// Index valid => digits bit is set.
+		assert(bitmap & bitmask);
 
 		offset = ((bitmap == (cJL_FULLBITMAPB)) ?
 			  digit % cJL_BITSPERSUBEXPB :
 			  judyCountBits(bitmap & JL_MASKLOWEREXC(bitmask)));
 		Pjp2Raw = JL_JBB_PJP(Pjbb, subexp);
 		Pjp2 = P_JP(Pjp2Raw);
-		assert(Pjp2 != NULL);	// valid subexpanse pointer.
+		assert(Pjp2 != NULL);
 
 		if (JL_JPTYPE(Pjp2 + offset) != cJL_JPIMMED_1_01 + level - 2) {
 			Pjp = Pjp2 + offset;
@@ -257,17 +256,17 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 			return 1;
 		for (subexp2 = 0; subexp2 < cJL_NUMSUBEXPB; ++subexp2) {
 			if (subexp2 == subexp)
-				continue;	// skip current subexpanse.
+				continue;
 
 			if ((numJPs == cJL_BRANCHLMAXJPS) ? JL_JBB_BITMAP(Pjbb, subexp2) :
 			    ((numJPs += judyCountBits(JL_JBB_BITMAP(Pjbb, subexp2))) > cJL_BRANCHLMAXJPS)) {
-				return 1;	// too many JPs, cannot shrink.
+				return 1;
 			}
 		}
 
 		(void)judyBranchBToBranchL(Pjp, Pjpm);
 		return 1;
-	} // case.
+	}
 
 #define JL_BRANCHU_COMPRESS(cLevel,LeafType,MaxPop1,NullJPType,NewJPType,   \
                             LeafToLeaf,Alloc,ValueArea,CopyImmed,CopyIndex) \
@@ -326,46 +325,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 		level = cJL_ROOTSTATE;
 		Pjp = P_JP(Pjp->jp_Addr) + JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
 		break;
-// State transitions while deleting an Index, the inverse of the similar table
-// that appears in JudyIns.c:
-// Note:  In JudyIns.c this table is not needed and does not appear until the
-// Immed handling code; because once a Leaf is reached upon growing the tree,
-// the situation remains simpler, but for deleting indexes, the complexity
-// arises when leaves must compress to Immeds.
-// Note:  There are other transitions possible too, not shown here, such as to
-// a leaf one level higher.
-// (Yes, this is very terse...  Study it and it will make sense.)
-// (Note, parts of this diagram are repeated below for quick reference.)
-//                      reformat JP here for Judy1 only, from word-1 to word-2
-//           JUDY1 && JL_64BIT   JUDY1 || JL_64BIT                     |
-// (*) Leaf1 [[ => 1_15..08 ] => 1_07 => ... => 1_04 ] => 1_03 => 1_02 => 1_01
-//     Leaf2 [[ => 2_07..04 ] => 2_03 => 2_02        ]                 => 2_01
-//     Leaf3 [[ => 3_05..03 ] => 3_02                ]                 => 3_01
-// JL_64BIT only:
-//     Leaf4 [[ => 4_03..02 ]]                                         => 4_01
-//     Leaf5 [[ => 5_03..02 ]]                                         => 5_01
-//     Leaf6 [[ => 6_02     ]]                                         => 6_01
-//     Leaf7 [[ => 7_02     ]]                                         => 7_01
-// (*) For Judy1 & 64-bit, go directly from a LeafB1 to cJL_JPIMMED_1_15; skip
-//     Leaf1, as described in Judy1.h regarding cJ1_JPLEAF1.
-// MACROS FOR COMMON CODE:
-// (De)compress a LeafX into a LeafY one index size (cIS) larger (X+1 = Y):
-// This is only possible when the current leaf is under a narrow pointer
-// ((ParentLevel - 1) > cIS) and its population fits in a higher-level leaf.
-// Variables ParentLevel, pop1, PjllnewRaw, Pjllnew, Pjpm, and Index are in the
-// context.
-// Note:  Doing an "uplevel" doesnt occur until the old leaf can be compressed
-// up one level BEFORE deleting an index; that is, hysteresis = 1.
-// Note:  LeafType, MaxPop1, NewJPType, and Alloc refer to the up-level leaf,
-// not the current leaf.
-// Note:  010327:  Fixed bug where the jp_DcdPopO next-uplevel digit (byte)
-// above the current Pop0 value was not being cleared.  When upleveling, one
-// digit in jp_DcdPopO "moves" from being part of the Dcd subfield to the Pop0
-// subfield, but since a leaf maxpop1 is known to be <= 1 byte in size, the new
-// Pop0 byte should always be zero.  This is easy to overlook because
-// JL_JPLEAF_POP0() "knows" to only use the LSB of Pop0 (for efficiency) and
-// ignore the other bytes...  Until someone uses cJL_POP0MASK() instead of
-// JL_JPLEAF_POP0(), such as in JudyInsertBranch.c.
+
 #define JL_LEAF_UPLEVEL(cIS,LeafType,MaxPop1,NewJPType,LeafToLeaf,      \
                         Alloc,ValueArea)                                \
         assert(((ParentLevel - 1) == (cIS)) || (pop1 >= (MaxPop1)));    \
@@ -495,8 +455,6 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
                            ValueArea);                                  \
         }
 
-	// END OF MACROS, START OF CASES:
-	// (*) Leaf1 [[ => 1_15..08 ] => 1_07 => ... => 1_04 ] => 1_03 => 1_02 => 1_01
 	case cJL_JPLEAF1:
 		JL_LEAF(1, JL_LEAF_UPLEVEL, uint16_t *, cJL_LEAF2_MAXPOP1, cJL_JPLEAF2,
 			judyLeaf1ToLeaf2, judyLAllocJLL2, JL_LEAF2VALUEAREA,
@@ -505,13 +463,6 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 			cJL_JPIMMED_1_02, cJL_JPIMMED_1_01, judySearchLeaf1,
 			JL_LEAF1GROWINPLACE, JL_DELETEINPLACE, JL_DELETECOPY,
 			judyLAllocJLL1, judyLFreeJLL1, JL_LEAF1VALUEAREA);
-	// A complicating factor is that for JudyL & 32-bit, a Leaf2 must go directly
-	// to an Immed 2_01 and a Leaf3 must go directly to an Immed 3_01:
-	// Leaf2 [[ => 2_07..04 ] => 2_03 => 2_02 ] => 2_01
-	// Leaf3 [[ => 3_05..03 ] => 3_02         ] => 3_01
-	// Hence use JL_LEAF_TOIMMED_23 instead of JL_LEAF_TOIMMED in the cases below,
-	// and also the parameters ToImmed and, for odd index sizes, CopyPIndex, are
-	// required.
 	case cJL_JPLEAF2:
 		JL_LEAF(2, JL_LEAF_UPLEVEL, uint8_t *, cJL_LEAF3_MAXPOP1, cJL_JPLEAF3,
 			judyLeaf2ToLeaf3, judyLAllocJLL3, JL_LEAF3VALUEAREA,
@@ -571,7 +522,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 			JL_JLB_BITMAP(Pjlb, subexp) = 0;
 			return 1;
 		}
-		// Shrink value area in place or move to a smaller value area:
+
 		if (JL_LEAFVGROWINPLACE(pop1 - 1)) {	// hysteresis = 0.
 			JL_DELETEINPLACE(Pjv, pop1, offset, ignore);
 		} else {
@@ -652,22 +603,22 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 	default:
 		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 		return -1;
-	}			// switch
+	}
 
 	assert(level);
 	retcode = judyDelWalk(Pjp, Index, level, Pjpm);
-	assert(retcode != 0);	// should never happen.
-	if ((JL_JPTYPE(Pjp)) < cJL_JPIMMED_1_01) {	// not an Immed.
+	assert(retcode != 0);
+	if ((JL_JPTYPE(Pjp)) < cJL_JPIMMED_1_01) {
 		switch (retcode) {
 		case 1: {
 			jp_t JP = *Pjp;
 			Word_t DcdP0;
 
-			DcdP0 = JL_JPDCDPOP0(Pjp) - 1;	// decrement count.
+			DcdP0 = JL_JPDCDPOP0(Pjp) - 1;
 			JL_JPSETADT(Pjp, JP.jp_Addr, DcdP0, JL_JPTYPE(&JP));
 			break;
 		}
-		case 2:	{// collapse BranchL to single JP; see above:
+		case 2:	{
 			Pjbl_t PjblRaw = (Pjbl_t) (Pjp->jp_Addr);
 			Pjbl_t Pjbl = P_JBL(PjblRaw);
 
@@ -683,9 +634,9 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 
 int JudyLDel(void **PPArray, uint32_t Index) 
 {
-	Word_t pop1;		// population of leaf.
-	int offset;		// at which to delete Index.
-	void **PPvalue;	// pointer from JudyLGet().
+	Word_t pop1;
+	int offset;
+	void **PPvalue;	
 
 	if (PPArray == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
@@ -697,38 +648,34 @@ int JudyLDel(void **PPArray, uint32_t Index)
 	if (PPvalue == NULL)
 		return 0;
 
-	if (JL_LEAFW_POP0(*PPArray) < cJL_LEAFW_MAXPOP1) {	// must be a LEAFW
-		Pjv_t Pjv;	// current value area.
-		Pjv_t Pjvnew;	// value area in new leaf.
-		Pjlw_t Pjlw = P_JLW(*PPArray);	// first word of leaf.
-		Pjlw_t Pjlwnew;	// replacement leaf.
-		pop1 = Pjlw[0] + 1;	// first word of leaf is pop0.
+	if (JL_LEAFW_POP0(*PPArray) < cJL_LEAFW_MAXPOP1) {
+		Pjv_t Pjv;
+		Pjv_t Pjvnew;
+		Pjlw_t Pjlw = P_JLW(*PPArray);
+		Pjlw_t Pjlwnew;	
+		pop1 = Pjlw[0] + 1;
 
-		// Delete single (last) Index from array:
 		if (pop1 == 1) {
 			judyLFreeJLW(Pjlw, /* pop1 = */ 1, NULL);
 			*PPArray = NULL;
 			return 1;
 		}
 
-		// Locate Index in compressible leaf:
 		offset = judySearchLeafW(Pjlw + 1, pop1, Index);
-		assert(offset >= 0);	// Index must be valid.
+		assert(offset >= 0);
 
 		Pjv = JL_LEAFWVALUEAREA(Pjlw, pop1);
 
 		if (JL_LEAFWGROWINPLACE(pop1 - 1)) {
 			JL_DELETEINPLACE(Pjlw + 1, pop1, offset, ignore);
 			JL_DELETEINPLACE(Pjv, pop1, offset, ignore);
-			--(Pjlw[0]);	// decrement population.
+			--(Pjlw[0]);
 			return 1;
 		}
-		// Allocate new leaf for use in either case below:
+
 		Pjlwnew = judyLAllocJLW(pop1 - 1);
 		JL_CHECKALLOC(Pjlw_t, Pjlwnew, JERR);
 
-		// Shrink to smaller LEAFW:
-		// Note:  Skip the first word = pop0 in each leaf.
 		Pjlwnew[0] = (pop1 - 1) - 1;
 		JL_DELETECOPY(Pjlwnew + 1, Pjlw + 1, pop1, offset, ignore);
 
@@ -763,13 +710,11 @@ int JudyLDel(void **PPArray, uint32_t Index)
 		Pjlwnew = judyLAllocJLW(cJL_LEAFW_MAXPOP1);
 		JL_CHECKALLOC(Pjlw_t, Pjlwnew, JERR);
 
-		// Plug leaf into root pointer and set population count:
 		*PPArray = (void *) Pjlwnew;
 		Pjv = JL_LEAFWVALUEAREA(Pjlwnew, cJL_LEAFW_MAXPOP1);
-		*Pjlwnew++ = cJL_LEAFW_MAXPOP1 - 1;	// set pop0.
+		*Pjlwnew++ = cJL_LEAFW_MAXPOP1 - 1;
 
 		switch (JL_JPTYPE(Pjp)) {
-		// JPBRANCH_L:  Copy each JPs indexes to the new LEAFW and free the old branch:
 		case cJL_JPBRANCH_L: {
 			Pjbl_t PjblRaw = (Pjbl_t) (Pjp->jp_Addr);
 			Pjbl_t Pjbl = P_JBL(PjblRaw);
@@ -778,14 +723,13 @@ int JudyLDel(void **PPArray, uint32_t Index)
 				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, (Pjbl->jbl_jp) + offset, 
 					JL_DIGITTOSTATE(Pjbl->jbl_Expanse [offset],
 					cJL_BYTESPERWORD), (void *) Pjpm);
-				Pjlwnew += pop1;	// advance through indexes.
-				Pjv += pop1;	// advance through values.
+				Pjlwnew += pop1;
+				Pjv += pop1;
 			}
 			judyLFreeJBL(PjblRaw, Pjpm);
 
-			break;	// delete Index from new LEAFW.
+			break;
 		}
-
 		case cJL_JPBRANCH_B: {
 			Pjbb_t PjbbRaw = (Pjbb_t) (Pjp->jp_Addr);
 			Pjbb_t Pjbb = P_JBB(PjbbRaw);
@@ -802,8 +746,7 @@ int JudyLDel(void **PPArray, uint32_t Index)
 				Pjp2Raw = JL_JBB_PJP(Pjbb, subexp);
 				Pjp2 = P_JP(Pjp2Raw);
 				assert(Pjp2 != NULL);
-			// Walk through bits for all possible sub-subexpanses (digits); increment
-			// offset for each populated subexpanse; until no more set bits:
+
 				for (offset = 0; bitmap != 0;
 				     bitmap >>= 1, ++digit) {
 					if (!(bitmap & 1))	// skip empty sub-subexpanse.
@@ -818,36 +761,35 @@ int JudyLDel(void **PPArray, uint32_t Index)
 			}
 			judyLFreeJBB(PjbbRaw, Pjpm);
 
-			break;	// delete Index from new LEAFW.
+			break;
 		}
 		case cJL_JPBRANCH_U: {
 			Pjbu_t PjbuRaw = (Pjbu_t) (Pjp->jp_Addr);
 			Pjbu_t Pjbu = P_JBU(PjbuRaw);
-			Word_t ldigit;	// larger than uint8_t.
+			Word_t ldigit;
 
 			for (Pjp = Pjbu->jbu_jp, ldigit = 0; ldigit < cJL_BRANCHUNUMJPS; ++Pjp, ++ldigit) {
-				// Shortcuts, to save a little time for possibly big branches:
-				if ((JL_JPTYPE(Pjp)) == cJL_JPNULLMAX)	// skip null JP.
+				if ((JL_JPTYPE(Pjp)) == cJL_JPNULLMAX)
 					continue;
-				if ((JL_JPTYPE(Pjp)) == cJL_JPIMMED_3_01) {	// single Immed:
+				if ((JL_JPTYPE(Pjp)) == cJL_JPIMMED_3_01) {
 					*Pjlwnew++ = JL_DIGITTOSTATE(ldigit, cJL_BYTESPERWORD)
-							| JL_JPDCDPOP0(Pjp);	// rebuild Index.
-					*Pjv++ = Pjp->jp_Addr;	// copy value area.
+							| JL_JPDCDPOP0(Pjp);
+					*Pjv++ = Pjp->jp_Addr;
 					continue;
 				}
 
 				pop1 = judyLeafM1ToLeafW(Pjlwnew, Pjv, Pjp,
 					JL_DIGITTOSTATE(ldigit, cJL_BYTESPERWORD), (void *) Pjpm);
-				Pjlwnew += pop1;	// advance through indexes.
-				Pjv += pop1;	// advance through values.
+				Pjlwnew += pop1;
+				Pjv += pop1;
 			}
 			judyLFreeJBU(PjbuRaw, Pjpm);
-			break;	// delete Index from new LEAFW.
+			break;
 		}
 		default:
 			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
 			return JERR;
-		}		// end switch on sub-JP type.
+		}
 		judyLFreeJPM(Pjpm, NULL);
 		return 1;
 	}

@@ -25,7 +25,7 @@
 } while(0)
 
 typedef struct SHORCUTLEAF {
-	void *scl_Pvalue;	// callers value area.
+	void *scl_Pvalue;		// callers value area.
 	uint8_t scl_Index[WORDSIZE];	// base Index string.
 } scl_t, *Pscl_t;
 
@@ -77,9 +77,9 @@ static void JudySLModifyErrno(const void *PArray, const void *PArrayOrig)
 
 void **JudySLGet(const void *PArray, const uint8_t *Index)
 {
-	const uint8_t *pos = Index;	// place in Index.
-	uint32_t indexword;	// buffer for aligned copy.
-	void **PPValue;	// from JudyL array.
+	const uint8_t *pos = Index;
+	uint32_t indexword;
+	void **PPValue;
 
 	if (Index == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
@@ -87,15 +87,15 @@ void **JudySLGet(const void *PArray, const uint8_t *Index)
 	}
 
 	do {
-		if (IS_PSCL(PArray))	// a shortcut leaf.
+		if (IS_PSCL(PArray))
 			return (PPSCLVALUE_EQ(pos, PArray));
 
-		COPYSTRINGtoWORD(indexword, pos);	// copy next 4[8] bytes.
+		COPYSTRINGtoWORD(indexword, pos);
 		PPValue = JudyLGet(PArray, indexword);
 		if ((PPValue == NULL) || LASTWORD_BY_VALUE(indexword))
 			return PPValue;
 		pos += WORDSIZE;
-		PArray = *PPValue;	// each value -> next array.
+		PArray = *PPValue;
 	} while (1);
 }
 
@@ -124,7 +124,7 @@ void **JudySLIns(void **PPArray, const uint8_t *Index)
 		return PPJERR;
 	}
 
-	len = STRLEN(Index);	// bytes remaining.
+	len = STRLEN(Index);
 
 	while (1) {
 		if (*PPArray == NULL)	{
@@ -182,10 +182,8 @@ void **JudySLIns(void **PPArray, const uint8_t *Index)
 			return PPValue;	// is value for whole Index string.
 		}
 
-		pos += WORDSIZE;
-		len -= WORDSIZE;
-		pos2 += WORDSIZE;	// useless unless Pscl is set.
-		len2 -= WORDSIZE;
+		pos += WORDSIZE, len -= WORDSIZE;
+		pos2 += WORDSIZE, len2 -= WORDSIZE;
 		PPArray = PPValue;	// each value -> next array.
 	}
 }
@@ -209,7 +207,7 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 			const uint8_t *Index, size_t len)
 {
 	uint32_t indexword;	// next word to find.
-	void **PPValue;	// from JudyL array.
+	void **PPValue;		// from JudyL array.
 	int retcode;		// from lower-level call.
 
 	assert(PPArray != NULL);
@@ -220,13 +218,13 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 		uint32_t words;
 
 		if (STRCMP(Index, Pscll->scl_Index))
-			return 0;	// incorrect index.
+			return 0;
 
 		words = SCLSIZE(STRLEN(Pscll->scl_Index));
 		JudyFree((void *)Pscll, words);
 
 		*PPArray = NULL;
-		return 1;	// correct index deleted.
+		return 1;
 	}
 
 	COPYSTRINGtoWORD(indexword, Index);
@@ -269,7 +267,7 @@ void **JudySLPrev(const void *PArray, uint8_t * Index)
 
 	if (PArray == NULL)
 		return NULL;
-	return (JudySLPrevSub(PArray, Index, 1, STRLEN(Index)));
+	return JudySLPrevSub(PArray, Index, 1, STRLEN(Index));
 }
 
 static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_t len)
@@ -284,16 +282,16 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 			return PPValue;
 		}
 
-		COPYSTRINGtoWORD(indexword, Index);	// copy next 4[8] bytes.
-		if (len > WORDSIZE) {	// not at end of Index.
+		COPYSTRINGtoWORD(indexword, Index);
+		if (len > WORDSIZE) {
 			PPValue = JudyLGet(PArray, indexword);
 			if (PPValue != NULL) {
 				PPValue = JudySLPrevSub(*PPValue, Index + WORDSIZE, 1,
 							len - WORDSIZE);
 				if (PPValue == PPJERR)
-					return PPJERR;	// propagate error.
+					return PPJERR;
 				if (PPValue != NULL)
-					return PPValue;	// see above.
+					return PPValue;
 			}
 		}
 
@@ -303,7 +301,7 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 		}
 
 		if (PPValue == NULL)
-			return NULL;	// no previous index word.
+			return NULL;
 	} else {
 		if (IS_PSCL(PArray)) {
 			(void)STRCPY(Index, PSCLINDEX(PArray));
@@ -317,10 +315,10 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 		}
 
 		if (PPValue == NULL)
-			return NULL;	// no previous index word.
+			return NULL;
 	}
 
-	COPYWORDtoSTRING(Index, indexword);	// copy next 4[8] bytes.
+	COPYWORDtoSTRING(Index, indexword);
 	if (LASTWORD_BY_VALUE(indexword))
 		return PPValue;
 	return (JudySLPrevSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE));
@@ -349,7 +347,7 @@ static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t
 			return PPValue;
 		}
 
-		COPYSTRINGtoWORD(indexword, Index);	// copy next 4[8] bytes.
+		COPYSTRINGtoWORD(indexword, Index);
 
 		if (len > WORDSIZE) {
 			PPValue = JudyLGet(PArray, indexword);
@@ -357,9 +355,9 @@ static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t
 				PPValue = JudySLNextSub(*PPValue, Index + WORDSIZE, 1,
 							len - WORDSIZE);
 				if (PPValue == PPJERR)
-					return PPJERR;	// propagate error.
+					return PPJERR;
 				if (PPValue != NULL)
-					return PPValue;	// see above.
+					return PPValue;	
 			}
 		}
 
@@ -369,7 +367,7 @@ static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t
 		}
 
 		if (PPValue == NULL)
-			return NULL;	// no next index word.
+			return NULL;
 	} else {
 		if (IS_PSCL(PArray)) {
 			(void)STRCPY(Index, PSCLINDEX(PArray));
@@ -382,46 +380,45 @@ static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t
 			return PPJERR;
 		}
 		if (PPValue == NULL)
-			return NULL;	// no next index word.
+			return NULL;
 	}
 
-	COPYWORDtoSTRING(Index, indexword);	// copy next 4[8] bytes
+	COPYWORDtoSTRING(Index, indexword);
 	if (LASTWORD_BY_VALUE(indexword))
 		return PPValue;
-	return (JudySLNextSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE));
+
+	return JudySLNextSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE);
 }
 
-void **JudySLFirst(const void *PArray, uint8_t * Index)
+void **JudySLFirst(const void *PArray, uint8_t *Index)
 {
-	void **PPValue;	// from JudyL array.
+	void **PPValue;
 	if (Index == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
 		return PPJERR;
 	}
 
 	if ((PPValue = JudySLGet(PArray, Index)) == PPJERR)
-		return PPJERR;	// propagate serious error.
-	if ((PPValue == NULL)	// first try failed.
-	    && ((PPValue = JudySLNext(PArray, Index)) == PPJERR)) {
-		return PPJERR;	// propagate serious error.
-	}
+		return PPJERR;
+	if (PPValue == NULL && (PPValue = JudySLNext(PArray, Index)) == PPJERR)
+		return PPJERR;
 
 	return PPValue;
 }
 
 void **JudySLLast(const void *PArray, uint8_t * Index)
 {
-	void **PPValue;	// from JudyL array.
+	void **PPValue;
 	if (Index == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
 		return PPJERR;
 	}
 
 	if ((PPValue = JudySLGet(PArray, Index)) == PPJERR)
-		return PPJERR;	// propagate serious error.
-	if ((PPValue == NULL)	// first try failed.
+		return PPJERR;
+	if ((PPValue == NULL)
 	    && ((PPValue = JudySLPrev(PArray, Index)) == PPJERR)) {
-		return PPJERR;	// propagate serious error.
+		return PPJERR;
 	}
 
 	return PPValue;
@@ -432,8 +429,8 @@ size_t JudySLFreeArray(void **PPArray)
 	void **PPArrayOrig = PPArray;	// for error reporting.
 	uint32_t indexword = 0;		// word just found.
 	void **PPValue;			// from Judy array.
-	uint32_t bytes_freed = 0;		// bytes freed at this level.
-	uint32_t bytes_total = 0;		// bytes freed at all levels.
+	uint32_t bytes_freed = 0;	// bytes freed at this level.
+	uint32_t bytes_total = 0;	// bytes freed at all levels.
 	if (PPArray == NULL) {
 		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
 		return JERR;
@@ -466,5 +463,6 @@ size_t JudySLFreeArray(void **PPArray)
 		JudySLModifyErrno(*PPArray, *PPArrayOrig);
 		return JERR;
 	}
+
 	return bytes_total + bytes_freed;
 }

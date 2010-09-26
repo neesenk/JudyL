@@ -6,21 +6,11 @@
 
 #include "JudyL.h"
 
-static void **JudyIter(const void *PArray, Word_t *PIndex);
-
 #ifdef JUDYPREV
 void **JudyLPrev(const void *PArray, uint32_t *PIndex)
 #else
 void **JudyLNext(const void *PArray, uint32_t *PIndex)
 #endif
-{
-	Word_t Index = *PIndex;
-	void **ret = JudyIter(PArray, &Index);
-	*PIndex = Index;
-	return ret;
-}
-
-static void **JudyIter(const void *PArray, PWord_t PIndex)
 {
 	Pjp_t Pjp, Pjp2;	// current JPs.
 	Pjbl_t Pjbl;		// Pjp->jp_Addr masked and cast to types:
@@ -29,11 +19,7 @@ static void **JudyIter(const void *PArray, PWord_t PIndex)
 	Pjll_t Pjll = NULL;
 	Word_t state;		// current state in SM.
 	Word_t digit;		// next digit to decode from Index.
-#if defined(JUDYPREV)
 	Word_t pop1 = 0;	// in a leaf.
-#else
-	Word_t pop1;		// in a leaf.
-#endif
 	int offset;		// linear branch/leaf, from judySearchLeaf*().
 	int subexp;		// subexpanse in a bitmap branch.
 	Word_t bitposmask;	// bit in bitmap for Index.
