@@ -4,14 +4,14 @@ void **JudyLFirst(const void *PArray, uint32_t *PIndex)
 {
 	void **PValue;
 	if (PIndex == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		JL_SET_ERRNO(JLE_NULLPINDEX);
 		return PPJERR;
 	}
 
 	if ((PValue = JudyLGet(PArray, *PIndex)) == PPJERR)
 		return PPJERR;
 	if (PValue != NULL)
-		return PValue;	// found *PIndex.
+		return PValue;
 	return JudyLNext(PArray, PIndex);
 }
 
@@ -19,7 +19,7 @@ void **JudyLLast(const void *PArray, uint32_t *PIndex)
 {
 	void **PValue;
 	if (PIndex == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);	// caller error.
+		JL_SET_ERRNO(JLE_NULLPINDEX);
 		return PPJERR;
 	}
 
@@ -32,18 +32,18 @@ void **JudyLLast(const void *PArray, uint32_t *PIndex)
 
 void **JudyLGet(const void *PArray, uint32_t Index)
 {
-	Pjp_t Pjp;		// current JP while walking the tree.
-	Pjpm_t Pjpm;		// for global accounting.
-	uint8_t Digit;		// byte just decoded from Index.
-	Word_t Pop1;		// leaf population (number of indexes).
-	Pjll_t Pjll;		// pointer to LeafL.
-	int posidx;		// signed offset in leaf.
+	Pjp_t Pjp;
+	Pjpm_t Pjpm;
+	Word_t Pop1;
+	Pjll_t Pjll;
+	int posidx;
+	uint8_t Digit;
 
 	if (PArray == NULL)
 		return NULL;
 
-	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {	// must be a LEAFW
-		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
+	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
+		Pjlw_t Pjlw = P_JLW(PArray);
 		Pop1 = Pjlw[0] + 1;
 		posidx = judySearchLeafW(Pjlw + 1, Pop1, Index);
 		if (posidx >= 0)
@@ -52,9 +52,9 @@ void **JudyLGet(const void *PArray, uint32_t Index)
 	}
 
 	Pjpm = P_JPM(PArray);
-	Pjp = &Pjpm->jpm_JP;	// top branch is below JPM.
+	Pjp = &Pjpm->jpm_JP;
 
-ContinueWalk:	// for going down one level; come here with Pjp set.
+ContinueWalk:
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		return NULL;
@@ -69,7 +69,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	case cJL_JPBRANCH_L:{
 		Pjbl_t Pjbl;
 		Digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
-	JudyBranchL: // Common code for all BranchLs; come here with Digit set:
+	JudyBranchL:
 		Pjbl = P_JBL(Pjp->jp_Addr);
 		posidx = 0;
 		do {
@@ -91,9 +91,8 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		goto JudyBranchB;
 	case cJL_JPBRANCH_B:{
 		Pjbb_t Pjbb;
-		Word_t subexp;	// in bitmap, 0..7.
-		BITMAPB_t BitMap;	// for one subexpanse.
-		BITMAPB_t BitMask;	// bit in BitMap for Indexs Digit.
+		Word_t subexp;
+		BITMAPB_t BitMap, BitMask;
 		Digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
       JudyBranchB:
 		Pjbb = P_JBB(Pjp->jp_Addr);
@@ -104,15 +103,14 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 
 		BitMask = JL_BITPOSMASKB(Digit);
 
-		// No JP in subexpanse for Index => Index not found:
 		if (!(BitMap & BitMask))
 			break;
-		// Count JPs in the subexpanse below the one for Index:
+
 		Pjp += judyCountBits(BitMap & (BitMask - 1));
 		goto ContinueWalk;
 	}
-	// Notice the reverse order of the cases, and falling through to the next case,
-	// for performance.
+	/* Notice the reverse order of the cases, and falling through
+	 * to the next case, for performance. */
 	case cJL_JPBRANCH_U:
 		Pjp = JL_JBU_PJP(Pjp, Index, cJL_ROOTSTATE);
 		if (JL_JPTYPE(Pjp) != cJL_JPBRANCH_U3)
@@ -121,7 +119,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		Pjp = JL_JBU_PJP(Pjp, Index, 3);
 		if (JL_JPTYPE(Pjp) != cJL_JPBRANCH_U2)
 			goto ContinueWalk;
-	// and fall through.
+	/* and fall through. */
 	case cJL_JPBRANCH_U2:
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 2)) break;
 		Pjp = JL_JBU_PJP(Pjp, Index, 2);
@@ -155,16 +153,13 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 		if (JL_DCDNOTMATCHINDEX(Index, Pjp, 1)) break;
 
 		Pjlb = P_JLB(Pjp->jp_Addr);
-		// JudyL is much more complicated because of value area subarrays:
 		Digit = JL_DIGITATSTATE(Index, 1);
 		subexp = Digit / cJL_BITSPERSUBEXPL;
 		BitMap = JL_JLB_BITMAP(Pjlb, subexp);
 		BitMask = JL_BITPOSMASKL(Digit);
 
-		// No value in subexpanse for Index => Index not found:
 		if (!(BitMap & BitMask)) break;
 
-		// Count value areas in the subexpanse below the one for Index:
 		Pjv = P_JV(JL_JLB_PVALUE(Pjlb, subexp));
 		assert(Pjv != NULL);
 		posidx = judyCountBits(BitMap & (BitMask - 1));
@@ -173,7 +168,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 	}
 	case cJL_JPIMMED_1_01: case cJL_JPIMMED_2_01: case cJL_JPIMMED_3_01:
 		if (JL_JPDCDPOP0(Pjp) != JL_TRIMTODCDSIZE(Index)) break;
-		return (void **)(&Pjp->jp_Addr);	// immediate value area.
+		return (void **)(&Pjp->jp_Addr);
 	case cJL_JPIMMED_1_03:
 		if (((uint8_t *)Pjp->jp_LIndex)[2] == (uint8_t)Index)
 			return (void **)(P_JV(Pjp->jp_Addr) + 2);
@@ -184,7 +179,7 @@ ContinueWalk:	// for going down one level; come here with Pjp set.
 			return (void **)(P_JV(Pjp->jp_Addr) + 0);
 		break;
 	default:
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
 

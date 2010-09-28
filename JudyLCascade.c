@@ -98,8 +98,8 @@ static Pjlb_t judyJLL2toJLB1(uint16_t * Pjll, Pjv_t Pjv, Word_t LeafPop1, void *
 
 	for (subexp = 0; subexp < cJL_NUMSUBEXPL; ++subexp) {
 		struct _POINTER_VALUES {
-			Word_t pv_Pop1;	// size of value area.
-			Pjv_t pv_Pjv;	// raw pointer to value area.
+			Word_t pv_Pop1;
+			Pjv_t pv_Pjv;
 		} pv[cJL_NUMSUBEXPL];
 
 		pv[subexp].pv_Pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, subexp));
@@ -119,7 +119,7 @@ static Pjlb_t judyJLL2toJLB1(uint16_t * Pjll, Pjv_t Pjv, Word_t LeafPop1, void *
 
 			Pjvnew = P_JV(pv[subexp].pv_Pjv);
 			JL_COPYMEM(Pjvnew, Pjv, pv[subexp].pv_Pop1);
-			Pjv += pv[subexp].pv_Pop1;	// advance value pointer.
+			Pjv += pv[subexp].pv_Pop1;
 
 			JL_JLB_PVALUE(Pjlb, subexp) = pv[subexp].pv_Pjv;
 		}
@@ -152,7 +152,7 @@ int judyCascade1(Pjp_t Pjp, void *Pjpm)
 
 	for (ii = 0; ii < cJL_NUMSUBEXPL; ii++) {
 		if ((Pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, ii)))) {
-			Pjv_t PjvnewRaw, Pjvnew;	// value area of new leaf.
+			Pjv_t PjvnewRaw, Pjvnew;
 
 			PjvnewRaw = judyLAllocJV(Pop1, Pjpm);
 			if (PjvnewRaw == NULL) {
@@ -183,11 +183,11 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 {
 	uint16_t *PLeaf;
 	Word_t End, Start, ExpCnt, CIndex;
-	Pjv_t Pjv;				// value area of leaf.
-	jp_t StageJP[cJL_LEAF2_MAXPOP1];	// JPs of new leaves
-	uint8_t StageExp[cJL_LEAF2_MAXPOP1];	// Expanses of new leaves
-	uint8_t SubJPCount[cJL_NUMSUBEXPB];	// JPs in each subexpanse
-	jbb_t StageJBB;				// staged bitmap branch
+	Pjv_t Pjv;
+	jp_t StageJP[cJL_LEAF2_MAXPOP1];
+	uint8_t StageExp[cJL_LEAF2_MAXPOP1];
+	uint8_t SubJPCount[cJL_NUMSUBEXPB];
+	jbb_t StageJBB;
 
 	assert(JL_JPTYPE(Pjp) == cJL_JPLEAF2);
 	assert((JL_JPDCDPOP0(Pjp) & 0xFFFF) == (cJL_LEAF2_MAXPOP1 - 1));
@@ -201,7 +201,7 @@ int judyCascade2(Pjp_t Pjp, void *Pjpm)
 		Pjlb_t PjlbRaw;
 		PjlbRaw = judyJLL2toJLB1(PLeaf, Pjv, cJL_LEAF2_MAXPOP1, Pjpm);
 		if (PjlbRaw == NULL)
-			return -1;	// out of memory
+			return -1;
 
 		DcdP0 = (CIndex & cJL_DCDMASK(1)) | JL_JPDCDPOP0(Pjp);
 		JL_JPSETADT(Pjp, (Word_t) PjlbRaw, DcdP0, cJL_JPLEAF_B1);
@@ -296,11 +296,11 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 	uint8_t *PLeaf;
 	Word_t End, Start, ExpCnt, CIndex;
 	Pjv_t Pjv;
-	jp_t StageJP[cJL_LEAF3_MAXPOP1];	// JPs of new leaves
+	jp_t StageJP[cJL_LEAF3_MAXPOP1];
 	Word_t StageA[cJL_LEAF3_MAXPOP1];
-	uint8_t StageExp[cJL_LEAF3_MAXPOP1];	// Expanses of new leaves
-	uint8_t SubJPCount[cJL_NUMSUBEXPB];	// JPs in each subexpanse
-	jbb_t StageJBB;		// staged bitmap branch
+	uint8_t StageExp[cJL_LEAF3_MAXPOP1];
+	uint8_t SubJPCount[cJL_NUMSUBEXPB];
+	jbb_t StageJBB;
 
 	assert(JL_JPTYPE(Pjp) == cJL_JPLEAF3);
 	assert((JL_JPDCDPOP0(Pjp) & 0xFFFFFF) == (cJL_LEAF3_MAXPOP1 - 1));
@@ -330,7 +330,7 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 		return 1;
 	}
 
-	StageJBB = StageJBBZero;	// zero staged bitmap branch
+	StageJBB = StageJBBZero;
 	ZEROJP(SubJPCount);
 	for (ExpCnt = Start = 0, End = 1;; End++) {
 		if ((End == cJL_LEAF3_MAXPOP1) || (JL_DIGITATSTATE(CIndex^StageA[End], 3))) {
@@ -375,7 +375,7 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
 		}
 	}
 
-	if (ExpCnt <= cJL_BRANCHLMAXJPS) {	// put the Leaves below a BranchL
+	if (ExpCnt <= cJL_BRANCHLMAXJPS) {
 		if (judyCreateBranchL(Pjp, StageJP, StageExp, ExpCnt, Pjpm) == -1)
 			FREEALLEXIT(ExpCnt, StageJP, Pjpm);
 		Pjp->jp_Type = cJL_JPBRANCH_L3;
@@ -401,20 +401,20 @@ int judyCascade3(Pjp_t Pjp, void *Pjpm)
  */
 int judyCascadeL(Pjp_t Pjp, void *Pjpm)
 {
-	Pjlw_t Pjlw;		// leaf to work on.
+	Pjlw_t Pjlw;
 	Word_t End, Start, ExpCnt, CIndex;
-	Pjv_t Pjv;		// value area of leaf.
+	Pjv_t Pjv;
 	jp_t StageJP[cJL_LEAFW_MAXPOP1];
 	uint8_t StageExp[cJL_LEAFW_MAXPOP1];
-	uint8_t SubJPCount[cJL_NUMSUBEXPB];	// JPs in each subexpanse
-	jbb_t StageJBB;		// staged bitmap branch
+	uint8_t SubJPCount[cJL_NUMSUBEXPB];
+	jbb_t StageJBB;
 
 	Pjlw = P_JLW(Pjp->jp_Addr);
 	assert(Pjlw[0] == (cJL_LEAFW_MAXPOP1 - 1));
 	Pjv = JL_LEAFWVALUEAREA(Pjlw, cJL_LEAFW_MAXPOP1);
-	Pjlw++;			// Now point to Index area
+	Pjlw++;
 
-	CIndex = Pjlw[0];	// also used far below
+	CIndex = Pjlw[0];
 	if (!JL_DIGITATSTATE(CIndex ^ Pjlw[cJL_LEAFW_MAXPOP1 - 1], cJL_ROOTSTATE)) {
 		Pjll_t PjllRaw, Pjll;
 		Pjv_t Pjvnew;

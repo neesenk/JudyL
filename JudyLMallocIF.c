@@ -17,7 +17,7 @@ static const Word_t juMaxWords = ~0UL;
 	if ((Ptr = JudyMalloc(Words)) != NULL)			\
 		Pjpm->jpm_TotalMemWords += Words;		\
 	else 							\
-		JL_SET_ERRNO(JL_ERRNO_NOMEM);			\
+		JL_SET_ERRNO(JLE_NOMEM);			\
 } while (0)
 
 Pjpm_t judyLAllocJPM(void)
@@ -159,7 +159,7 @@ Pjlw_t judyLAllocJLW(Word_t Pop1)
 	Word_t Words = JL_LEAFWPOPTOWORDS(Pop1);
 	Pjlw_t Pjlw = JudyMalloc(Words);
 	if (Pjlw == NULL)
-		JL_SET_ERRNO(JL_ERRNO_NOMEM);
+		JL_SET_ERRNO(JLE_NOMEM);
 	return Pjlw;
 }
 

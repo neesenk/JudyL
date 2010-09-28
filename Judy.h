@@ -13,25 +13,25 @@ extern "C" {
 
 /* Judy error numbers */
 typedef enum {
-        JL_ERRNO_NONE           = 0,
-        JL_ERRNO_FULL           = 1,
-        JL_ERRNO_NFMAX          = JL_ERRNO_FULL,
-        JL_ERRNO_NOMEM          = 2,	// cannot obtain needed memory
-        JL_ERRNO_NULLPPARRAY    = 3,    // PPARRAY is NULL
-        JL_ERRNO_NONNULLPARRAY  = 10,   // PARRAY is not NULL
-        JL_ERRNO_NULLPINDEX     = 4,    // PIndex is NULL
-        JL_ERRNO_NULLPVALUE     = 11,   // PValue is NULL
-        JL_ERRNO_NOTJUDYL       = 6,    // PArray is not to a JudyL array.
-        JL_ERRNO_NOTJUDYSL      = 7,    // PArray is not to a JudySL array.
-        JL_ERRNO_UNSORTED       = 12,   // see above.
-        JL_ERRNO_OVERRUN        = 8,	// Judy detects a not recoverable point
-        JL_ERRNO_CORRUPT        = 9	// Judy detects an impossible value
+        JLE_NONE           = 0,
+        JLE_FULL           = 1,
+        JLE_NFMAX          = JLE_FULL,
+        JLE_NOMEM          = 2,		/* cannot obtain needed memory */
+        JLE_NULLPPARRAY    = 3,		/* PPARRAY is NULL */
+        JLE_NONNULLPARRAY  = 10,	/* PARRAY is not NULL */
+        JLE_NULLPINDEX     = 4,		/* PIndex is NULL */
+        JLE_NULLPVALUE     = 11,	/* PValue is NULL */
+        JLE_NOTJUDYL       = 6,		/* PArray is not to a JudyL array. */
+        JLE_NOTJUDYSL      = 7,		/* PArray is not to a JudySL array. */
+        JLE_UNSORTED       = 12,	/* Index or Value is not sorted */
+        JLE_OVERRUN        = 8,		/* Judy detects a not recoverable point */
+        JLE_CORRUPT        = 9		/* Judy detects an impossible value */
 } JL_Errno_t;
 
-#define JL_SET_ERRNO(JErrno) do {			\
-	assert((JErrno) != JL_ERRNO_OVERRUN);		\
-	assert((JErrno) != JL_ERRNO_CORRUPT);		\
-	errno = (JErrno);				\
+#define JL_SET_ERRNO(JErrno)	do {		\
+	assert((JErrno) != JLE_OVERRUN);	\
+	assert((JErrno) != JLE_CORRUPT);	\
+	errno = (JErrno);			\
 } while (0)
 
 #define JERR		(-1)			/* functions returning int or Word_t */
@@ -41,7 +41,7 @@ typedef enum {
 
 extern void **	JudyLGet(const void *PArray, uint32_t Index);
 extern void **	JudyLIns(void **PPArray, uint32_t Index);
-extern int	JudyLInsArray(void **PPArray, size_t, const uint32_t *, const void **);
+extern int	JudyLInsArray(void **PPArray, size_t, const uint32_t *, void * const *);
 extern int	JudyLDel(void **PPArray, uint32_t Index);
 extern size_t	JudyLCount(const void *PArray, uint32_t Idx_beg, uint32_t Idx_end);
 extern void **	JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex);
@@ -54,7 +54,7 @@ extern void **	JudyLPrev(const void *PArray, uint32_t *PIndex);
 
 /* if return not 0, then walk stop */
 typedef int (*walk_fn_t)(void *ctx, uint32_t Index, void **Value);
-extern int JudyLWalk(void *PArray, walk_fn_t fn, void *ctx);
+extern int	JudyLWalk(void *PArray, walk_fn_t fn, void *ctx);
 
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);

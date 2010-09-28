@@ -42,7 +42,7 @@ double get_counter(void)
 #define PREVITER	0x001
 #define CALL		0x200
 
-#define SN_ 10000000
+#define SN_ 100000
 struct object {
 	int nums;
 	unsigned long state;
@@ -76,7 +76,7 @@ int insert(void **root)
 			buff[i].nums = 0;
 		}
 	}
-	count += get_counter();
+	count = get_counter();
 	printf("insert count %lf\n", count);
 
 	return num;
@@ -84,7 +84,7 @@ int insert(void **root)
 
 void search(const void *root)
 {
-	int i = 0;
+	int i = 0, j = 0;
 	double count = 0;
 	uint32_t p = 0;
 	struct object **ret = 0;
@@ -111,7 +111,72 @@ void search(const void *root)
 		assert(*ret < buff + N_ && *ret >= buff);
 		assert((*ret)->nums == p);
 	}
-	count += get_counter();
+	count = get_counter();
+	printf("search count %lf\n", count);
+
+	start_counter();
+	for (i=N_-1; i>=0; i--) {
+		if (buff[i].nums == 0) {
+			ret = (struct object **)JudyLGet(root, buff[i].nums);
+			assert(ret != (struct object **)-1);
+			assert(ret == NULL);
+		} else {
+			ret = (struct object **)JudyLGet(root, buff[i].nums);
+			assert(ret != NULL);
+			assert(ret != (struct object **)-1);
+			assert(*ret == buff + i);
+		}
+	}
+	count = get_counter();
+	printf("search count %lf\n", count);
+
+	start_counter();
+	for (j = 0; j < N_; j++) {
+		int i = random() % N_;
+		if (buff[i].nums == 0) {
+			ret = (struct object **)JudyLGet(root, buff[i].nums);
+			assert(ret != (struct object **)-1);
+			assert(ret == NULL);
+		} else {
+			ret = (struct object **)JudyLGet(root, buff[i].nums);
+			assert(ret != NULL);
+			assert(ret != (struct object **)-1);
+			assert(*ret == buff + i);
+		}
+	}
+	count = get_counter();
+	printf("search count %lf\n", count);
+
+	start_counter();
+	for (i = 0; i < N_; i++) {
+		j = i % 1;
+		ret = (struct object **)JudyLGet(root, buff[i].nums + j);
+		if (j == 0 && buff[i].nums != 0) {
+			assert(ret != NULL);
+			assert(ret != (struct object **)-1);
+			assert(*ret == buff + i);
+		} else {
+			assert(ret == NULL);
+		}
+	}
+	count = get_counter();
+	printf("search count %lf\n", count);
+
+	start_counter();
+	for (j = 0; j < N_; j++) {
+		int i = random() % N_;
+		int s = i % 1;
+
+		ret = (struct object **)JudyLGet(root, buff[i].nums + s);
+		if (s == 0 && buff[i].nums != 0) {
+			assert(ret != NULL);
+			assert(ret != (struct object **)-1);
+			assert(*ret == buff + i);
+		} else {
+			assert(ret == NULL);
+		}
+	}
+	count = get_counter();
 	printf("search count %lf\n", count);
 }
 
@@ -158,7 +223,7 @@ void next(void *root, int num)
 		assert(!(buff[i].state & INSERT) || (buff[i].state & NEXTITER));
 
 	assert(n == num);
-	count += get_counter();
+	count = get_counter();
 
 	printf("next count %lf\n", count);
 }
@@ -192,7 +257,7 @@ void prev(void *root, int num)
 		assert(!(buff[i].state & INSERT) || (buff[i].state & PREVITER));
 
 	assert(n == num);
-	count += get_counter();
+	count = get_counter();
 	printf("prev count %lf\n", count);
 }
 
@@ -210,7 +275,7 @@ void bycount(void *root)
 		assert(ret != (void **)-1);
 		assert(*ret == (void *)(buff + i));
 	}
-	count += get_counter();
+	count = get_counter();
 	printf("bycount count %lf\n", count);
 }
 
@@ -229,7 +294,7 @@ void ccount(void *root, int num)
 		ret = JudyLCount(root, nums[p1], nums[p2]);
 		assert(ret == (p2 - p1 + 1));
 	}
-	count += get_counter();
+	count = get_counter();
 	printf("count count %lf\n", count);
 }
 
@@ -265,7 +330,7 @@ void walk(void *root, int nums)
 	ret = JudyLWalk(root, walk_fn, &ctx);
 	assert(ret == 0);
 	assert(ctx.calls == nums);
-	count += get_counter();
+	count = get_counter();
 	printf("walk count %lf\n", count);
 }
 
@@ -279,14 +344,54 @@ void do_test(int m_dup)
 		assert(num == N_);
 	printf("memory count %u\n", JudyLMemUsed(root));
 	search(root);
-	if (N_ == 128)
-		JudyLGet(root, 1804289582);
 	walk(root, num);
 	prev(root, num);
 	next(root, num);
 	ccount(root, num);
 	bycount(root);
 	delete(&root);
+	// JudyLFreeArray(&root);
+}
+
+void insert_array(void)
+{
+	void *root = NULL;
+	uint32_t *index = calloc(N_, sizeof(uint32_t));
+	void **value = calloc(N_, sizeof(void *));
+	int i = 0;
+	int loop = random() % 256 + 1;
+	double count = 0;
+	memset(buff, 0, sizeof(buff));
+	memset(nums, 0, sizeof(nums));
+
+	for (i = 0; i < N_; i++) {
+		index[i] = (i + 1) * loop;
+		buff[i].nums = index[i];
+		buff[i].state |= INSERT;
+		value[i] = buff + i;
+	}
+
+	start_counter();
+	i = JudyLInsArray(&root, N_, index, value);
+	count = get_counter();
+	free(index);
+	free(value);
+	assert(i == 1);
+	printf("Ins array count %lf\n", count);
+
+	printf("memory count %u\n", JudyLMemUsed(root));
+	search(root);
+	walk(root, N_);
+	prev(root, N_);
+	next(root, N_);
+	ccount(root, N_);
+	bycount(root);
+	// JudyLFreeArray(&root);
+	delete(&root);
+	for (i = 0; i < N_; i++) {
+		buff[i].state = 0;
+	}
+	do_test(0);
 }
 
 void random_test(void)
@@ -339,11 +444,9 @@ void line_test(void)
 
 int main(void)
 {
-	for (N_ = 16; N_ <= SN_; N_ *= 2) {
-		printf("TEST NUMs = %d\n", N_);
-		line_test();
-		random_test();
-		loop_test();
-	}
+	line_test();
+	random_test();
+	loop_test();
+	insert_array();
 	return 0;
 }

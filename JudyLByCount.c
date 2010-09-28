@@ -4,35 +4,29 @@ extern Word_t judyLJPPop1(const Pjp_t Pjp);
 
 void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 {
-	Word_t Count0;		// Count, base-0, to match pop0.
-	Word_t state;		// current state in SM.
-	Word_t pop1;		// of current branch or leaf, or of expanse.
-	Word_t pop1lower;	// pop1 of expanses (JPs) below that for Count.
-	Word_t digit;		// current word in branch.
-	Word_t jpcount;		// JPs in a BranchB subexpanse.
-	long jpnum;		// JP number in a branch (base 0).
-	long subexp;		// for stepping through layer 1 (subexpanses).
-	int offset;		// index ordinal within a leaf, base 0.
+	Word_t Count0, state, pop1, pop1lower, digit, jpcount;
+	long jpnum, subexp;
+	int offset;
 
-	Pjp_t Pjp;		// current JP in branch.
-	Pjll_t Pjll;		// current Judy linear leaf.
+	Pjp_t Pjp;
+	Pjll_t Pjll;
 
 	if (PArray == NULL)
 		return NULL;
 	if (PIndex == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPINDEX);
+		JL_SET_ERRNO(JLE_NULLPINDEX);
 		return PPJERR;
 	}
 
 	Count0 = Count - 1;
-	assert((Count || Count0 == ~0));	// ensure CPU is sane about 0 - 1.
+	assert((Count || Count0 == ~0));	/* ensure CPU is sane about 0 - 1. */
 	pop1lower = 0;
 
 	if (JL_LEAFW_POP0(PArray) < cJL_LEAFW_MAXPOP1) {
-		Pjlw_t Pjlw = P_JLW(PArray);	// first word of leaf.
+		Pjlw_t Pjlw = P_JLW(PArray);
 		if (Count0 > Pjlw[0])
 			return NULL;
-		*PIndex = Pjlw[Count];	// Index, base 1.
+		*PIndex = Pjlw[Count];
 		return (void **)(JL_LEAFWVALUEAREA(Pjlw, Pjlw[0] + 1) + Count0);
 	} else {
 		Pjpm_t Pjpm = P_JPM(PArray);
@@ -57,7 +51,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 	assert((Offset) >= 0);			\
 	assert((Offset) <= JL_JPLEAF_POP0(Pjp))
 
-      SMByCount:		// return here for next branch/leaf.
+      SMByCount:		/* return here for next branch/leaf. */
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPBRANCH_L2:
 		PREPB_DCD(Pjp, 2, BranchL);
@@ -67,26 +61,26 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		PREPB_ROOT(BranchL);
 	{
 		Pjbl_t Pjbl;
-		// Common code (state-independent) for all cases of linear branches:
+		/* Common code (state-independent) for all cases of linear branches: */
 	      BranchL:
 		Pjbl = P_JBL(Pjp->jp_Addr);
 		for (jpnum = 0; jpnum < (Pjbl->jbl_NumJPs); ++jpnum) {
 			if ((pop1 = judyLJPPop1((Pjbl->jbl_jp) + jpnum)) == cJL_ALLONES) {
-				JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+				JL_SET_ERRNO(JLE_CORRUPT);
 				return PPJERR;
 			}
 			assert(pop1 != 0);
 
-			if (pop1lower + pop1 > Count0) {	// Index is in this expanse.
+			if (pop1lower + pop1 > Count0) {
 				JL_SETDIGIT(*PIndex, Pjbl->jbl_Expanse[jpnum], state);
 				Pjp = (Pjbl->jbl_jp) + jpnum;
-				goto SMByCount;	// look under this expanse.
+				goto SMByCount;
 			}
 
-			pop1lower += pop1;	// add this JPs pop1.
+			pop1lower += pop1;
 		}
 
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// should never get here.
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
 	case cJL_JPBRANCH_B2:
@@ -111,33 +105,33 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 			for (subexp = 0; subexp < cJL_NUMSUBEXPB; ++subexp) {
 				if ((jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp)))
 				    && (BMPJP0(subexp) == NULL)) {
-					JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// null ptr.
+					JL_SET_ERRNO(JLE_CORRUPT);
 					return PPJERR;
 				}
 				for (jpnum = 0; jpnum < jpcount; ++jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						JL_SET_ERRNO(JLE_CORRUPT);
 						return PPJERR;
 					}
 					assert(pop1 != 0);
 
 					if (pop1lower + pop1 > Count0)
-						JBB_FOUNDEXPANSE;	// Index is in this expanse.
+						JBB_FOUNDEXPANSE;
 
-					pop1lower += pop1;	// add this JPs pop1.
+					pop1lower += pop1;
 				}
 			}
 		} else {
-			pop1lower += pop1;	// add whole branch to start.
+			pop1lower += pop1;
 			for (subexp = cJL_NUMSUBEXPB - 1; subexp >= 0; --subexp) {
 				if ((jpcount = judyCountBits(JL_JBB_BITMAP(Pjbb, subexp)))
 				    && (BMPJP0(subexp) == NULL)) {
-					JL_SET_ERRNO(JL_ERRNO_CORRUPT);	// null ptr.
+					JL_SET_ERRNO(JLE_CORRUPT);
 					return PPJERR;
 				}
 				for (jpnum = jpcount - 1; jpnum >= 0; --jpnum) {
 					if ((pop1 = judyLJPPop1(BMPJP(subexp, jpnum))) == cJL_ALLONES) {
-						JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+						JL_SET_ERRNO(JLE_CORRUPT);
 						return PPJERR;
 					}
 					assert(pop1 != 0);
@@ -147,7 +141,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 				}
 			}
 		}
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
 	case cJL_JPBRANCH_U2:
@@ -158,7 +152,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		PREPB_ROOT(BranchU);
 	{
 		Pjbu_t Pjbu;
-	// Common code (state-independent) for all cases of uncompressed branches:
+	/* Common code (state-independent) for all cases of uncompressed branches: */
 	BranchU:
 		Pjbu = P_JBU(Pjp->jp_Addr);
 #define	JBU_FOUNDEXPANSE do {			\
@@ -172,7 +166,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 					continue;
 
 				if ((pop1 = judyLJPPop1((Pjbu->jbu_jp) + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					JL_SET_ERRNO(JLE_CORRUPT);
 					return PPJERR;
 				}
 				assert(pop1 != 0);
@@ -187,7 +181,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 				if ((Pjbu->jbu_jp[jpnum].jp_Type) <= cJL_JPNULLMAX)
 					continue;
 				if ((pop1 = judyLJPPop1(Pjbu->jbu_jp + jpnum)) == cJL_ALLONES) {
-					JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+					JL_SET_ERRNO(JLE_CORRUPT);
 					return PPJERR;
 				}
 				assert(pop1 != 0);
@@ -196,7 +190,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 					JBU_FOUNDEXPANSE;
 			}
 		}
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
 
@@ -232,8 +226,8 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 			for (subexp = 0; subexp < cJL_NUMSUBEXPL; ++subexp) {
 				pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, subexp));
 				if (pop1lower + pop1 > Count0)
-					goto LeafB1;	// Index is in this subexpanse.
-				pop1lower += pop1;	// add this subexpanses pop1.
+					goto LeafB1;
+				pop1lower += pop1;
 			}
 		} else {
 			pop1lower += pop1;
@@ -243,7 +237,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 					goto LeafB1;
 			}
 		}
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	LeafB1:
 		SETOFFSET(offset, Count0, pop1lower, Pjp);
@@ -270,7 +264,7 @@ void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)
 		JL_SETDIGIT1(*PIndex, ((uint8_t *) Pjp->jp_LIndex)[offset]);
 		return (void **)(P_JV(Pjp->jp_Addr) + offset);
 	default:
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
 }

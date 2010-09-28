@@ -47,7 +47,7 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 {
 	Pjbb_t PjbbRaw, Pjbb;
 	Word_t ii, jj;
-	uint8_t CurrSubExp;	// Current sub expanse for BM
+	uint8_t CurrSubExp;
 
 	assert(ExpCnt <= cJL_BRANCHBMAXJPS);
 
@@ -59,12 +59,12 @@ int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void 
 	CurrSubExp = Exp[0] / cJL_BITSPERSUBEXPB;
 
 	for (jj = ii = 0; ii <= ExpCnt; ii++) {
-		Word_t SubExp;	// Cannot be a uint8_t
+		Word_t SubExp;
 
 		if (ii == ExpCnt) {
-			SubExp = cJL_ALLONES;	// Force last one
+			SubExp = cJL_ALLONES;
 		} else {
-			SubExp = Exp[ii] / cJL_BITSPERSUBEXPB;	// Bits 5..7.
+			SubExp = Exp[ii] / cJL_BITSPERSUBEXPB;
 			JL_JBB_BITMAP(Pjbb, SubExp) |= JL_BITPOSMASKB(Exp[ii]);
 		}
 		if (SubExp != CurrSubExp) {

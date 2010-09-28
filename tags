@@ -13,10 +13,11 @@ BMPJP	JudyLByCount.c	103;"	d	file:
 BMPJP	JudyLCount.c	177;"	d	file:
 BMPJP0	JudyLByCount.c	102;"	d	file:
 BMPJP0	JudyLCount.c	176;"	d	file:
-CDcmp__	JudyLNext.c	76;"	d	file:
+CALL	main.c	43;"	d	file:
+CDcmp__	JudyIter.c	76;"	d	file:
 CFLAGS	Makefile	/^CFLAGS = -I. -fPIC -Wall -O0 -pipe -g$/;"	m
+CHECKDCD	JudyIter.c	80;"	d	file:
 CHECKDCD	JudyLCount.c	97;"	d	file:
-CHECKDCD	JudyLNext.c	80;"	d	file:
 CHECKLEAFORDER	JudyLInsArray.c	104;"	d	file:
 CLEAR_PLS	JudyHS.c	4;"	d	file:
 CLEAR_PSCL	JudySL.c	6;"	d	file:
@@ -28,12 +29,12 @@ COPYTOLEAF_EVEN_SUB	JudyLInsArray.c	51;"	d	file:
 COPYTOLEAF_ODD	JudyLInsArray.c	76;"	d	file:
 COPYTOLEAF_ODD_SUB	JudyLInsArray.c	60;"	d	file:
 COPYWORDtoSTRING	JudySL.c	20;"	d	file:
-FREEALLEXIT	JudyLCascade.c	25;"	d	file:
+FREEALLEXIT	JudyLCascade.c	23;"	d	file:
 HEADFILE	Makefile	/^HEADFILE := Judy.h JudyL.h JudyPrivate.h JudyPrivateBranch.h$/;"	m
-HISTPOP	JudyLNext.c	38;"	d	file:
-HISTPOPBOFF	JudyLNext.c	46;"	d	file:
-HISTPUSH	JudyLNext.c	30;"	d	file:
-HISTPUSHBOFF	JudyLNext.c	44;"	d	file:
+HISTPOP	JudyIter.c	38;"	d	file:
+HISTPOPBOFF	JudyIter.c	46;"	d	file:
+HISTPUSH	JudyIter.c	30;"	d	file:
+HISTPUSHBOFF	JudyIter.c	44;"	d	file:
 IMMABOVE_01	JudyLCount.c	301;"	d	file:
 INSERT	main.c	40;"	d	file:
 IS_PLS	JudyHS.c	3;"	d	file:
@@ -162,23 +163,23 @@ JL_SETDCD	JudyPrivate.h	325;"	d
 JL_SETDIGIT	JudyPrivate.h	302;"	d
 JL_SETDIGIT1	JudyPrivate.h	307;"	d
 JL_SETDIGITS	JudyPrivate.h	310;"	d
+JL_SETINDEX	JudyLWalk.c	7;"	d	file:
 JL_SET_ERRNO	Judy.h	31;"	d
 JL_SUBEXPB	JudyPrivateBranch.h	151;"	d
 JL_SUBEXPL	JudyPrivate.h	226;"	d
 JL_TOIMMED_01_EVEN	JudyLDel.c	347;"	d	file:
 JL_TOIMMED_01_ODD	JudyLDel.c	359;"	d	file:
 JL_TRIMTODCDSIZE	JudyPrivateBranch.h	73;"	d
-JPNULL	JudyLNext.c	58;"	d	file:
+JPNULL	JudyIter.c	58;"	d	file:
 JUDYHASHSTR	JudyHS.c	27;"	d	file:
 JUDYL_LEAF_BITMAP	JudyL.h	/^typedef struct JUDYL_LEAF_BITMAP {$/;"	s
 JUDYL_LEAF_BITMAP_SUBEXPANSE	JudyL.h	/^typedef struct JUDYL_LEAF_BITMAP_SUBEXPANSE {$/;"	s
 JUDYL_POPULATION_AND_MEMORY	JudyL.h	/^typedef struct JUDYL_POPULATION_AND_MEMORY {$/;"	s
-JUDYPREV	JudyLNext.c	3;"	d	file:
+JUDYPREV	JudyIter.c	3;"	d	file:
 JUDY_BRANCH_BITMAP	JudyPrivateBranch.h	/^typedef struct JUDY_BRANCH_BITMAP {$/;"	s
 JUDY_BRANCH_BITMAP_SUBEXPANSE	JudyPrivateBranch.h	/^typedef struct JUDY_BRANCH_BITMAP_SUBEXPANSE {$/;"	s
 JUDY_BRANCH_LINEAR	JudyPrivateBranch.h	/^typedef struct JUDY_BRANCH_LINEAR {$/;"	s
 JUDY_BRANCH_UNCOMPRESSED	JudyPrivateBranch.h	/^typedef struct JUDY_BRANCH_UNCOMPRESSED {$/;"	s
-JUDY_LEAF_TOTAL	JudyLMallocIF.c	255;"	d	file:
 JUDY_POINTER	JudyPrivateBranch.h	/^typedef union JUDY_POINTER {	\/\/ JP.$/;"	u
 JUDY_POINTER_IMMED	JudyPrivateBranch.h	/^typedef struct JUDY_POINTER_IMMED {$/;"	s
 JUDY_POINTER_OTHERS	JudyPrivateBranch.h	/^typedef struct JUDY_POINTER_OTHERS {$/;"	s
@@ -188,37 +189,38 @@ JudyFree	JudyHS.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyFree	JudyLMallocIF.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyFree	JudySL.c	/^static void JudyFree(void *PWord, size_t Words)$/;"	f	file:
 JudyHSDel	JudyHS.c	/^int JudyHSDel(void **PPArray, void *Str, size_t Len)$/;"	f
-JudyHSFreeArray	JudyHS.c	/^size_t JudyHSFreeArray(void **PPArray)$/;"	f
+JudyHSFreeArray	JudyHS.c	/^void JudyHSFreeArray(void **PPArray)$/;"	f
 JudyHSGet	JudyHS.c	/^void **JudyHSGet(const void *PArray, void *Str, size_t Len)$/;"	f
 JudyHSIns	JudyHS.c	/^void **JudyHSIns(void **PPArray, void *Str, size_t Len)$/;"	f
 JudyLByCount	JudyLByCount.c	/^void **JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex)$/;"	f
-JudyLCount	JudyLCount.c	/^uint32_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)$/;"	f
-JudyLDel	JudyLDel.c	/^int JudyLDel(void **PPArray, uint32_t Index) $/;"	f
-JudyLFirst	JudyLGet.c	/^void **JudyLFirst(const void *PArray, uint32_t *PIndex) $/;"	f
-JudyLFreeArray	JudyLFreeArray.c	/^size_t JudyLFreeArray(void **PPArray)$/;"	f
+JudyLCount	JudyLCount.c	/^size_t JudyLCount(const void *PArray, uint32_t Index1, uint32_t Index2)$/;"	f
+JudyLDel	JudyLDel.c	/^int JudyLDel(void **PPArray, uint32_t Index)$/;"	f
+JudyLFirst	JudyLGet.c	/^void **JudyLFirst(const void *PArray, uint32_t *PIndex)$/;"	f
+JudyLFreeArray	JudyLFreeArray.c	/^void JudyLFreeArray(void **PPArray)$/;"	f
 JudyLGet	JudyLGet.c	/^void **JudyLGet(const void *PArray, uint32_t Index)$/;"	f
 JudyLIns	JudyLIns.c	/^void **JudyLIns(void **PPArray, uint32_t Index)$/;"	f
-JudyLInsArray	JudyLInsArray.c	/^int JudyLInsArray(void **PPArray, size_t Count, $/;"	f
-JudyLLast	JudyLGet.c	/^void **JudyLLast(const void *PArray, uint32_t *PIndex) $/;"	f
-JudyLMallocSizes	JudyLTables.c	/^const char *JudyLMallocSizes = $/;"	v
-JudyLMemActive	JudyLMallocIF.c	/^size_t JudyLMemActive(const void *PArray) $/;"	f
-JudyLMemUsed	JudyLMallocIF.c	/^size_t JudyLMemUsed(const void *PArray) $/;"	f
-JudyLPrev	JudyLNext.c	/^void **JudyLPrev(const void *PArray, uint32_t *PIndex)$/;"	f
+JudyLInsArray	JudyLInsArray.c	/^int JudyLInsArray(void **PPArray, size_t Count,$/;"	f
+JudyLLast	JudyLGet.c	/^void **JudyLLast(const void *PArray, uint32_t *PIndex)$/;"	f
+JudyLMallocSizes	JudyLTables.c	/^const char *JudyLMallocSizes =$/;"	v
+JudyLMemUsed	JudyLMallocIF.c	/^size_t JudyLMemUsed(const void *PArray)$/;"	f
+JudyLPrev	JudyIter.c	/^void **JudyLPrev(const void *PArray, uint32_t *PIndex)$/;"	f
+JudyLWalk	JudyLWalk.c	/^int JudyLWalk(void *PArray, walk_fn_t fn, void *ctx)$/;"	f
 JudyMalloc	JudyHS.c	/^static void *JudyMalloc(size_t words)$/;"	f	file:
 JudyMalloc	JudyLMallocIF.c	/^static void *JudyMalloc(size_t Words)$/;"	f	file:
 JudyMalloc	JudySL.c	/^static void *JudyMalloc(size_t words)$/;"	f	file:
 JudySLDel	JudySL.c	/^int JudySLDel(void **PPArray, const uint8_t * Index)$/;"	f
 JudySLDelSub	JudySL.c	/^static int JudySLDelSub(void **PPArray, void **PPArrayOrig,$/;"	f	file:
 JudySLFirst	JudySL.c	/^void **JudySLFirst(const void *PArray, uint8_t *Index)$/;"	f
-JudySLFreeArray	JudySL.c	/^size_t JudySLFreeArray(void **PPArray)$/;"	f
+JudySLFreeArray	JudySL.c	/^void JudySLFreeArray(void **PPArray)$/;"	f
 JudySLGet	JudySL.c	/^void **JudySLGet(const void *PArray, const uint8_t *Index)$/;"	f
 JudySLIns	JudySL.c	/^void **JudySLIns(void **PPArray, const uint8_t *Index)$/;"	f
 JudySLLast	JudySL.c	/^void **JudySLLast(const void *PArray, uint8_t * Index)$/;"	f
 JudySLModifyErrno	JudySL.c	/^static void JudySLModifyErrno(const void *PArray, const void *PArrayOrig)$/;"	f	file:
-JudySLNext	JudySL.c	/^void **JudySLNext(const void *PArray, uint8_t * Index)$/;"	f
+JudySLNext	JudySL.c	/^void **JudySLNext(const void *PArray, uint8_t *Index)$/;"	f
 JudySLNextSub	JudySL.c	/^static void **JudySLNextSub(const void *PArray, uint8_t *Index, int orig, size_t len)$/;"	f	file:
 JudySLPrev	JudySL.c	/^void **JudySLPrev(const void *PArray, uint8_t * Index)$/;"	f
 JudySLPrevSub	JudySL.c	/^static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_t len)$/;"	f	file:
+JudyWalk	JudyLWalk.c	/^static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)$/;"	f	file:
 LASTWORD_BY_VALUE	JudySL.c	8;"	d	file:
 LEAFABOVE	JudyLCount.c	296;"	d	file:
 LEAFLABOVE	JudyLCount.c	292;"	d	file:
@@ -233,10 +235,10 @@ MAKELEAF_SUB2	JudyLInsArray.c	87;"	d	file:
 MALLOC	JudyLMallocIF.c	16;"	d	file:
 NEXTITER	main.c	41;"	d	file:
 NOMEM	JudyLInsArray.c	46;"	d	file:
-N_	main.c	44;"	d	file:
+N_	main.c	/^int N_ = SN_;$/;"	v
 OBJS	Makefile	/^OBJS := JudyLCascade.o 		\\$/;"	m
 PJERR	Judy.h	38;"	d
-PJI	JudyLNext.c	322;"	d	file:
+PJI	JudyIter.c	322;"	d	file:
 PPJERR	Judy.h	39;"	d
 PPSCLVALUE_EQ	JudySL.c	40;"	d	file:
 PPSCLVALUE_GT	JudySL.c	44;"	d	file:
@@ -251,7 +253,7 @@ PREPL_DCD	JudyLByCount.c	203;"	d	file:
 PREVITER	main.c	42;"	d	file:
 PSCLINDEX	JudySL.c	37;"	d	file:
 PSCLVALUE	JudySL.c	38;"	d	file:
-PWord_t	JudyPrivate.h	/^typedef unsigned long Word_t, *PWord_t; $/;"	t
+PWord_t	JudyPrivate.h	/^typedef unsigned long Word_t, *PWord_t;$/;"	t
 P_JBB	JudyPrivate.h	79;"	d
 P_JBL	JudyPrivate.h	78;"	d
 P_JBU	JudyPrivate.h	80;"	d
@@ -275,43 +277,44 @@ Pscl_t	JudySL.c	/^} scl_t, *Pscl_t;$/;"	t	typeref:struct:SHORCUTLEAF	file:
 SAMESUBEXP	JudyLInsArray.c	43;"	d	file:
 SCLCMP	JudySL.c	39;"	d	file:
 SCLSIZE	JudySL.c	33;"	d	file:
-SEARCHBITMAPB	JudyLNext.c	60;"	d	file:
-SEARCHBITMAPL	JudyLNext.c	63;"	d	file:
-SEARCHBITMAPMAXB	JudyLNext.c	67;"	d	file:
-SEARCHBITMAPMAXL	JudyLNext.c	70;"	d	file:
+SEARCHBITMAPB	JudyIter.c	60;"	d	file:
+SEARCHBITMAPL	JudyIter.c	63;"	d	file:
+SEARCHBITMAPMAXB	JudyIter.c	67;"	d	file:
+SEARCHBITMAPMAXL	JudyIter.c	70;"	d	file:
 SEARCHLEAFNATIVE	JudyPrivate.h	112;"	d
 SEARCHLEAFNONNAT	JudyPrivate.h	130;"	d
 SETIMMTYPE	JudyLInsArray.c	81;"	d	file:
 SETJPNULL	JudyLInsArray.c	45;"	d	file:
 SETJPNULL_PARENT	JudyLInsArray.c	44;"	d	file:
 SETOFFSET	JudyLByCount.c	55;"	d	file:
-SET_01	JudyLNext.c	309;"	d	file:
+SET_01	JudyIter.c	309;"	d	file:
 SET_PLS	JudyHS.c	5;"	d	file:
 SET_PSCL	JudySL.c	7;"	d	file:
 SHORCUTLEAF	JudySL.c	/^typedef struct SHORCUTLEAF {$/;"	s	file:
-SM1IMM	JudyLNext.c	379;"	d	file:
-SM1IMM_01	JudyLNext.c	389;"	d	file:
-SM1IMM_01_SETPOP1	JudyLNext.c	385;"	d	file:
-SM1IMM_SETPOP1	JudyLNext.c	375;"	d	file:
-SM1LEAFL	JudyLNext.c	252;"	d	file:
-SM1PREPB	JudyLNext.c	88;"	d	file:
-SM3IMM	JudyLNext.c	674;"	d	file:
-SM3IMM_OFFSET	JudyLNext.c	669;"	d	file:
-SM3LEAFLDCD	JudyLNext.c	598;"	d	file:
-SM3LEAFLNODCD	JudyLNext.c	605;"	d	file:
-SM3LEAFL_SETPOP1	JudyLNext.c	602;"	d	file:
-SM3PREPB	JudyLNext.c	96;"	d	file:
-SM3PREPB_DCD	JudyLNext.c	93;"	d	file:
+SM1IMM	JudyIter.c	379;"	d	file:
+SM1IMM_01	JudyIter.c	389;"	d	file:
+SM1IMM_01_SETPOP1	JudyIter.c	385;"	d	file:
+SM1IMM_SETPOP1	JudyIter.c	375;"	d	file:
+SM1LEAFL	JudyIter.c	252;"	d	file:
+SM1PREPB	JudyIter.c	88;"	d	file:
+SM3IMM	JudyIter.c	674;"	d	file:
+SM3IMM_OFFSET	JudyIter.c	669;"	d	file:
+SM3LEAFLDCD	JudyIter.c	598;"	d	file:
+SM3LEAFLNODCD	JudyIter.c	605;"	d	file:
+SM3LEAFL_SETPOP1	JudyIter.c	602;"	d	file:
+SM3PREPB	JudyIter.c	96;"	d	file:
+SM3PREPB_DCD	JudyIter.c	93;"	d	file:
+SN_	main.c	45;"	d	file:
 STRCMP	JudySL.c	34;"	d	file:
 STRCPY	JudySL.c	35;"	d	file:
 STRLEN	JudySL.c	36;"	d	file:
 STRUCTOVD	JudySL.c	32;"	d	file:
-StageJBBZero	JudyLCascade.c	/^static const jbb_t StageJBBZero;	\/\/ zeroed versions of namesake struct.$/;"	v	file:
+StageJBBZero	JudyLCascade.c	/^static const jbb_t StageJBBZero;$/;"	v	file:
 WORDS	JudySL.c	4;"	d	file:
 WORDSIZE	JudyHS.c	6;"	d	file:
 WORDSIZE	JudySL.c	3;"	d	file:
-Word_t	JudyPrivate.h	/^typedef unsigned long Word_t, *PWord_t; $/;"	t
-ZEROJP	JudyLCascade.c	31;"	d	file:
+Word_t	JudyPrivate.h	/^typedef unsigned long Word_t, *PWord_t;$/;"	t
+ZEROJP	JudyLCascade.c	29;"	d	file:
 _JUDYL_INCLUDED	JudyL.h	2;"	d
 _JUDYPRIVATE_INCLUDED	JudyPrivate.h	2;"	d
 _JUDY_INCLUDED	Judy.h	2;"	d
@@ -320,7 +323,7 @@ access_counter	main.c	/^void access_counter(unsigned *hi, unsigned *lo)$/;"	f
 branchB_JPtype	JudyLInsArray.c	/^static uint8_t branchB_JPtype[] = { 0, 0, cJL_JPBRANCH_B2, cJL_JPBRANCH_B3, cJL_JPBRANCH_B };$/;"	v	file:
 branchL_JPtype	JudyLInsArray.c	/^static uint8_t branchL_JPtype[] = { 0, 0, cJL_JPBRANCH_L2, cJL_JPBRANCH_L3, cJL_JPBRANCH_L };$/;"	v	file:
 branchU_JPtype	JudyLInsArray.c	/^static uint8_t branchU_JPtype[] = { 0, 0, cJL_JPBRANCH_U2, cJL_JPBRANCH_U3, cJL_JPBRANCH_U };$/;"	v	file:
-buff	main.c	/^} buff[N_];$/;"	v	typeref:struct:object
+buff	main.c	/^} buff[SN_];$/;"	v	typeref:struct:object
 bycount	main.c	/^void bycount(void *root)$/;"	f
 cJL_ALLONES	JudyPrivate.h	27;"	d
 cJL_BITSPERBITMAP	JudyPrivate.h	202;"	d
@@ -378,12 +381,14 @@ cJL_ROOTSTATE	JudyPrivate.h	36;"	d
 cJL_SUBEXPPERSTATE	JudyPrivate.h	41;"	d
 cJL_WORDSPERCL	JudyPrivateBranch.h	183;"	d
 cJL_WORDSPERJP	JudyPrivateBranch.h	182;"	d
+calls	main.c	/^	int calls;$/;"	m	struct:walk_ctx	file:
 ccount	main.c	/^void ccount(void *root, int num)$/;"	f
 cyc_hi	main.c	/^static unsigned cyc_hi = 0;$/;"	v	file:
 cyc_lo	main.c	/^static unsigned cyc_lo = 0;$/;"	v	file:
-delJudyLTree	JudyHS.c	/^static uint32_t delJudyLTree(void **PPValue, uint32_t Len)$/;"	f	file:
+delJudyLTree	JudyHS.c	/^static void delJudyLTree(void **PPValue, uint32_t Len)$/;"	f	file:
 delStrJudyLTree	JudyHS.c	/^static int delStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)$/;"	f	file:
 delete	main.c	/^void delete(void **root)$/;"	f
+do_test	main.c	/^void do_test(int m_dup)$/;"	f
 get_counter	main.c	/^double get_counter(void)$/;"	f
 immed_maxpop1	JudyLInsArray.c	/^static uint8_t immed_maxpop1[] = {$/;"	v	file:
 insStrJudyLTree	JudyHS.c	/^static void **insStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)$/;"	f	file:
@@ -433,7 +438,7 @@ jpi_t	JudyPrivateBranch.h	/^} jpi_t;$/;"	t	typeref:struct:JUDY_POINTER_IMMED
 jpm_JP	JudyL.h	/^	jp_t jpm_JP;$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
 jpm_LastUPop0	JudyL.h	/^	Word_t jpm_LastUPop0;$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
 jpm_PValue	JudyL.h	/^	Pjv_t jpm_PValue;$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
-jpm_Pop0	JudyL.h	/^	Word_t jpm_Pop0;$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
+jpm_Pop0	JudyL.h	/^	Word_t jpm_Pop0;	\/* Must be first *\/$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
 jpm_TotalMemWords	JudyL.h	/^	Word_t jpm_TotalMemWords;$/;"	m	struct:JUDYL_POPULATION_AND_MEMORY
 jpo_t	JudyPrivateBranch.h	/^} jpo_t;$/;"	t	typeref:struct:JUDY_POINTER_OTHERS
 jpo_u	JudyPrivateBranch.h	/^	} jpo_u;$/;"	m	struct:JUDY_POINTER_OTHERS	typeref:union:JUDY_POINTER_OTHERS::__anon3
@@ -452,8 +457,8 @@ judyCountLeafB1	JudyLCount.c	/^static int judyCountLeafB1(const Pjll_t Pjll, con
 judyCreateBranchB	JudyLCreateBranch.c	/^int judyCreateBranchB(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void *Pjpm)$/;"	f
 judyCreateBranchL	JudyLCreateBranch.c	/^int judyCreateBranchL(Pjp_t Pjp, Pjp_t PJPs, uint8_t Exp[], Word_t ExpCnt, void *Pjpm)$/;"	f
 judyCreateBranchU	JudyLCreateBranch.c	/^int judyCreateBranchU(Pjp_t Pjp, void *Pjpm)$/;"	f
-judyDelWalk	JudyLDel.c	/^static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)	$/;"	f	file:
-judyInsArray	JudyLInsArray.c	/^static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1, $/;"	f	file:
+judyDelWalk	JudyLDel.c	/^static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)$/;"	f	file:
+judyInsArray	JudyLInsArray.c	/^static int judyInsArray(Pjp_t PjpParent, int Level, PWord_t PPop1,$/;"	f	file:
 judyInsWalk	JudyLIns.c	/^static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)$/;"	f	file:
 judyInsertBranch	JudyLIns.c	/^static int judyInsertBranch(Pjp_t Pjp, Word_t Index, Word_t BranchLevel, Pjpm_t Pjpm)$/;"	f	file:
 judyJLL2toJLB1	JudyLCascade.c	/^static Pjlb_t judyJLL2toJLB1(uint16_t * Pjll, Pjv_t Pjv, Word_t LeafPop1, void *Pjpm)$/;"	f	file:
@@ -481,7 +486,6 @@ judyLFreeJLW	JudyLMallocIF.c	/^void judyLFreeJLW(Pjlw_t Pjlw, Word_t Pop1, Pjpm_
 judyLFreeJPM	JudyLMallocIF.c	/^void judyLFreeJPM(Pjpm_t PjpmFree, Pjpm_t PjpmStats)$/;"	f
 judyLFreeJV	JudyLMallocIF.c	/^void judyLFreeJV(Pjv_t Pjv, Word_t Pop1, Pjpm_t Pjpm)$/;"	f
 judyLFreeSM	JudyLFreeArray.c	/^void judyLFreeSM(Pjp_t Pjp, Pjpm_t Pjpm)$/;"	f
-judyLGetMemActive	JudyLMallocIF.c	/^static Word_t judyLGetMemActive(Pjp_t Pjp)$/;"	f	file:
 judyLJPPop1	JudyLCount.c	/^Word_t judyLJPPop1(const Pjp_t Pjp)$/;"	f
 judyLeaf1ToLeaf2	JudyLDecascade.c	/^Word_t judyLeaf1ToLeaf2(uint16_t *PLeaf2, Pjv_t Pjv2, Pjp_t Pjp, Word_t MSByte, void *Pjpm)$/;"	f
 judyLeaf2ToLeaf3	JudyLDecascade.c	/^Word_t judyLeaf2ToLeaf3(uint8_t *PLeaf3, Pjv_t Pjv3, Pjp_t Pjp, Word_t MSByte,	void *Pjpm)$/;"	f
@@ -497,13 +501,15 @@ leaf_maxpop1	JudyLInsArray.c	/^static uint8_t leaf_maxpop1[] = { 0, 0, cJL_LEAF2
 line_test	main.c	/^void line_test(void)$/;"	f
 loop_test	main.c	/^void loop_test(void)$/;"	f
 ls_String	JudyHS.c	/^	uint8_t ls_String[WORDSIZE];	\/\/ to fill out to a uint32_t size$/;"	m	struct:L_EAFSTRING	file:
-ls_Value	JudyHS.c	/^	void *ls_Value;	\/\/ Value area (cannot change size)$/;"	m	struct:L_EAFSTRING	file:
+ls_Value	JudyHS.c	/^	void *ls_Value;			\/\/ Value area (cannot change size)$/;"	m	struct:L_EAFSTRING	file:
 ls_t	JudyHS.c	/^} ls_t, *Pls_t;$/;"	t	typeref:struct:L_EAFSTRING	file:
 main	main.c	/^int main(void)$/;"	f
 next	main.c	/^void next(void *root, int num)$/;"	f
 nums	main.c	/^	int nums;$/;"	m	struct:object	file:
-nums	main.c	/^int nums[N_];$/;"	v
+nums	main.c	/^	int nums;$/;"	m	struct:walk_ctx	file:
+nums	main.c	/^int nums[SN_];$/;"	v
 object	main.c	/^struct object {$/;"	s	file:
+prev	main.c	/^	int prev;$/;"	m	struct:walk_ctx	file:
 prev	main.c	/^void prev(void *root, int num)$/;"	f
 random_test	main.c	/^void random_test(void)$/;"	f
 rank	main.c	/^	int rank;$/;"	m	struct:object	file:
@@ -514,3 +520,7 @@ search	main.c	/^void search(const void *root)$/;"	f
 start_counter	main.c	/^void start_counter(void)$/;"	f
 state	main.c	/^	unsigned long state;$/;"	m	struct:object	file:
 subexp_mask	JudyLInsArray.c	/^static Word_t subexp_mask[] = { 0, ~cJL_POP0MASK(1), ~cJL_POP0MASK(2), ~cJL_POP0MASK(3) };$/;"	v	file:
+walk	main.c	/^void walk(void *root, int nums)$/;"	f
+walk_ctx	main.c	/^struct walk_ctx {$/;"	s	file:
+walk_fn	main.c	/^int walk_fn(void *ctx, uint32_t idx, void **value)$/;"	f
+walk_fn_t	Judy.h	/^typedef int (*walk_fn_t)(void *ctx, uint32_t Index, void **Value);$/;"	t

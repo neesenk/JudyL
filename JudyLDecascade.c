@@ -23,15 +23,11 @@ static void judyCopy3toW(PWord_t PDest, uint8_t *PSrc, Word_t Pop1, Word_t MSByt
 
 int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm)
 {
-	Pjbb_t PjbbRaw;		// old BranchB to shrink.
-	Pjbb_t Pjbb;
-	Pjbl_t PjblRaw;		// new BranchL to create.
-	Pjbl_t Pjbl;
-	Word_t Digit;		// in BranchB.
-	Word_t NumJPs;		// non-null JPs in BranchB.
-	uint8_t Expanse[cJL_BRANCHLMAXJPS];	// for building jbl_Expanse[].
-	Pjp_t Pjpjbl;		// current JP in BranchL.
-	Word_t SubExp;		// in BranchB.
+	Pjbb_t PjbbRaw, Pjbb;
+	Pjbl_t PjblRaw, Pjbl;
+	Word_t Digit, NumJPs, SubExp;
+	uint8_t Expanse[cJL_BRANCHLMAXJPS];
+	Pjp_t Pjpjbl;
 
 	assert(JL_JPTYPE(Pjp) >= cJL_JPBRANCH_B2);
 	assert(JL_JPTYPE(Pjp) <= cJL_JPBRANCH_B);
@@ -42,7 +38,7 @@ int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm)
 	for (NumJPs = Digit = 0; Digit < cJL_BRANCHUNUMJPS; ++Digit) {
 		if (JL_BITMAPTESTB(Pjbb, Digit)) {
 			Expanse[NumJPs++] = Digit;
-			assert(NumJPs <= cJL_BRANCHLMAXJPS);	// required of caller.
+			assert(NumJPs <= cJL_BRANCHLMAXJPS);
 		}
 	}
 
@@ -53,24 +49,24 @@ int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm)
 	JL_COPYMEM(Pjbl->jbl_Expanse, Expanse, NumJPs);
 
 	Pjbl->jbl_NumJPs = NumJPs;
-	Pjpjbl = P_JP(Pjbl->jbl_jp);	// start at first JP in array.
+	Pjpjbl = P_JP(Pjbl->jbl_jp);
 
 	for (SubExp = 0; SubExp < cJL_NUMSUBEXPB; ++SubExp) {
-		Pjp_t PjpRaw = JL_JBB_PJP(Pjbb, SubExp);	// current Pjp.
+		Pjp_t PjpRaw = JL_JBB_PJP(Pjbb, SubExp);
 		Pjp_t Pjp;
 
 		if (PjpRaw == NULL)
-			continue;	// skip empty subexpanse.
+			continue;
 		Pjp = P_JP(PjpRaw);
 
 		NumJPs = judyCountBits(JL_JBB_BITMAP(Pjbb, SubExp));
 		assert(NumJPs);
-		JL_COPYMEM(Pjpjbl, Pjp, NumJPs);	// one subarray at a time.
+		JL_COPYMEM(Pjpjbl, Pjp, NumJPs);
 
 		Pjpjbl += NumJPs;
-		judyLFreeJBBJP(PjpRaw, NumJPs, Pjpm);	// subarray.
+		judyLFreeJBBJP(PjpRaw, NumJPs, Pjpm);
 	}
-	judyLFreeJBB(PjbbRaw, Pjpm);	// BranchB itself.
+	judyLFreeJBB(PjbbRaw, Pjpm);
 
 	Pjp->jp_Type += cJL_JPBRANCH_L - cJL_JPBRANCH_B;
 	Pjp->jp_Addr = (Word_t) PjblRaw;
@@ -80,14 +76,12 @@ int judyBranchBToBranchL(Pjp_t Pjp, void *Pjpm)
 
 int judyLeafB1ToLeaf1(Pjp_t Pjp, void *Pjpm)
 {
-	Pjlb_t PjlbRaw;		// bitmap in old leaf.
-	Pjlb_t Pjlb;
-	Pjll_t PjllRaw;		// new Leaf1.
-	uint8_t *Pleaf1;	// Leaf1 pointer type.
-	Word_t Digit;		// in LeafB1 bitmap.
-	Pjv_t PjvNew;		// value area in new Leaf1.
-	Word_t Pop1;
-	Word_t SubExp;
+	Pjlb_t PjlbRaw, Pjlb;
+	Pjll_t PjllRaw;
+	uint8_t *Pleaf1;
+	Word_t Digit, Pop1, SubExp;
+	Pjv_t PjvNew;
+
 	assert(JL_JPTYPE(Pjp) == cJL_JPLEAF_B1);
 	assert(((JL_JPDCDPOP0(Pjp) & 0xFF) + 1) == cJL_LEAF1_MAXPOP1);
 
@@ -108,14 +102,14 @@ int judyLeafB1ToLeaf1(Pjp_t Pjp, void *Pjpm)
 		Pjv_t Pjv = P_JV(PjvRaw);
 
 		if (Pjv == NULL)
-			continue;	// skip empty subarray.
+			continue;
 
-		Pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, SubExp));	// subarray.
+		Pop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, SubExp));
 		assert(Pop1);
 
-		JL_COPYMEM(PjvNew, Pjv, Pop1);	// copy value areas.
+		JL_COPYMEM(PjvNew, Pjv, Pop1);
 		judyLFreeJV(PjvRaw, Pop1, Pjpm);
-		PjvNew += Pop1;	// advance through new.
+		PjvNew += Pop1;
 	}
 
 	assert((((Word_t) Pleaf1) - (Word_t) P_JLL(PjllRaw))
@@ -137,16 +131,13 @@ int judyLeafB1ToLeaf1(Pjp_t Pjp, void *Pjpm)
  */
 Word_t judyLeaf1ToLeaf2(uint16_t *PLeaf2, Pjv_t Pjv2, Pjp_t Pjp, Word_t MSByte, void *Pjpm)
 {
-	Word_t Pop1;		// Indexes in leaf.
-	Word_t Offset;		// in linear leaf list.
-	Pjv_t Pjv1Raw;		// source object value area.
-	Pjv_t Pjv1;
+	Word_t Pop1, Offset;
+	Pjv_t Pjv1Raw, Pjv1;
 
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPLEAF_B1: {
 		Pjlb_t Pjlb = P_JLB(Pjp->jp_Addr);
-		Word_t Digit;	// in LeafB1 bitmap.
-		Word_t SubExp;	// in LeafB1.
+		Word_t Digit, SubExp;
 
 		Pop1 = JL_JPBRANCH_POP0(Pjp, 1) + 1;
 		assert(Pop1);
@@ -159,17 +150,17 @@ Word_t judyLeaf1ToLeaf2(uint16_t *PLeaf2, Pjv_t Pjv2, Pjp_t Pjp, Word_t MSByte, 
 
 			Pjv1Raw = JL_JLB_PVALUE(Pjlb, SubExp);
 			if (Pjv1Raw == NULL)
-				continue;	// skip empty.
+				continue;
 			Pjv1 = P_JV(Pjv1Raw);
 
 			SubExpPop1 = judyCountBits(JL_JLB_BITMAP(Pjlb, SubExp));
 			assert(SubExpPop1);
 
-			JL_COPYMEM(Pjv2, Pjv1, SubExpPop1);	// copy value areas.
+			JL_COPYMEM(Pjv2, Pjv1, SubExpPop1);
 			judyLFreeJV(Pjv1Raw, SubExpPop1, Pjpm);
-			Pjv2 += SubExpPop1;	// advance through new.
+			Pjv2 += SubExpPop1;
 		}
-		judyLFreeJLB1((Pjlb_t) (Pjp->jp_Addr), Pjpm);	// LeafB1 itself.
+		judyLFreeJLB1((Pjlb_t) (Pjp->jp_Addr), Pjpm);
 		return Pop1;
 	}
 	case cJL_JPLEAF1: {
@@ -187,7 +178,7 @@ Word_t judyLeaf1ToLeaf2(uint16_t *PLeaf2, Pjv_t Pjv2, Pjp_t Pjp, Word_t MSByte, 
 		return Pop1;
 	}
 	case cJL_JPIMMED_1_01: {
-		PLeaf2[0] = JL_JPDCDPOP0(Pjp);	// see above.
+		PLeaf2[0] = JL_JPDCDPOP0(Pjp);
 		Pjv2[0] = Pjp->jp_Addr;
 		return 1;
 	}
@@ -253,8 +244,8 @@ Word_t judyLeaf2ToLeaf3(uint8_t *PLeaf3, Pjv_t Pjv3, Pjp_t Pjp, Word_t MSByte,	v
  */
 Word_t judyLeaf3ToLeafW(Pjlw_t Pjlw, Pjv_t PjvW, Pjp_t Pjp, Word_t MSByte, void *Pjpm)
 {
-	Word_t Pop1;		// Indexes in leaf.
-	Pjv_t Pjv3;		// source object value area.
+	Word_t Pop1;
+	Pjv_t Pjv3;
 	int jptype = JL_JPTYPE(Pjp);
 
 	if (jptype == cJL_JPLEAF3) {
@@ -267,7 +258,7 @@ Word_t judyLeaf3ToLeafW(Pjlw_t Pjlw, Pjv_t PjvW, Pjp_t Pjp, Word_t MSByte, void 
 		judyLFreeJLL3((Pjll_t) (Pjp->jp_Addr), Pop1, Pjpm);
 		return Pop1;
 	} else if (jptype == cJL_JPIMMED_3_01) {
-		Pjlw[0] = MSByte | JL_JPDCDPOP0(Pjp);	// see above.
+		Pjlw[0] = MSByte | JL_JPDCDPOP0(Pjp);
 		PjvW[0] = Pjp->jp_Addr;
 		return 1;
 	} else {

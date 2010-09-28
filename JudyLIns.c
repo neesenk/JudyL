@@ -69,12 +69,12 @@ static int judyInsertBranch(Pjp_t Pjp, Word_t Index, Word_t BranchLevel, Pjpm_t 
 
 static int judyInsWalk(Pjp_t Pjp, Word_t Index, Pjpm_t Pjpm)
 {
-	uint8_t digit;		// from Index, current offset into a branch.
-	jp_t newJP;		// for creating a new Immed JP.
-	Word_t exppop1;		// expanse (leaf) population.
-	int retcode;		// return codes:  -1, 0, 1.
+	uint8_t digit;
+	jp_t newJP;
+	Word_t exppop1;
+	int retcode;
 
-ContinueInsWalk:		// for modifying state without recursing.
+ContinueInsWalk:		/* for modifying state without recursing. */
 	switch (JL_JPTYPE(Pjp))	{
 	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		assert((Pjp->jp_Addr) == 0);
@@ -92,12 +92,10 @@ ContinueInsWalk:		// for modifying state without recursing.
 		JL_BRANCH_OUTLIER(digit, exppop1, 3, Pjp, Index, Pjpm);
 		goto JudyBranchL;
 	case cJL_JPBRANCH_L: {
-		Pjbl_t PjblRaw;	// pointer to old linear branch.
-		Pjbl_t Pjbl;
-		Pjbu_t PjbuRaw;	// pointer to new uncompressed branch.
-		Pjbu_t Pjbu;
-		Word_t numJPs;	// number of JPs = populated expanses.
-		int offset;	// in branch.
+		Pjbl_t PjblRaw, Pjbl;
+		Pjbu_t PjbuRaw, Pjbu;
+		Word_t numJPs;
+		int offset;
 
 		digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
 		exppop1 = Pjpm->jpm_Pop0;
@@ -109,7 +107,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 			goto ConvertBranchLtoU;
 		numJPs = Pjbl->jbl_NumJPs;
 		if ((numJPs == 0) || (numJPs > cJL_BRANCHLMAXJPS)) {
-			JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+			JL_SET_ERRNO(JLE_CORRUPT);
 			return -1;
 		}
 		offset = judySearchLeaf1((Pjll_t) (Pjbl->jbl_Expanse), numJPs, digit);
@@ -125,7 +123,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 			JL_INSERTINPLACE(Pjbl->jbl_Expanse, numJPs, offset, digit);
 			JL_INSERTINPLACE(Pjbl->jbl_jp, numJPs, offset, newJP);
 			++(Pjbl->jbl_NumJPs);
-			// value area is first word of new Immed 01 JP:
+			/* value area is first word of new Immed 01 JP: */
 			Pjpm->jpm_PValue = (Pjv_t) ((Pjbl->jbl_jp) + offset);
 			return 1;
 		}
@@ -134,7 +132,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 		if (judyCreateBranchB(Pjp, Pjbl->jbl_jp, Pjbl->jbl_Expanse, numJPs, Pjpm) == -1)
 			return -1;
 		Pjp->jp_Type += cJL_JPBRANCH_B - cJL_JPBRANCH_L;
-		judyLFreeJBL(PjblRaw, Pjpm);	// free old BranchL.
+		judyLFreeJBL(PjblRaw, Pjpm);
 		goto ContinueInsWalk;
 	ConvertBranchLtoU:
 		if ((PjbuRaw = judyLAllocJBU(Pjpm)) == NULL)
@@ -164,15 +162,11 @@ ContinueInsWalk:		// for modifying state without recursing.
 		JL_BRANCH_OUTLIER(digit, exppop1, 3, Pjp, Index, Pjpm);
 		goto JudyBranchB;
 	case cJL_JPBRANCH_B: {
-		Pjbb_t Pjbb;	// pointer to bitmap branch.
-		Pjbb_t PjbbRaw;	// pointer to bitmap branch.
-		Pjp_t Pjp2Raw;	// 1 of N arrays of JPs.
-		Pjp_t Pjp2;	// 1 of N arrays of JPs.
-		Word_t subexp;	// 1 of N subexpanses in bitmap.
-		BITMAPB_t bitmap;	// for one subexpanse.
-		BITMAPB_t bitmask;	// bit set for Indexs digit.
-		Word_t numJPs;	// number of JPs = populated expanses.
-		int offset;	// in bitmap branch.
+		Pjbb_t PjbbRaw, Pjbb;
+		Pjp_t Pjp2Raw, Pjp2;
+		BITMAPB_t bitmap, bitmask;
+		Word_t subexp, numJPs;
+		int offset;
 
 		digit = JL_DIGITATSTATE(Index, cJL_ROOTSTATE);
 		exppop1 = Pjpm->jpm_Pop0;
@@ -191,11 +185,11 @@ ContinueInsWalk:		// for modifying state without recursing.
 		PjbbRaw = (Pjbb_t) (Pjp->jp_Addr);
 		Pjbb = P_JBB(PjbbRaw);
 
-		// Form the Int32 offset, and Bit offset values:
-		// 8 bit Decode | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-		//              |SubExpanse |    Bit offset     |
-		// Get the 1 of 8 expanses from digit, Bits 5..7 = 1 of 8, and get the 32-bit
-		// word that may have a bit set:
+		/* Form the Int32 offset, and Bit offset values:
+		 * 8 bit Decode | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+		 *              |SubExpanse |    Bit offset     |
+		 * Get the 1 of 8 expanses from digit, Bits 5..7 = 1 of 8,
+		 * and get the 32-bit word that may have a bit set: */
 		subexp = digit / cJL_BITSPERSUBEXPB;
 		bitmap = JL_JBB_BITMAP(Pjbb, subexp);
 		Pjp2Raw = JL_JBB_PJP(Pjbb, subexp);
@@ -326,42 +320,38 @@ ContinueInsWalk:		// for modifying state without recursing.
 		JL_LEAFSET(3, uint8_t *, cJL_LEAF3_MAXPOP1, judySearchLeaf3,
 			   JL_LEAF3GROWINPLACE, JL_INSERTINPLACE3, JL_INSERTCOPY3,
 			   judyCascade3, judyLAllocJLL3, judyLFreeJLL3, JL_LEAF3VALUEAREA);
-	// JPLEAF_B1:
-	// 8 bit Decode | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-	//              |SubExpanse |    Bit offset     |
-	// Note:  For JudyL, values are stored in 8 subexpanses, each a linear word
-	// array of up to 32 values each.
+	/* JPLEAF_B1:
+	 * 8 bit Decode | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+	 *              |SubExpanse |    Bit offset     |
+	 * Note:  For JudyL, values are stored in 8 subexpanses,
+	 * each a linear word array of up to 32 values each. */
 	case cJL_JPLEAF_B1: {
-		Pjv_t PjvRaw;	// pointer to value part of the leaf.
-		Pjv_t Pjv;	// pointer to value part of the leaf.
-		Pjv_t PjvnewRaw;	// new value area.
-		Pjv_t Pjvnew;	// new value area.
-		Word_t subexp;	// 1 of 8 subexpanses in bitmap.
-		Pjlb_t Pjlb;	// pointer to bitmap part of the leaf.
-		BITMAPL_t bitmap;	// for one subexpanse.
-		BITMAPL_t bitmask;	// bit set for Indexs digit.
-		int offset;	// of index in value area.
+		Pjv_t PjvRaw, Pjv, PjvnewRaw, Pjvnew;
+		Word_t subexp;
+		Pjlb_t Pjlb;
+		BITMAPL_t bitmap, bitmask;
+		int offset;
 		JL_CHECK_IF_OUTLIER(Pjp, Index, 1, Pjpm);
 
 		digit = JL_DIGITATSTATE(Index, 1);
 		Pjlb = P_JLB(Pjp->jp_Addr);
-		subexp = digit / cJL_BITSPERSUBEXPL;	// which subexpanse.
-		bitmap = JL_JLB_BITMAP(Pjlb, subexp);	// subexps 32-bit map.
-		PjvRaw = JL_JLB_PVALUE(Pjlb, subexp);	// corresponding values.
-		Pjv = P_JV(PjvRaw);	// corresponding values.
-		bitmask = JL_BITPOSMASKL(digit);	// mask for Index.
-		offset = judyCountBits(bitmap & (bitmask - 1));	// of Index.
+		subexp = digit / cJL_BITSPERSUBEXPL;
+		bitmap = JL_JLB_BITMAP(Pjlb, subexp);
+		PjvRaw = JL_JLB_PVALUE(Pjlb, subexp);
+		Pjv = P_JV(PjvRaw);
+		bitmask = JL_BITPOSMASKL(digit);
+		offset = judyCountBits(bitmap & (bitmask - 1));
 		if (bitmap & bitmask) {
 			assert(Pjv);
-			Pjpm->jpm_PValue = Pjv + offset;	// existing value.
+			Pjpm->jpm_PValue = Pjv + offset;
 			return 0;
 		}
 		exppop1 = judyCountBits(bitmap);
 
 		if (JL_LEAFVGROWINPLACE(exppop1)) {
 			JL_INSERTINPLACE(Pjv, exppop1, offset, 0);
-			JL_JLB_BITMAP(Pjlb, subexp) |= bitmask;	// set Indexs bit.
-			Pjpm->jpm_PValue = Pjv + offset;	// new value area.
+			JL_JLB_BITMAP(Pjlb, subexp) |= bitmask;
+			Pjpm->jpm_PValue = Pjv + offset;
 			return 1;
 		}
 
@@ -373,7 +363,7 @@ ContinueInsWalk:		// for modifying state without recursing.
 			assert(Pjv);
 			JL_INSERTCOPY(Pjvnew, Pjv, exppop1, offset, 0);
 			Pjpm->jpm_PValue = Pjvnew + offset;
-			judyLFreeJV(PjvRaw, exppop1, Pjpm);	// free old values.
+			judyLFreeJV(PjvRaw, exppop1, Pjpm);
 		} else {
 			Pjpm->jpm_PValue = Pjvnew;
 			*(Pjpm->jpm_PValue) = 0;
@@ -383,64 +373,65 @@ ContinueInsWalk:		// for modifying state without recursing.
 		JL_JLB_PVALUE(Pjlb, subexp) = PjvnewRaw;
 		return 1;
 	}
-// This is some of the most complex code in Judy considering Judy1 versus JudyL
-// and 32-bit versus 64-bit variations.  The following comments attempt to make
-// this clearer.
-// Of the 2 words in a JP, for immediate indexes Judy1 can use 2 words - 1 byte
-// = 7 [15] bytes, but JudyL can only use 1 word - 1 byte = 3 [7] bytes because
-// the other word is needed for a value area or a pointer to a value area.
-// For both Judy1 and JudyL, cJL_JPIMMED_*_01 indexes are in word 2; otherwise
-// for Judy1 only, a list of 2 or more indexes starts in word 1.  JudyL keeps
-// the list in word 2 because word 1 is a pointer (to a LeafV, that is, a leaf
-// containing only values).  Furthermore, cJL_JPIMMED_*_01 indexes are stored
-// all-but-first-byte in jp_DcdPopO, not just the Index Sizes bytes.
-// TBD:  This can be confusing because Doug didnt use data structures for it.
-// Instead he often directly accesses Pjp for the first word and jp_DcdPopO for
-// the second word.  It would be nice to use data structs, starting with
-// jp_LIndex where possible.
-// Maximum Immed JP types for Judy1/JudyL, depending on Index Size (cIS):
-//          32-bit  64-bit
-//    bytes:  7/ 3   15/ 7   (Judy1/JudyL)
-//    cIS
-//    1_     07/03   15/07   (as in: cJ1_JPIMMED_1_07)
-//    2_     03/01   07/03
-//    3_     02/01   05/02
-//    4_             03/01
-//    5_             03/01
-//    6_             02/01
-//    7_             02/01
-// State transitions while inserting an Index, matching the above table:
-// (Yes, this is very terse...  Study it and it will make sense.)
-// (Note, parts of this diagram are repeated below for quick reference.)
-//      +-- reformat JP here for Judy1 only, from word-2 to word-1
-//      |
-//      |                  JUDY1 || JL_64BIT        JUDY1 && JL_64BIT
-//      V
-// 1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] Leaf1 (*)
-// 2_01 =>                 [ 2_02 => 2_03 =>        [ 2_04..07 => ]] Leaf2
-// 3_01 =>                 [ 3_02 =>                [ 3_03..05 => ]] Leaf3
-// JL_64BIT only:
-// 4_01 =>                                         [[ 4_02..03 => ]] Leaf4
-// 5_01 =>                                         [[ 5_02..03 => ]] Leaf5
-// 6_01 =>                                         [[ 6_02     => ]] Leaf6
-// 7_01 =>                                         [[ 7_02     => ]] Leaf7
-// (*) For Judy1 & 64-bit, go directly from cJL_JPIMMED_1_15 to a LeafB1; skip
-//     Leaf1, as described in Judy1.h regarding cJ1_JPLEAF1.
-// COMMON CODE FRAGMENTS TO MINIMIZE REDUNDANCY BELOW:
-// These are necessary to support performance by function and loop unrolling
-// while avoiding huge amounts of nearly identical code.
-// The differences between Judy1 and JudyL with respect to value area handling
-// are just too large for completely common code between them...  Oh well, some
-// big ifdefs follow.  However, even in the following ifdefd code, use cJL_*,
-// JL_*, and Judy*() instead of cJ1_* / cJL_*, J1_* / JL_*, and
-// Judy1*()/JudyL*(), for minimum diffs.
-// Handle growth of cJL_JPIMMED_*_01 to cJL_JPIMMED_*_02, for an even or odd
-// Index Size (cIS), given oldIndex, Index, and Pjll in the context:
-// Put oldIndex and Index in their proper order.  For odd indexes, must copy
-// bytes.
-// Variations to also handle value areas; see comments above:
-// For JudyL, Pjv (start of value area) and oldValue are also in the context;
-// leave Pjv set to the value area for Index.
+
+/* This is some of the most complex code in Judy considering Judy1 versus JudyL
+ * and 32-bit versus 64-bit variations.  The following comments attempt to make
+ * this clearer.
+ * Of the 2 words in a JP, for immediate indexes Judy1 can use 2 words - 1 byte
+ * = 7 [15] bytes, but JudyL can only use 1 word - 1 byte = 3 [7] bytes because
+ * the other word is needed for a value area or a pointer to a value area.
+ * For both Judy1 and JudyL, cJL_JPIMMED_*_01 indexes are in word 2; otherwise
+ * for Judy1 only, a list of 2 or more indexes starts in word 1.  JudyL keeps
+ * the list in word 2 because word 1 is a pointer (to a LeafV, that is, a leaf
+ * containing only values).  Furthermore, cJL_JPIMMED_*_01 indexes are stored
+ * all-but-first-byte in jp_DcdPopO, not just the Index Sizes bytes.
+ * TBD:  This can be confusing because Doug didnt use data structures for it.
+ * Instead he often directly accesses Pjp for the first word and jp_DcdPopO for
+ * the second word.  It would be nice to use data structs, starting with
+ * jp_LIndex where possible.
+ * Maximum Immed JP types for Judy1/JudyL, depending on Index Size (cIS):
+ *          32-bit  64-bit
+ *    bytes:  7/ 3   15/ 7   (Judy1/JudyL)
+ *    cIS
+ *    1_     07/03   15/07   (as in: cJ1_JPIMMED_1_07)
+ *    2_     03/01   07/03
+ *    3_     02/01   05/02
+ *    4_             03/01
+ *    5_             03/01
+ *    6_             02/01
+ *    7_             02/01
+ * State transitions while inserting an Index, matching the above table:
+ * (Yes, this is very terse...  Study it and it will make sense.)
+ * (Note, parts of this diagram are repeated below for quick reference.)
+ *      +-- reformat JP here for Judy1 only, from word-2 to word-1
+ *      |
+ *      |                  JUDY1 || JL_64BIT        JUDY1 && JL_64BIT
+ *      V
+ * 1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] Leaf1 (*)
+ * 2_01 =>                 [ 2_02 => 2_03 =>        [ 2_04..07 => ]] Leaf2
+ * 3_01 =>                 [ 3_02 =>                [ 3_03..05 => ]] Leaf3
+ * JL_64BIT only:
+ * 4_01 =>                                         [[ 4_02..03 => ]] Leaf4
+ * 5_01 =>                                         [[ 5_02..03 => ]] Leaf5
+ * 6_01 =>                                         [[ 6_02     => ]] Leaf6
+ * 7_01 =>                                         [[ 7_02     => ]] Leaf7
+ * (*) For Judy1 & 64-bit, go directly from cJL_JPIMMED_1_15 to a LeafB1; skip
+ *     Leaf1, as described in Judy1.h regarding cJ1_JPLEAF1.
+ * COMMON CODE FRAGMENTS TO MINIMIZE REDUNDANCY BELOW:
+ * These are necessary to support performance by function and loop unrolling
+ * while avoiding huge amounts of nearly identical code.
+ * The differences between Judy1 and JudyL with respect to value area handling
+ * are just too large for completely common code between them...  Oh well, some
+ * big ifdefs follow.  However, even in the following ifdefd code, use cJL_*,
+ * JL_*, and Judy*() instead of cJ1_* / cJL_*, J1_* / JL_*, and
+ * Judy1*()/JudyL*(), for minimum diffs.
+ * Handle growth of cJL_JPIMMED_*_01 to cJL_JPIMMED_*_02, for an even or odd
+ * Index Size (cIS), given oldIndex, Index, and Pjll in the context:
+ * Put oldIndex and Index in their proper order.  For odd indexes, must copy
+ * bytes.
+ * Variations to also handle value areas; see comments above:
+ * For JudyL, Pjv (start of value area) and oldValue are also in the context;
+ * leave Pjv set to the value area for Index. */
 #define JL_IMMSET_01_COPY_EVEN(cIS,CopyWord)    \
         if (oldIndex < Index) {                 \
             Pjll[0] = oldIndex;                 \
@@ -588,14 +579,14 @@ ContinueInsWalk:		// for modifying state without recursing.
             return 1;                                                  \
         }
 
-	// (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL)
+	/* (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL) */
 	case cJL_JPIMMED_1_01:
 		JL_IMMSET_01_COPY(1, uint8_t *, cJL_JPIMMED_1_02,
 				  JL_IMMSET_01_COPY_EVEN, ignore);
-	// 2_01 leads to 2_02, and 3_01 leads to 3_02, except for JudyL 32-bit, where
-	// they lead to a leaf:
-	// (2_01 => [ 2_02 => 2_03 => [ 2_04..07 => ]] LeafL)
-	// (3_01 => [ 3_02 =>         [ 3_03..05 => ]] LeafL)
+	/* 2_01 leads to 2_02, and 3_01 leads to 3_02, except for JudyL 32-bit, where
+	 * they lead to a leaf:
+	 * (2_01 => [ 2_02 => 2_03 => [ 2_04..07 => ]] LeafL)
+	 * (3_01 => [ 3_02 =>         [ 3_03..05 => ]] LeafL) */
 	case cJL_JPIMMED_2_01:
 		JL_IMMSET_01_CASCADE(2, uint16_t *, cJL_JPLEAF2, JL_LEAF2VALUEAREA,
 				     JL_IMMSET_01_COPY_EVEN, ignore, judyLAllocJLL2);
@@ -603,23 +594,23 @@ ContinueInsWalk:		// for modifying state without recursing.
 		JL_IMMSET_01_CASCADE(3, uint8_t *, cJL_JPLEAF3, JL_LEAF3VALUEAREA,
 				     JL_IMMSET_01_COPY_ODD,
 				     JL_COPY3_LONG_TO_PINDEX, judyLAllocJLL3);
-	// cJL_JPIMMED_1_* cases that can grow in place:
-	// (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL)
+	/* cJL_JPIMMED_1_* cases that can grow in place:
+	 * (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL) */
 	case cJL_JPIMMED_1_02:
 		JL_IMMSETINPLACE(1, uint8_t *, cJL_JPIMMED_1_02, judySearchLeaf1,
 				 JL_INSERTINPLACE);
-	// cJL_JPIMMED_1_* cases that must cascade:
-	// (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL)
+	/* cJL_JPIMMED_1_* cases that must cascade:
+	 * (1_01 => 1_02 => 1_03 => [ 1_04 => ... => 1_07 => [ 1_08..15 => ]] LeafL) */
 	case cJL_JPIMMED_1_03:
 		JL_IMMSETCASCADE(1, 3, uint8_t *, cJL_JPLEAF1, JL_LEAF1VALUEAREA,
 				 judySearchLeaf1, JL_INSERTCOPY, judyLAllocJLL1);
-	// cJL_JPIMMED_[2..7]_[02..15] cases that grow in place or cascade:
-	// (2_01 => [ 2_02 => 2_03 => [ 2_04..07 => ]] LeafL)
-	// (3_01 => [ 3_02 => [ 3_03..05 => ]] LeafL)
+	/* cJL_JPIMMED_[2..7]_[02..15] cases that grow in place or cascade:
+	 * (2_01 => [ 2_02 => 2_03 => [ 2_04..07 => ]] LeafL)
+	 * (3_01 => [ 3_02 => [ 3_03..05 => ]] LeafL) */
 	default:
-		JL_SET_ERRNO(JL_ERRNO_CORRUPT);
+		JL_SET_ERRNO(JLE_CORRUPT);
 		return -1;
-	}			// switch on JP type
+	}
 	retcode = judyInsWalk(Pjp, Index, Pjpm);
 
 	if ((JL_JPTYPE(Pjp) < cJL_JPIMMED_1_01) && (retcode == 1)) {
@@ -634,14 +625,13 @@ ContinueInsWalk:		// for modifying state without recursing.
 
 void **JudyLIns(void **PPArray, uint32_t Index)
 {
-	Pjv_t Pjv;		// value area in old leaf.
-	Pjv_t Pjvnew;		// value area in new leaf.
-	Pjpm_t Pjpm;		// array-global info.
-	int offset;		// position in which to store new Index.
+	Pjv_t Pjv, Pjvnew;
+	Pjpm_t Pjpm;
+	int offset;
 	Pjlw_t Pjlw;
 
 	if (PPArray == NULL) {
-		JL_SET_ERRNO(JL_ERRNO_NULLPPARRAY);
+		JL_SET_ERRNO(JLE_NULLPPARRAY);
 		return PPJERR;
 	}
 
