@@ -167,7 +167,7 @@ void **JudySLIns(void **PPArray, const uint8_t *Index)
 }
 
 static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
-			const uint8_t *Index, size_t len)
+			const uint8_t *Index, size_t len, void **Value)
 {
 	uint32_t indexword;
 	void **PPValue;
@@ -183,6 +183,8 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 		if (STRCMP(Index, Pscll->scl_Index))
 			return 0;
 
+		if (Value)
+			*Value = Pscll->scl_Pvalue;
 		words = SCLSIZE(STRLEN(Pscll->scl_Index));
 		JudyFree((void *)Pscll, words);
 
@@ -193,7 +195,7 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 	COPYSTRINGtoWORD(indexword, Index);
 
 	if (len <= WORDSIZE) {
-		if ((retcode = JudyLDel(PPArray, indexword)) == JERR) {
+		if ((retcode = JudyLDel(PPArray, indexword, Value)) == JERR) {
 			JudySLModifyErrno(*PPArray, *PPArrayOrig);
 			return JERR;
 		}
@@ -204,15 +206,17 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 	if (PPValue == NULL)
 		return 0;
 	if ((retcode = JudySLDelSub(PPValue, PPArrayOrig, Index + WORDSIZE,
-				    len - WORDSIZE)) != 1) {
+				    len - WORDSIZE, Value)) != 1) {
 		return retcode;
 	}
 
 	if (*PPValue == NULL) {
-		if ((retcode = JudyLDel(PPArray, indexword)) == JERR) {
+		void *PPdel = NULL;
+		if ((retcode = JudyLDel(PPArray, indexword, &PPdel)) == JERR) {
 			JudySLModifyErrno(*PPArray, *PPArrayOrig);
 			return JERR;
 		}
+		assert(*PPValue == PPdel);
 
 		return retcode;
 	}
@@ -220,14 +224,14 @@ static int JudySLDelSub(void **PPArray, void **PPArrayOrig,
 	return 1;
 }
 
-int JudySLDel(void **PPArray, const uint8_t * Index)
+int JudySLDel(void **PPArray, const uint8_t *Index, void **PPvalue)
 {
 	if (PPArray == NULL || Index == NULL) {
 		JL_SET_ERRNO(JLE_NULLPPARRAY);
 		return JERR;
 	}
 
-	return JudySLDelSub(PPArray, PPArray, Index, STRLEN(Index));
+	return JudySLDelSub(PPArray, PPArray, Index, STRLEN(Index), PPvalue);
 }
 
 static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_t len)

@@ -153,4 +153,4 @@ Pjpm_t judyLAllocJPM(void);
 void   judyLFreeJPM(Pjpm_t PjpmFree, Pjpm_t PjpmStats);
 void   judyLFreeSM(Pjp_t, Pjpm_t);
 
-#endif // ! _JUDYL_INCLUDED
+#endif /* ! _JUDYL_INCLUDED */

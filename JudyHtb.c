@@ -158,7 +158,7 @@ void **JudyHtbIns(void **PPArray, void *Str, size_t Len)
 	return &list->ls_Value;
 }
 
-int JudyHtbDel(void **PPArray, void *Str, size_t Len)
+int JudyHtbDel(void **PPArray, void *Str, size_t Len, void **PPValue)
 {
 	uint8_t *String = (uint8_t *) Str;
 	void **PPBucket, **PPHtble;
@@ -174,9 +174,9 @@ int JudyHtbDel(void **PPArray, void *Str, size_t Len)
 	if (Len <= WORDSIZE) {
 		int r = 0;
 		COPYSTRINGtoWORD(HValue, String, Len);
-		r = JudyLDel(PPHtble, HValue);
+		r = JudyLDel(PPHtble, HValue, PPValue);
 		if (*PPHtble == NULL)
-			JudyLDel(PPArray, Len);
+			JudyLDel(PPArray, Len, NULL);
 		return r;
 	}
 
@@ -186,11 +186,13 @@ int JudyHtbDel(void **PPArray, void *Str, size_t Len)
 	for (list = (Pls_t *)PPBucket; (item = *list) != NULL; list = &item->next) {
 		if (memcmp(item->ls_String, String, Len) == 0) {
 			*list = item->next;
+			if (PPValue)
+				*PPValue = item->ls_Value;
 			free(item);
 			if (*PPBucket == NULL)
-				JudyLDel(PPHtble, HValue);
+				JudyLDel(PPHtble, HValue, NULL);
 			if (*PPHtble == NULL)
-				JudyLDel(PPArray, Len);
+				JudyLDel(PPArray, Len, NULL);
 			return 1;
 		}
 	}
@@ -257,7 +259,7 @@ size_t JudyHtbMemUsed(void *PArray)
 	     (PPHtble != NULL) && (PPHtble != PPJERR);
 	     PPHtble = JudyLNext(PArray, &Len)) {
 		ret += JudyLMemUsed(*PPHtble);
-		//ret += JudyLCount(*PPHtble, 0, ~0) * (sizeof(ls_t) + Len);
+		/* ret += JudyLCount(*PPHtble, 0, ~0) * (sizeof(ls_t) + Len); */
 	}
 
 	ret += JudyLMemUsed(PArray);

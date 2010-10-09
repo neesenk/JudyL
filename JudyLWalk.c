@@ -193,7 +193,7 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 		Index = prefix | ((uint8_t *)Pjp->jp_LIndex)[1];
 		return fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 1));
 	default:
-		assert("impossible to reach here" && 0);
+		assert("Impossible!!!" && 0);
 	}
 
 	return 0;

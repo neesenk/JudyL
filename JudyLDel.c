@@ -370,8 +370,8 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
             Pjv_t  PjvnewRaw;						\
             Pjv_t  Pjvnew;						\
 									\
-            if ((PjvnewRaw = judyLAllocJV(pop1 - 1, Pjpm))		\
-                == NULL) return -1;					\
+            if ((PjvnewRaw = judyLAllocJV(pop1 - 1, Pjpm)) == NULL)	\
+		    return -1;						\
 	    Pjvnew = P_JV(PjvnewRaw);					\
 									\
             DeleteCopy((LeafType) (Pjp->jp_LIndex), Pleaf, pop1, offset, cIS); \
@@ -582,8 +582,7 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 	case cJL_JPIMMED_3_01: JL_IMMED_01(cJL_JPNULL3, cJL_JPBRANCH_U);
 	case cJL_JPIMMED_1_02: JL_IMMED_02(1, uint8_t *, cJL_JPIMMED_1_01);
 	case cJL_JPIMMED_1_03:
-		JL_IMMED(1, uint8_t *, cJL_JPIMMED_1_02,
-			 judySearchLeaf1, JL_DELETEINPLACE);
+		JL_IMMED(1, uint8_t *, cJL_JPIMMED_1_02, judySearchLeaf1, JL_DELETEINPLACE);
 	default:
 		JL_SET_ERRNO(JLE_CORRUPT);
 		return -1;
@@ -616,21 +615,25 @@ static int judyDelWalk(Pjp_t Pjp, Word_t Index,	Word_t ParentLevel, Pjpm_t Pjpm)
 	return retcode;
 }
 
-int JudyLDel(void **PPArray, uint32_t Index)
+int JudyLDel(void **PPArray, uint32_t Index, void **PPvalue)
 {
 	Word_t pop1;
 	int offset;
-	void **PPvalue;
+	void **PPret;
 
 	if (PPArray == NULL) {
 		JL_SET_ERRNO(JLE_NULLPPARRAY);
 		return JERR;
 	}
 
-	if ((PPvalue = JudyLGet(*PPArray, Index)) == PPJERR)
+	if ((PPret = JudyLGet(*PPArray, Index)) == PPJERR)
 		return JERR;
-	if (PPvalue == NULL)
+
+	if (PPret == NULL)
 		return 0;
+
+	if (PPvalue)
+		*PPvalue = *PPret;
 
 	if (JL_LEAFW_POP0(*PPArray) < cJL_LEAFW_MAXPOP1) {
 		Pjv_t Pjv;

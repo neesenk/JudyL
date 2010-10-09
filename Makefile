@@ -15,6 +15,7 @@ OBJS := JudyLCascade.o 		\
 	JudyLPrev.o		\
 	JudyLByCount.o		\
 	JudyLWalk.o		\
+	JudyLWalkRang.o		\
 	JudySL.o		\
 	JudyHtb.o		\
 	JudyHS.o

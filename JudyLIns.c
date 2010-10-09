@@ -637,14 +637,13 @@ void **JudyLIns(void **PPArray, uint32_t Index)
 
 	Pjlw = P_JLW(*PPArray);
 	if (Pjlw == NULL) {
-		Pjlw_t Pjlwnew;
-
-		Pjlwnew = judyLAllocJLW(1);
+		Pjlw_t Pjlwnew = judyLAllocJLW(1);
 		JL_CHECKALLOC(Pjlw_t, Pjlwnew, PPJERR);
 
 		Pjlwnew[0] = 1 - 1;
 		Pjlwnew[1] = Index;
 
+		assert(sizeof(Word_t) == sizeof(void *));
 		*PPArray = (void *) Pjlwnew;
 		Pjlwnew[2] = 0;
 		return (void **)(Pjlwnew + 2);

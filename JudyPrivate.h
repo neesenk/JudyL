@@ -476,4 +476,4 @@ static inline int judySearchLeafW(Pjlw_t Pjlw, Word_t LeafPop1, Word_t Index)
 {
 	SEARCHLEAFNATIVE(Word_t, Pjlw, LeafPop1, Index);
 }
-#endif // ! _JUDYPRIVATE_INCLUDED
+#endif /* ! _JUDYPRIVATE_INCLUDED */

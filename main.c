@@ -41,8 +41,9 @@ double get_counter(void)
 #define NEXTITER	0x010
 #define PREVITER	0x001
 #define CALL		0x200
+#define PCALL		0x400
 
-#define SN_ 100000
+#define SN_ 10000000
 struct object {
 	int nums;
 	unsigned long state;
@@ -184,10 +185,18 @@ void delete(void **root)
 {
 	int i = 0;
 	double count = 0;
+	void *v;
 
 	start_counter();
-	for (i=0; i< N_; i++)
-		JudyLDel(root, buff[i].nums);
+	for (i=0; i< N_; i++) {
+		int r = JudyLDel(root, buff[i].nums, &v);
+		if (buff[i].nums != 0) {;
+			assert(r > 0);
+			assert(v == buff + i);
+		} else {
+			assert(r <= 0);
+		}
+	}
 
 	count = get_counter();
 	assert(*root == NULL);
@@ -267,6 +276,7 @@ void bycount(void *root)
 	double count = 0;
 	void ** ret;
 	uint32_t p = 0;
+	return;
 	start_counter();
 	for (i=0; i< N_; i++) {
 		if (buff[i].nums == 0)
@@ -319,6 +329,22 @@ int walk_fn(void *ctx, uint32_t idx, void **value)
 	return 0;
 }
 
+int walk_rang_fn(void *ctx, uint32_t idx, void **value)
+{
+	struct object *ret = *value;
+	struct walk_ctx *c = ctx;
+	assert(ret < buff + N_ && ret >= buff);
+	assert(ret->nums == idx);
+	assert(ret->nums != 0);
+	assert((ret->state & PCALL) == 0);
+	assert(c->prev <= idx);
+	ret->state |= PCALL;
+	c->prev = idx;
+	c->calls++;
+	return 0;
+}
+
+extern int JudyLWalkRang(void *PArray, uint32_t beg, uint32_t end, walk_fn_t fn, void *ctx);
 void walk(void *root, int nums)
 {
 	struct walk_ctx ctx = { 0, 0, 0};
@@ -326,12 +352,39 @@ void walk(void *root, int nums)
 
 	double count = 0;
 	start_counter();
-
 	ret = JudyLWalk(root, walk_fn, &ctx);
 	assert(ret == 0);
 	assert(ctx.calls == nums);
 	count = get_counter();
 	printf("walk count %lf\n", count);
+
+#if 0
+	memset(&ctx, 0, sizeof(ctx));
+	start_counter();
+	ret = JudyLWalkRang(root, 0, ~0, walk_rang_fn, &ctx);
+	count = get_counter();
+	assert(ret == 0);
+	assert(ctx.calls == nums);
+	printf("walk count %lf\n", count);
+#endif
+
+	memset(&ctx, 0, sizeof(ctx));
+	start_counter();
+	ret = JudyLWalkRang(root, buff[nums/2].nums, ~0, walk_rang_fn, &ctx);
+	count = get_counter();
+	assert(ret == 0);
+	printf("walk count %lf\n", count);
+	printf("walk nums %d\n", ctx.calls);
+	memset(&ctx, 0, sizeof(ctx));
+
+	ret = JudyLWalkRang(root, 0, 0, walk_rang_fn, &ctx);
+	assert(ret == 0);
+	assert(ctx.calls == 0);
+
+	ret = JudyLWalkRang(root, ~0, ~0, walk_rang_fn, &ctx);
+	assert(ret == 0);
+	assert(ctx.calls == 0);
+	// buff[nums/2].
 }
 
 void do_test(int m_dup)
@@ -350,7 +403,7 @@ void do_test(int m_dup)
 	ccount(root, num);
 	bycount(root);
 	delete(&root);
-	// JudyLFreeArray(&root);
+	/* JudyLFreeArray(&root); */
 }
 
 void insert_array(void)
@@ -386,7 +439,7 @@ void insert_array(void)
 	next(root, N_);
 	ccount(root, N_);
 	bycount(root);
-	// JudyLFreeArray(&root);
+	/* JudyLFreeArray(&root); */
 	delete(&root);
 	for (i = 0; i < N_; i++) {
 		buff[i].state = 0;
@@ -401,7 +454,7 @@ void random_test(void)
 	printf("RANDOM TEST:\n");
 	memset(buff, 0, sizeof(buff));
 	memset(nums, 0, sizeof(nums));
-	// srand(0);
+	/* srand(0); */
 	for (i = 0; i< N_; i++) {
 		buff[i].nums = random();
 		if (buff[i].nums == 0)
@@ -420,7 +473,7 @@ void loop_test(void)
 	printf("LOOP TEST:\n");
 	memset(buff, 0, sizeof(buff));
 	memset(nums, 0, sizeof(nums));
-	// srand(0);
+	/* srand(0); */
 	num = random();
 	loop = random() % 256 + 1;
 	for (i = 0; i< N_; i++)
@@ -444,9 +497,13 @@ void line_test(void)
 
 int main(void)
 {
-	line_test();
-	random_test();
-	loop_test();
-	insert_array();
+	// int i = 0;
+	// for (i = 16; i < SN_; i *= 2) {
+	//	N_ = i;
+		line_test();
+		random_test();
+		loop_test();
+		insert_array();
+	//}
 	return 0;
 }

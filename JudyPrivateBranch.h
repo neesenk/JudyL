@@ -220,4 +220,4 @@ typedef struct JUDY_BRANCH_UNCOMPRESSED {
 #define JL_DIGITTOSTATE(Digit,cState) \
         ((Word_t) (((Word_t) (Digit)) << (((cState) - 1) * cJL_BITSPERBYTE)))
 
-#endif // ! _JUDY_PRIVATE_BRANCH_INCLUDED
+#endif /* ! _JUDY_PRIVATE_BRANCH_INCLUDED */

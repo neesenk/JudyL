@@ -42,7 +42,7 @@ typedef enum {
 extern void **	JudyLGet(const void *PArray, uint32_t Index);
 extern void **	JudyLIns(void **PPArray, uint32_t Index);
 extern int	JudyLInsArray(void **PPArray, size_t, const uint32_t *, void * const *);
-extern int	JudyLDel(void **PPArray, uint32_t Index);
+extern int	JudyLDel(void **PPArray, uint32_t Index, void **Value);
 extern size_t	JudyLCount(const void *PArray, uint32_t Idx_beg, uint32_t Idx_end);
 extern void **	JudyLByCount(const void *PArray, uint32_t Count, uint32_t *PIndex);
 extern void	JudyLFreeArray(void **PPArray);
@@ -58,7 +58,7 @@ extern int	JudyLWalk(void *PArray, walk_fn_t fn, void *ctx);
 
 extern void **	JudySLGet(const void *, const uint8_t *Index);
 extern void **	JudySLIns(void **, const uint8_t *Index);
-extern int      JudySLDel(void **, const uint8_t *Index);
+extern int      JudySLDel(void **, const uint8_t *Index, void **Value);
 extern void	JudySLFreeArray(void **);
 extern void **	JudySLFirst(const void *, uint8_t *Index);
 extern void **	JudySLNext(const void *, uint8_t *Index);
@@ -67,7 +67,7 @@ extern void **	JudySLPrev(const void *, uint8_t *Index);
 
 extern void **	JudyHSGet(const void *PArray, void *Index, size_t len);
 extern void **	JudyHSIns(void **PPArray, void *Index, size_t len);
-extern int      JudyHSDel(void **PPArray, void *Index, size_t len);
+extern int      JudyHSDel(void **PPArray, void *Index, size_t len, void **Value);
 extern void	JudyHSFreeArray(void **PPArray);
 
 #ifdef __cplusplus

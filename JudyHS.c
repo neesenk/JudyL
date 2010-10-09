@@ -191,15 +191,17 @@ void **JudyHSIns(void **PPArray, void *Str, size_t Len)
 	return PPValue;
 }
 
-static int delStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)
+static int delStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue, void **Ret)
 {
 	void **PPValueN;
 	uint32_t Index;
-	int Ret;
+	int r;
 
 	if (IS_PLS(*PPValue)) {
 		Pls_t Pls;
 		Pls = (Pls_t) CLEAR_PLS(*PPValue);
+		if (Ret)
+			*Ret = Pls->ls_Value;
 		JudyFree((void *) Pls, LS_WORDLEN(Len));
 		*PPValue = NULL;
 		return 1;
@@ -211,20 +213,20 @@ static int delStrJudyLTree(uint8_t *String, uint32_t Len, void **PPValue)
 
 		String += WORDSIZE, Len -= WORDSIZE;
 
-		Ret = delStrJudyLTree(String, Len, PPValueN);
-		if (Ret != 1)
-			return Ret;
+		r = delStrJudyLTree(String, Len, PPValueN, Ret);
+		if (r != 1)
+			return r;
 
 		if (*PPValueN == NULL)
-			Ret = JudyLDel(PPValue, Index);
+			r = JudyLDel(PPValue, Index, NULL);
 	} else {
 		COPYSTRINGtoWORD(Index, String, Len);
-		Ret = JudyLDel(PPValue, Index);
+		r = JudyLDel(PPValue, Index, Ret);
 	}
-	return Ret;
+	return r;
 }
 
-int JudyHSDel(void **PPArray, void *Str, size_t Len)
+int JudyHSDel(void **PPArray, void *Str, size_t Len, void **Value)
 {
 	uint8_t *String = (uint8_t *) Str;
 	void **PPBucket, **PPHtble;
@@ -239,21 +241,21 @@ int JudyHSDel(void **PPArray, void *Str, size_t Len)
 	PPHtble = JudyLGet(*PPArray, Len);
 	if (Len > WORDSIZE) {
 		JUDYHASHSTR(HValue, String, Len);
-		PPBucket = JudyLGet(*PPHtble, (uint32_t ) HValue);
+		PPBucket = JudyLGet(*PPHtble, HValue);
 	} else {
 		PPBucket = PPHtble;
 	}
 
-	if (!delStrJudyLTree(String, Len, PPBucket))
+	if (!delStrJudyLTree(String, Len, PPBucket, Value))
 		return -1;
 
 	if (*PPBucket == NULL) {
 		if (Len > WORDSIZE) {
-			if (!JudyLDel(PPHtble, HValue))
+			if (!JudyLDel(PPHtble, HValue, NULL))
 				return -1;
 		}
 		if (*PPHtble == NULL) {
-			if (!JudyLDel(PPArray, Len))
+			if (!JudyLDel(PPArray, Len, NULL))
 				return -1;
 		}
 	}
