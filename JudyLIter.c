@@ -42,8 +42,7 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 	(Offset) %= cJL_BITSPERSUBEXPB
 #else
 #define	HISTPUSHBOFF(Subexp,Offset,Digit)	 \
-	 (((Digit) << cJL_BITSPERBYTE)		 \
-	| ((Subexp) * cJL_BITSPERSUBEXPB) | (Offset))
+	 (((Digit) << cJL_BITSPERBYTE) | ((Subexp) * cJL_BITSPERSUBEXPB) | (Offset))
 #define	HISTPOPBOFF(Subexp,Offset,Digit)	 \
 	(Digit)   = (Offset) >> cJL_BITSPERBYTE; \
 	(Subexp)  = ((Offset) & JL_LEASTBYTESMASK(1)) / cJL_BITSPERSUBEXPB; \
@@ -59,11 +58,9 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 	 judyCountBits((Bitmap) & JL_MASKLOWERINC(Bitposmask)) - 1)
 #ifdef JUDYPREV
 #define	SEARCHBITMAPMAXB(Bitmap)				  \
-	(((Bitmap) == cJL_FULLBITMAPB) ? cJL_BITSPERSUBEXPB - 1 : \
-	 judyCountBits(Bitmap) - 1)
+	(((Bitmap) == cJL_FULLBITMAPB) ? cJL_BITSPERSUBEXPB - 1 : judyCountBits(Bitmap) - 1)
 #define	SEARCHBITMAPMAXL(Bitmap)				  \
-	(((Bitmap) == cJL_FULLBITMAPL) ? cJL_BITSPERSUBEXPL - 1 : \
-	 judyCountBits(Bitmap) - 1)
+	(((Bitmap) == cJL_FULLBITMAPL) ? cJL_BITSPERSUBEXPL - 1 : judyCountBits(Bitmap) - 1)
 #endif
 
 #ifdef JUDYPREV
@@ -398,7 +395,6 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 		return PPJERR;
 
 	}
-
       SM2Backtrack:
 	HISTPOP(Pjp, offset);
 	switch (JL_JPTYPE(Pjp)) {
@@ -499,7 +495,6 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 		JL_SET_ERRNO(JLE_CORRUPT);
 		return PPJERR;
 	}
-
       SM3Findlimit:
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPBRANCH_L2:
@@ -524,7 +519,6 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 		JL_SETDIGIT(*PIndex, Pjbl->jbl_Expanse[offset], state);
 		Pjp = (Pjbl->jbl_jp) + offset;
 		goto SM3Findlimit;
-
 	case cJL_JPBRANCH_B2:
 		SM3PREPB_DCD(2, SM3BranchB);
 	case cJL_JPBRANCH_B3:
@@ -563,7 +557,6 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 
 		Pjp += offset;
 		goto SM3Findlimit;
-
 	case cJL_JPBRANCH_U2:
 		SM3PREPB_DCD(2, SM3BranchU);
 	case cJL_JPBRANCH_U3:
@@ -620,7 +613,6 @@ void **JudyLNext(const void *PArray, uint32_t *PIndex)
 			*PIndex = (*PIndex & (~JL_LEASTBYTESMASK(3))) | lsb;
 			return (void **) (JL_LEAF3VALUEAREA(Pjll, pop1) + offset);
 		}
-
 	case cJL_JPLEAF_B1: {
 		Pjlb_t Pjlb;
 		JL_SETDCD(*PIndex, Pjp, 1);

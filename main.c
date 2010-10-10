@@ -397,13 +397,15 @@ void do_test(int m_dup)
 		assert(num == N_);
 	printf("memory count %u\n", JudyLMemUsed(root));
 	search(root);
+#if 0
 	walk(root, num);
 	prev(root, num);
 	next(root, num);
 	ccount(root, num);
 	bycount(root);
 	delete(&root);
-	/* JudyLFreeArray(&root); */
+#endif
+	JudyLFreeArray(&root);
 }
 
 void insert_array(void)

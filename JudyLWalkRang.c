@@ -1,8 +1,6 @@
 #include <stdio.h>
 
 #include "JudyL.h"
-#include "JudyPrivate.h"
-#include "JudyPrivateBranch.h"
 
 #define JL_SETINDEX(INDEX, State, V)			\
 	(((INDEX) & ~(cJL_MASKATSTATE(State))) |	\
@@ -15,7 +13,7 @@ void check_print(char *d)
 {
 	int i = 0;
 	#define D(idx) { idx, #idx }
-	struct { int idx; char *desc;} idx[] = 
+	static const struct { int idx; char *desc;} idx[] = 
 	{ 
 		D(cJL_JPNULL1),		D(cJL_JPNULL2),		D(cJL_JPNULL3),
 		D(cJL_JPBRANCH_L2),	D(cJL_JPBRANCH_L3),	D(cJL_JPBRANCH_L),
@@ -36,19 +34,25 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	int i, mask, ret = 0, state = 0;
 	uint32_t Index = 0;
 	int b = 0, e = 0, v = 0;
-
+#define J_WR(_j, _p, _b, _e) do {	\
+	if ((ret = JudyWalkRang(_j,_p,_b,_e,fn,ctx)) != 0) return ret;	\
+} while (0)
+#define J_FN(_i, _k) do {		\
+	if ((ret = fn(ctx, _i, _k)) != 0) return ret;			\
+} while (0)
+#define CHECK_RANG(v) do {			\
+	if ((v) < b || (v) > e) return 0;	\
+	if ((v) > b) beg = 0;			\
+	if ((v) < e) end = ~0;			\
+} while (0)
 	switch (JL_JPTYPE(Pjp)) {
 	case cJL_JPNULL1: case cJL_JPNULL2: case cJL_JPNULL3:
 		return 0;
 	case cJL_JPBRANCH_L2:
 		b = JL_GETINDEX(beg, 3);
 		e = JL_GETINDEX(end, 3);
-		if (Pjp->jp_DcdP0[0] < b || Pjp->jp_DcdP0[0] > e)
-			return 0;
-		if (Pjp->jp_DcdP0[0] > b)
-			beg = 0;
-		if (Pjp->jp_DcdP0[0] < e)
-			end = ~0;
+		CHECK_RANG(Pjp->jp_DcdP0[0]);
+
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_L;
@@ -74,17 +78,13 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			if (b == e)
 				return JudyWalkRang(Pjbl->jbl_jp + i, Index, beg, end, fn, ctx);
 
-			ret = JudyWalkRang(Pjbl->jbl_jp + i, Index, beg, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjbl->jbl_jp + i, Index, beg, ~0);
 			i++;
 		}
 
 		for (; i < Pjbl->jbl_NumJPs && Pjbl->jbl_Expanse[i] < e; i++) {
 			Index = JL_SETINDEX(prefix, state, Pjbl->jbl_Expanse[i]);
-			ret = JudyWalkRang(Pjbl->jbl_jp + i, Index, 0, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjbl->jbl_jp + i, Index, 0, ~0);
 		}
 
 		if (i < Pjbl->jbl_NumJPs && Pjbl->jbl_Expanse[i] == e) {
@@ -97,12 +97,8 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	case cJL_JPBRANCH_B2:
 		b = JL_GETINDEX(beg, 3);
 		e = JL_GETINDEX(end, 3);
-		if (Pjp->jp_DcdP0[0] < b || Pjp->jp_DcdP0[0] > e)
-			return 0;
-		if (Pjp->jp_DcdP0[0] > b)
-			beg = 0;
-		if (Pjp->jp_DcdP0[0] < e)
-			end = ~0;
+		CHECK_RANG(Pjp->jp_DcdP0[0]);
+
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_B;
@@ -132,9 +128,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			Pjp3 = Pjp2 + judyCountBits(BitMap & (BitMask - 1));
 			if (b == e)
 				return JudyWalkRang(Pjp3, Index, beg, end, fn, ctx);
-			ret = JudyWalkRang(Pjp3, Index, beg, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjp3, Index, beg, ~0);
 		}
 
 		for (v = b + 1; v < e; v++) {
@@ -148,9 +142,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			Pjp3 = Pjp2 + judyCountBits(BitMap & (BitMask - 1));
 
 			Index = JL_SETINDEX(prefix, state, v);
-			ret = JudyWalkRang(Pjp3, Index, 0, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjp3, Index, 0, ~0);
 		}
 
 		i = e / cJL_BITSPERSUBEXPB;
@@ -175,12 +167,8 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	case cJL_JPBRANCH_U2:
 		b = JL_GETINDEX(beg, 3);
 		e = JL_GETINDEX(end, 3);
-		if (Pjp->jp_DcdP0[0] < b || Pjp->jp_DcdP0[0] > e)
-			return 0;
-		if (Pjp->jp_DcdP0[0] > b)
-			beg = 0;
-		if (Pjp->jp_DcdP0[0] < e)
-			end = ~0;
+		CHECK_RANG(Pjp->jp_DcdP0[0]);
+
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_U;
@@ -195,9 +183,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			Index = JL_SETINDEX(prefix, state, b);
 			if (b == e)
 				return JudyWalkRang(Pjbu->jbu_jp + b, Index, beg, end, fn, ctx);
-			ret = JudyWalkRang(Pjbu->jbu_jp + b, Index, beg, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjbu->jbu_jp + b, Index, beg, ~0);
 		}
 
 		for (i = b + 1; i < e; i++) {
@@ -206,9 +192,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 				continue;
 
 			Index = JL_SETINDEX(prefix, state, i);
-			ret = JudyWalkRang(Pjbu->jbu_jp + i, Index, 0, ~0, fn, ctx);
-			if (ret != 0)
-				return ret;
+			J_WR(Pjbu->jbu_jp + i, Index, 0, ~0);
 		}
 
 		if (!(Pjbu->jbu_jp[e].jp_Type >= cJL_JPNULL1 && 
@@ -228,12 +212,8 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		v = (Pjp->jp_DcdP0[0]<<8) | Pjp->jp_DcdP0[1];
 		b = (beg >> 8) & 0xffff;
 		e = (end >> 8) & 0xffff;
-		if (v < b || v > e)
-			return 0;
-		if (v > b)
-			beg = 0;
-		if (v < e)
-			end = ~0;
+		CHECK_RANG(v);
+
 		b = beg & 0xff;
 		e = end & 0xff;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
@@ -244,9 +224,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			if (Pjll[i] > e)
 				break;
 			Index = (prefix & 0xffffff00) | Pjll[i];
-			ret = fn(ctx, Index, (void **)(Pjv + i));
-			if (ret != 0)
-				return ret;
+			J_FN(Index, (void **)(Pjv + i));
 		}
 
 		return 0;
@@ -258,12 +236,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		Pjv_t Pjv = JL_LEAF2VALUEAREA(Pjll, Pop1);
 		b = JL_GETINDEX(beg, 3);
 		e = JL_GETINDEX(end, 3);
-		if (Pjp->jp_DcdP0[0] < b || Pjp->jp_DcdP0[0] > e)
-			return 0;
-		if (Pjp->jp_DcdP0[0] > b)
-			beg = 0;
-		if (Pjp->jp_DcdP0[0] < e)
-			end = ~0;
+		CHECK_RANG(Pjp->jp_DcdP0[0]);
 
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		b = beg & 0xffff;
@@ -274,9 +247,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			if (Pjll[i] > e)
 				break;
 			Index = (prefix & 0xffff0000) | Pjll[i];
-			ret = fn(ctx, Index, (void **)(Pjv + i));
-			if (ret != 0)
-				return ret;
+			J_FN(Index, (void **)(Pjv + i));
 		}
 		return 0;
 	}
@@ -295,9 +266,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			if (idx > e)
 				break;
 			Index = (prefix & 0xff000000) | idx;
-			ret = fn(ctx, Index | idx, (void **)(Pjv + i));
-			if (ret != 0)
-				return ret;
+			J_FN(Index | idx, (void **)(Pjv + i));
 		}
 		return 0;
 	}
@@ -309,12 +278,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		v = (Pjp->jp_DcdP0[0] << 8) | Pjp->jp_DcdP0[1];
 		b = (beg >> 8) & 0xffff;
 		e = (end >> 8) & 0xffff;
-		if (v < b || v > e)
-			return 0;
-		if (v > b)
-			beg = 0;
-		if (v < e)
-			end = ~0;
+		CHECK_RANG(v);
 
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		prefix = JL_SETINDEX(prefix, 2, Pjp->jp_DcdP0[1]);
@@ -335,9 +299,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			Pjv2 = Pjv + judyCountBits(BitMap & (BitMask - 1));
 
 			Index = (prefix & 0xffffff00) | v;
-			ret = fn(ctx, Index, (void **)Pjv2);
-			if (ret != 0)
-				return ret;
+			J_FN(Index, (void **)Pjv2);
 		}
 
 		return 0;
@@ -352,45 +314,29 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		Index = (prefix & 0xff000000) | v;
 		return fn(ctx, Index, (void **)(&Pjp->jp_Addr));
 	case cJL_JPIMMED_1_03:
+#define WALK_JPIMMED(pos) do {				\
+	v = ((uint8_t *)Pjp->jp_LIndex)[pos];		\
+	if (v >= b && v <= e) {				\
+		Index = prefix | v;			\
+		J_FN(Index, (void **)(P_JV(Pjp->jp_Addr) + pos)); \
+	}						\
+} while (0)
 		b = beg & 0xff;
 		e = end & 0xff;
 		prefix &= 0xffffff00;
 
-		v = ((uint8_t *)Pjp->jp_LIndex)[0];
-		if (v >= b && v <= e) {
-			Index = prefix | v;
-			if ((ret = fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 0))) != 0)
-				return ret;
-		}
-		v = ((uint8_t *)Pjp->jp_LIndex)[1];
-		if (v >= b && v <= e) {
-			Index = prefix | v;
-			if ((ret = fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 1))) != 0)
-				return ret;
-		}
-		
-		v = ((uint8_t *)Pjp->jp_LIndex)[2];
-		if (v < b || v > e)
-			return 0;
-		Index = prefix | v;
-		return fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 2));
+		WALK_JPIMMED(0);
+		WALK_JPIMMED(1);
+		WALK_JPIMMED(2);
+		return 0;
 	case cJL_JPIMMED_1_02:
 		b = beg & 0xff;
 		e = end & 0xff;
 
 		prefix &= 0xffffff00;
-		v = ((uint8_t *)Pjp->jp_LIndex)[0];
-		if (v >= b && v <= e) {
-			Index = prefix | v; 
-			if ((ret = fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 0))) != 0)
-				return ret;
-		}
-		
-		v = ((uint8_t *)Pjp->jp_LIndex)[1];
-		if (v < b || v > e)
-			return 0;
-		Index = prefix | ((uint8_t *)Pjp->jp_LIndex)[1];
-		return fn(ctx, Index, (void **)(P_JV(Pjp->jp_Addr) + 1));
+		WALK_JPIMMED(0);
+		WALK_JPIMMED(1);
+		return 0;
 	default:
 		assert("Impossible!!!" && 0);
 	}
@@ -424,4 +370,9 @@ int JudyLWalkRang(void *PArray, uint32_t beg, uint32_t end, walk_fn_t fn, void *
 
 	Pjpm = P_JPM(PArray);
 	return JudyWalkRang(&Pjpm->jpm_JP, 0, beg, end, fn, ctx);
+}
+
+int JudyLWalk2(void *PArray, walk_fn_t fn, void *ctx)
+{
+	return JudyLWalkRang(PArray, 0, ~0, fn, ctx);
 }

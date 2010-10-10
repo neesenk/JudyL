@@ -1,4 +1,4 @@
-CFLAGS = -I. -fPIC -Wall -O2 -pipe -g
+CFLAGS = -I. -fPIC -Wall -O0 -pipe -g
 
 OBJS := JudyLCascade.o 		\
 	JudyLTables.o 		\
@@ -20,7 +20,7 @@ OBJS := JudyLCascade.o 		\
 	JudyHtb.o		\
 	JudyHS.o
 
-HEADFILE := Judy.h JudyL.h JudyPrivate.h JudyPrivateBranch.h
+HEADFILE := Judy.h JudyL.h 
 
 all: libjudy.so test
 
