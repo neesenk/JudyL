@@ -308,6 +308,36 @@ void ccount(void *root, int num)
 	printf("count count %lf\n", count);
 }
 
+void next_empty(void *root, int num)
+{
+	int i = 0;
+	double count = 0;
+	uint32_t index = 0;
+	start_counter();
+	for (i=0; i < N_; i++) {
+		int ret = 0;
+		index = buff[i].nums;
+		ret = JudyLNextEmpty(root, &index);
+	}
+	count = get_counter();
+	printf("next empty count %lf\n", count);
+}
+
+void prev_empty(void *root, int num)
+{
+	int i = 0;
+	double count = 0;
+	uint32_t index = 0;
+	start_counter();
+	for (i=0; i < N_; i++) {
+		int ret = 0;
+		index = buff[i].nums;
+		ret = JudyLPrevEmpty(root, &index);
+	}
+	count = get_counter();
+	printf("prev empty count %lf\n", count);
+}
+
 struct walk_ctx {
 	int nums;
 	int calls;
@@ -397,15 +427,17 @@ void do_test(int m_dup)
 		assert(num == N_);
 	printf("memory count %u\n", JudyLMemUsed(root));
 	search(root);
-#if 0
+#if 1
 	walk(root, num);
 	prev(root, num);
 	next(root, num);
+	prev_empty(root, num);
+	next_empty(root, num);
 	ccount(root, num);
 	bycount(root);
 	delete(&root);
 #endif
-	JudyLFreeArray(&root);
+	// JudyLFreeArray(&root);
 }
 
 void insert_array(void)

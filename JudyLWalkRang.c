@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "JudyL.h"
 
 #define JL_SETINDEX(INDEX, State, V)			\
@@ -62,8 +61,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	case cJL_JPBRANCH_L:
 		state = cJL_ROOTSTATE;
 		goto JPBRANCH_L;
-	JPBRANCH_L:
-	{
+	JPBRANCH_L: {
 		Pjbl_t Pjbl;
 		Pjbl = P_JBL(Pjp->jp_Addr);
 		b = JL_GETINDEX(beg, state);
@@ -108,8 +106,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	case cJL_JPBRANCH_B:
 		state = cJL_ROOTSTATE;
 		goto JPBRANCH_B;
-	JPBRANCH_B:
-	{
+	JPBRANCH_B: {
 		Pjbb_t Pjbb;
 		BITMAPB_t BitMap, BitMask;
 		b = JL_GETINDEX(beg, state);
@@ -172,8 +169,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		state = 2;
 		prefix = JL_SETINDEX(prefix, 3, Pjp->jp_DcdP0[0]);
 		goto JPBRANCH_U;
-	JPBRANCH_U:
-	{
+	JPBRANCH_U: {
 		Pjbu_t Pjbu = P_JBU(Pjp->jp_Addr);
 		b = JL_GETINDEX(beg, state);
 		e = JL_GETINDEX(end, state);
@@ -203,8 +199,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 
 		return 0;
 	}
-	case cJL_JPLEAF1:
-	{
+	case cJL_JPLEAF1: {
 		Word_t Pop1 = JL_JPLEAF_POP0(Pjp) + 1;
 		uint8_t *Pjll = (uint8_t *)Pjp->jp_Addr;
 		Pjv_t Pjv = JL_LEAF1VALUEAREA(Pjll, Pop1);
@@ -229,8 +224,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 
 		return 0;
 	}
-	case cJL_JPLEAF2:
-	{
+	case cJL_JPLEAF2: {
 		Word_t Pop1 = JL_JPLEAF_POP0(Pjp) + 1;
 		uint16_t *Pjll = (uint16_t *)Pjp->jp_Addr;
 		Pjv_t Pjv = JL_LEAF2VALUEAREA(Pjll, Pop1);
@@ -251,8 +245,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		}
 		return 0;
 	}
-	case cJL_JPLEAF3:
-	{
+	case cJL_JPLEAF3: {
 		Word_t Pop1 = JL_JPLEAF_POP0(Pjp) + 1;
 		uint8_t *Pjll = P_JLL(Pjp->jp_Addr);
 		Pjv_t Pjv = JL_LEAF3VALUEAREA(Pjll, Pop1);
@@ -270,8 +263,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		}
 		return 0;
 	}
-	case cJL_JPLEAF_B1:
-	{
+	case cJL_JPLEAF_B1: {
 		BITMAPB_t BitMap, BitMask;
 		Pjlb_t Pjlb = P_JLB(Pjp->jp_Addr);
 		Pjv_t Pjv, Pjv2;
