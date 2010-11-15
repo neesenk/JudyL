@@ -1,0 +1,446 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+
+
+<script>function a(d){this.t={};this.tick=function(e,f,b){b=b?b:(new Date).getTime();this.t[e]=[b,f]};this.tick("start",null,d)}var c=new a;window.jstiming={Timer:a,load:c};try{var g=null;if(window.chrome&&window.chrome.csi)g=Math.floor(window.chrome.csi().pageT);if(g==null)if(window.gtbExternal)g=window.gtbExternal.pageT();if(g==null)if(window.external)g=window.external.pageT;if(g)window.jstiming.pt=g}catch(h){};
+</script>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<!-- base -->
+<title>Judy array</title>
+<style type="text/css">
+/* default css */
+table {
+font-size: 1em;
+line-height: inherit;
+border-collapse: collapse;
+}
+tr {
+text-align: left;
+}
+div, address, ol, ul, li, option, select {
+margin-top: 0px;
+margin-bottom: 0px;
+}
+p {
+margin: 0px;
+}
+pre {
+font-family: Courier New;
+white-space: pre-wrap;
+margin:0;
+}
+body {
+margin: 6px;
+padding: 0px;
+font-family: Verdana, sans-serif;
+font-size: 10pt;
+background-color: #ffffff;
+color: #000;
+}
+img {
+-moz-force-broken-image-icon: 1;
+}
+@media screen {
+html.pageview {
+background-color: #f3f3f3 !important;
+overflow-x: hidden;
+overflow-y: scroll;
+}
+body {
+min-height: 1100px;
+counter-reset: __goog_page__;
+}
+* html body {
+height: 1100px;
+}
+/* Prevent repaint errors when scrolling in Safari. This "Star-7" css hack
+targets Safari 3.1, but not WebKit nightlies and presumably Safari 4.
+That's OK because this bug is fixed in WebKit nightlies/Safari 4 :-). */
+html*#wys_frame::before {
+content: '\A0';
+position: fixed;
+overflow: hidden;
+width: 0;
+height: 0;
+top: 0;
+left: 0;
+}
+.pageview body {
+border-top: 1px solid #ccc;
+border-left: 1px solid #ccc;
+border-right: 2px solid #bbb;
+border-bottom: 2px solid #bbb;
+width: 648px !important;
+margin: 15px auto 25px;
+padding: 40px 50px;
+}
+/* IE6 */
+* html {
+overflow-y: scroll;
+}
+* html.pageview body {
+overflow-x: auto;
+}
+.writely-callout-data {
+display: none;
+}
+.writely-footnote-marker {
+background-image: url('images/footnote_doc_icon.gif');
+background-color: transparent;
+background-repeat: no-repeat;
+width: 7px;
+overflow: hidden;
+height: 16px;
+vertical-align: top;
+-moz-user-select: none;
+}
+.editor .writely-footnote-marker {
+cursor: move;
+}
+.writely-footnote-marker-highlight {
+background-position: -15px 0;
+-moz-user-select: text;
+}
+.writely-footnote-hide-selection ::-moz-selection, .writely-footnote-hide-selection::-moz-selection {
+background: transparent;
+}
+.writely-footnote-hide-selection ::selection, .writely-footnote-hide-selection::selection {
+background: transparent;
+}
+.writely-footnote-hide-selection {
+cursor: move;
+}
+/* Comments */
+.writely-comment-yellow {
+background-color: #ffffd7;
+}
+.writely-comment-orange {
+background-color: #ffe3c0;
+}
+.writely-comment-pink {
+background-color: #ffd7ff;
+}
+.writely-comment-green {
+background-color: #d7ffd7;
+}
+.writely-comment-blue {
+background-color: #d7ffff;
+}
+.writely-comment-purple {
+background-color: #eed7ff;
+}
+.br_fix span+br:not(:-moz-last-node) {
+position:relative;
+left: -1ex
+}
+#cb-p-tgt {
+font-size: 8pt;
+padding: .4em;
+background-color: #ddd;
+color: #333;
+}
+#cb-p-tgt-can {
+text-decoration: underline;
+color: #36c;
+font-weight: bold;
+margin-left: 2em;
+}
+#cb-p-tgt .spin {
+width: 16px;
+height: 16px;
+background: url(//ssl.gstatic.com/docs/clipboard/spin_16o.gif) no-repeat;
+}
+}
+h6 { font-size: 8pt }
+h5 { font-size: 8pt }
+h4 { font-size: 10pt }
+h3 { font-size: 12pt }
+h2 { font-size: 14pt }
+h1 { font-size: 18pt }
+blockquote {padding: 10px; border: 1px #DDD dashed }
+.webkit-indent-blockquote { border: none; }
+a img {border: 0}
+.pb {
+border-width: 0;
+page-break-after: always;
+/* We don't want this to be resizeable, so enforce a width and height
+using !important */
+height: 1px !important;
+width: 100% !important;
+}
+.editor .pb {
+border-top: 1px dashed #C0C0C0;
+border-bottom: 1px dashed #C0C0C0;
+}
+div.google_header, div.google_footer {
+position: relative;
+margin-top: 1em;
+margin-bottom: 1em;
+}
+/* Table of contents */
+.editor div.writely-toc {
+background-color: #f3f3f3;
+border: 1px solid #ccc;
+}
+.writely-toc > ol {
+padding-left: 3em;
+font-weight: bold;
+}
+ol.writely-toc-subheading {
+padding-left: 1em;
+font-weight: normal;
+}
+/* IE6 only */
+* html writely-toc ol {
+list-style-position: inside;
+}
+.writely-toc-none {
+list-style-type: none;
+}
+.writely-toc-decimal {
+list-style-type: decimal;
+}
+.writely-toc-upper-alpha {
+list-style-type: upper-alpha;
+}
+.writely-toc-lower-alpha {
+list-style-type: lower-alpha;
+}
+.writely-toc-upper-roman {
+list-style-type: upper-roman;
+}
+.writely-toc-lower-roman {
+list-style-type: lower-roman;
+}
+.writely-toc-disc {
+list-style-type: disc;
+}
+/* Ordered lists converted to numbered lists can preserve ordered types, and
+vice versa. This is confusing, so disallow it */
+ul[type="i"], ul[type="I"], ul[type="1"], ul[type="a"], ul[type="A"] {
+list-style-type: disc;
+}
+ol[type="disc"], ol[type="circle"], ol[type="square"] {
+list-style-type: decimal;
+}
+/* end default css */
+/* custom css */
+/* end custom css */
+/* ui edited css */
+body {
+font-family: Verdana;
+font-size: 10.0pt;
+line-height: normal;
+background-color: #ffffff;
+}
+/* end ui edited css */
+/* editor CSS */
+.editor a:visited {color: #551A8B}
+.editor table.zeroBorder {border: 1px dotted gray}
+.editor table.zeroBorder td {border: 1px dotted gray}
+.editor table.zeroBorder th {border: 1px dotted gray}
+.editor div.google_header, .editor div.google_footer {
+border: 2px #DDDDDD dashed;
+position: static;
+width: 100%;
+min-height: 2em;
+}
+.editor .misspell {background-color: yellow}
+.editor .writely-comment {
+font-size: 9pt;
+line-height: 1.4;
+padding: 1px;
+border: 1px dashed #C0C0C0
+}
+/* end editor CSS */
+</style>
+<style>
+body {
+margin: 0px;
+}
+#doc-contents {
+margin: 6px;
+}
+#google-view-footer {
+clear: both;
+border-top: thin solid;
+padding-top: 0.3em;
+padding-bottom: 0.3em;
+}
+a.google-small-link:link, a.google-small-link:visited {
+color:#112ABB;
+font-family:Arial,Sans-serif;
+font-size:11px !important;
+}
+body, p, div, td {
+direction: inherit;
+}
+@media print {
+#google-view-footer {
+display: none;
+}
+}
+</style>
+<script>
+function viewOnLoad() {
+if (document.location.href.indexOf('spi=1') != -1) {
+if (navigator.userAgent.toLowerCase().indexOf('msie') != -1) {
+window.print();
+} else {
+window.setTimeout(window.print, 10);
+}
+}
+if (document.location.href.indexOf('hgd=1') != -1) {
+var footer = document.getElementById("google-view-footer");
+if (footer) {
+footer.style.display = 'none';
+}
+}
+}
+</script>
+</head><body onload="window.jstiming.load.tick('ol'); window.jstiming.report(window.jstiming.load, null, document.location.protocol == 'https:' ? 'https://gg.google.com/csi' : null);">
+<div id="doc-contents">
+<p></p><h1 class="ph-title" style="text-align: center;"><font size="5">General purpose dynamic array - Judy</font></h1><br><p>Judy 本质上是一种稀疏数组，类似 Tire 数组和 Hash 表（类似字典）。<br> 在官方文档中，作者天马行空聊了一下，很随意, 10 分钟文档，相当于快速入门:&nbsp; <a href="http://judy.sourceforge.net/doc/10minutes.htm">http://judy.sourceforge.net/doc/10minutes.htm</a><br><br> Judy 树一般比其它的数据结构，比如 AVL 树，Btree，跳表等，使用更少的内存，具有更快的速度。首先是几个基本常用的概念：<br></p><ul><li> Expanse：可能的 key 的范围，比如 256...511。</li><li>Population：key 的数目，比如 260, 300, 499, 500 = 4。<br></li></ul><ul><li>Density：是密度，表示一组 key 的稀疏程度。定义为：density = population / expanse。如果密度为 1 说明所有的 key 都是存在于你所指定的范围之中的。</li></ul><ul><li> Node 和 Branch：对于树的节点的称呼，基本可以通用。</li></ul><ul><li> Key 和 index：也是基本通用的，代表 Hash 表的下标。</li></ul><p>一
+个很重要的概念是 CPU cache-line fill。它是指当一个 word 不在 cache 中的时候，需要从 RAM 
+中读取所要花费的额外时间。在现代计算机中，绝大多数情况下这个值是 50 到 2000 个机器指令时间，因此如果所需的指令数少于 50 
+时应该尽量避免 cache-line fill。</p><p><br></p><p>Judy 为什么要快？作者说：</p><p></p><ul><li>Judy 很少因为简单而牺牲速度和空间性能；</li><li>尽量避免 cache-line fill。Btree，binary tree，跳表等会导致更多的 cache-line fill。</li><li>Judy 会按照 key 的不同字节来对范围进行子树的划分，这样可以压缩节省空间（cascade）。</li><li>一个简单的数字树（trie）的最大缺点在于内容利用率很低，特别是在每个分支的扇出数目增大时。</li><li>Judy 相对其它同类数据结构的内存使用更加有效，除了密度很高的线性数组以外。<br></li></ul><p><br></p><p>Judy 就是一个 256 路数字数组。为什么是 256 路？主要原因是 1 个字节是 8 位。</p><p>现代计算机的 CPU cache 已经改变了写程序的方式。为了利用 cache，你不得不平衡很多东西。在 Judy 中，每次查找过程中一个 cache 导致的 cache-line fill 次数减少 1 次或者 3 次是可能的。</p><p>在
+ key 范围达到 2^32 时，对于 256 路数字数，至多需要 4 次 cache-line fill。Judy 的表现比这要好得多。The
+ reason is (in part) due to the fact "density" of the keys is seldom the
+ lowest possible number in a "majority" of the sub-expanses. It takes 
+high density combined with high population to increase the depth of a 
+Judy tree. </p><p>对于不同的 key 数目和密度，Judy 能自适应自动调整。为此 Judy 定义了 25 种主要的数据结构。对于 64 位，则有 85 种数据结构。<br>
+ 从内存消耗的角度来说，一个 Judy 树共享一个 key 中相同的字节。这是使用 trie 
+树的自然结果。要按照问题规模让树平衡是很不爽的事情。在 Judy 中，指针遍历时逐层“解开” key 的另 8 
+位，指向更小的子范围。在单纯的数字树当中，keys 并不是存在于树中，它们是由位置推导出来的。</p><p>当 JudyL 树带有一个 key 
+时，实际上时一个根指针指向一个 2 words 的对象，它包括 key 和关联的值。一个 JudyL 树带有 2 个 key 时是一个 4 
+words 的对象， 2 个是值，另 2 个是排序好的 key。一个带有 3 个 key 的树，是一个 8 words 
+的对象，带有一个用于计数的 word 加上 3 个值和 3 个排序好的 key。<br> 这种状况将持续直到问题规模达到 32 个 key。此时的树结构将会是一个压缩的 256 路分支树，它解码了每个 key 的第一个字节。在这个顶级分支下的所有对象包含削掉每个 key 第一个字节后缩短了的 keys。</p><p>一共有 3 种类型的分支。其中 2 个是在遍历时需要 1 次 cache-line fill（应该是线性分支和未压缩分支），另外一个是 2 次 cache-line fill（位图分支）。</p><p>In
+ every path down the tree and at all populations, a maximum of one of 
+the 2-cache-line fill branches is used. This means it is sometimes 
+possible to have 1 additional (the branch design often subtracts 1) 
+cache-line fill than you would expect from a pure 256-ary branch 
+traversal in an otherwise complete Judy tree.</p><p><br></p><p>在 Judy 的官方文档中，作者随意漫谈式论述 Judy 的结构。<br> 数字树有什么优点和缺点？<br>
+ 优点：数字树使得对随机大的索引的访问加快。如果在一个给定的数字（范围）下面没有索引（问题规模为 0 
+），那么也不会有内存的分配。这些数字对应的指针也就是空指针。进一步。存储在一个数字树当中的索引自然也是以自左向右的顺序排列，任何索引的邻居也就可
+ 以快速定位，即使索引集很稀疏。<br> 缺点：如果数字树越宽，每个数字所能解开的位也就越多，那么对于空的值可能有较多的内存浪费。如果每个分支越窄，将会有更多的间接访问（潜在的 cpu-cache fill）产生。<br><br> 然后作者一番论述，讲相对性，讲优化的度。讲到了 Hash 的缺点：<br>
+ 计算 Hash 值需要 CPU 时间。一个设计良好的 Hash 表具有较短的，长度均等的冲突链条。为了定位到冲突链的第一个元素，需要 1 次 
+CPU cache fill，随后又需要 1 次 CPU cache fill 来比对冲突链上的元素是否就是你想要的。当 Hash 
+把元素存放以后排序将会是一个大问题。</p><p>关于数字树：<br> 当索引集合很稀疏的时候，将树变窄加深有助于节省内存，因为这样可以减掉空的区段（expanse）。树的深度影响了访问特定索引的间接次数。数字树按照 key 的范围来分解问题规模，而其它一些方法，比如 Btree，则是按照问题规模来分解。</p><p>Judy
+ 尝试使用较宽的浅的数字树来获得时间效率，但是消耗不太多的内存，它是通过压缩不用的分支和叶节点来达到的。既然是树，就一定有分支和叶子节点。一共有
+ 3 种不同的分支类型（线性分支、位图分支、未压缩分支）。不同的分支具有不同的存储格式，每层在所承载的问题规模（population）和范围 
+（Expanse）不同时是可以互相转化的。转化细节在文后描述。</p><p>Judy 本质上是一棵树，在 32 位系统上，被分为 4 层。对于插入的 key，每层将解开（decode） key 的至少 1 个字节。在讨论中，我们只讨论 JudyL。关于所谓的压缩技巧，作者文档没说，感觉应该是 Cascade 类似的东西。</p><br><p>Judy 自上而下，可以分为如下一些结构：<br></p><ul><li><b>Judy Array Pointer</b> —— Judy 的根指针。</li></ul><ul><li><b>Root Level Leaves</b> —— 对于问题规模较小时的根级别叶子。</li></ul><ul><li><b>Judy Population/Memory Node（JPM）</b>—— 大数组的顶级节点，当元素逐步增加时，根指针下的元素将由 Root Level Leaves 演变为 JPM。JPM 下面才是真正的数组。</li></ul><ul><li><b>Judy Pointer（JP）</b> —— 这是 Judy 中很神奇的一个结构。它就是 Judy 树的中间节点，它需要负责的内容包括：这是一个什么类型的分支节点、解开了那些 key，还有多少 key 需要被解开。一个 JP 指向一个下层的 JP 或者叶节点。</li></ul><ul><li><b>Leaves </b>—— 叶子节点，对于 key 和问题规模的不同而有所区别。</li></ul><p><br> 预备知识：<br> Cache line size：假定所谓的 CPU cache line 总是 16 个字（64 字节）。<br> Tree level：树的层次。32 位系统，根的级别为 4。<br> 一个节点的级别等于在那一级还没有被解开的 key 的字节数。同样，一个 JP 中问题规模字段所占的字节大小等于出现这个字段的分支的级数。<br>
+ Similarly, the size of the Population field (in bytes) is equal to the 
+level at which the field appears in a branch in the tree.<br> Judy1 和 JudyL 的区别：前者也是一个数组，只是值不是 0 就是 1，而后者的值是一个 4 字节的值。</p><p><b>Judy Array Pointer</b><br>
+ 这是 Judy 数组的根。就是一个普通的指针（JudyLIns 中的 
+PPArray）。它要么是个空指针，要么所指向的地址首先是个描述问题规模的字段（population）。如果没有超过 
+cJU_LEAFW_MAXPOP1（31），那将很好，则是一种 Root Level Leaves。它的存储格式见文档的 4.3 
+节描述。首先将是一个 P 字段（4 字节）表示问题规模，其实就是 key 的数量，然后才是 index（按大小排列），随后是 index 对应的
+ value。要注意的是实际的 value 可能并不是按照 4.3 节的图中那样紧邻 index 存放的。假定数组的起始地址是 Pjlw ，则 
+index 的起始地址在 Pjlw + 1，而值的起始地址 Pjv 和 index 的数量 pop1 有关，它们之间的对应关系是 Pjv = 
+JL_LEAFWVALUEAREA(Pjlw, pop1)；随着 index 数量的增加，并不会每次都分配空间，当 index 个数为 Pop1
+ 时，将分配大小为 JU_LEAFWPOPTOWORDS(Pop1) 个 word 的空间。决定是否要分配空间的标准是宏 
+JL_LEAFWGROWINPLACE 。字面意思是<b>就地增长</b>：只要 pop1 下的 
+j__L_LeafWPopToWords[pop1] 和 j__L_LeafWPopToWords[pop1+1] 
+对应的值相等即不需要再分配。说到底就是这么回事。当新分配空间时，必须将原有的值搬移（JU_INSERTCOPY），包括对应的 index 和 
+value。</p><p>以上的讨论实际上是对 Root Level Leaves 的情况，由于 Judy 
+会根据索引实际范围实行专门不同的存储。只要是叶节点，它们的存储都是类似的，一些和上面很类似的宏和变量 
+（j__L_Leaf3Offset，j__L_Leaf2Offset，j__L_Leaf1Offset 等描述了在<b>叶子节点</b>索 引实际为 3 字节， 2 字节和 1 字节的情况下类似的行为） 。</p><p><b>Judy Population/Memory Node (JPM)</b><br> 当 Judy 中元素个数达到一定数量时，JPM 将开始产生。它将被认为是 Judy 下面数组的头。也提供了对整个 Judy 进行方便搜索和统计的概要信息。在 JPM 下面是几种分支。<br> 几种数据类型，见 JudyPrivate.h：<br> typedef PWord_t Pjlw_t; // pointer to root-level leaf (whole-word indexes).<br> typedef unsigned long Word_t, * PWord_t;<br> typedef void * Pvoid_t;<br> typedef void ** PPvoid_t;<br> typedef PWord_t Pjv_t; // pointer to JudyL value area.<br> typedef Pvoid_t Pjll_t; // pointer to lower-level linear leaf.<br> 首先是线性分支：<br> typedef struct J__UDY_BRANCH_LINEAR<br> {<br></p><div style="margin-left: 40px;"> uint8_t jbl_NumJPs; // num of JPs (Pjp_t), 1..N.<br> uint8_t jbl_Expanse[cJU_BRANCHLMAXJPS]; // 1..7 MSbs of pop exps.<br> jp_t jbl_jp [cJU_BRANCHLMAXJPS]; // JPs for populated exps.<br></div><p> } jbl_t, * Pjbl_t;<br> 分支定义在 JudyPrivateBranch.h。<br> 线性分支最多只能有 cJU_BRANCHLMAXJPS （7）个。<br> 位图分支：<br> typedef struct J__UDY_BRANCH_BITMAP_SUBEXPANSE<br> {<br></p><div style="margin-left: 40px;"> BITMAPB_t jbbs_Bitmap;<br> Pjp_t jbbs_Pjp;<br></div><p> } jbbs_t;</p><p>typedef struct J__UDY_BRANCH_BITMAP<br> {<br> jbbs_t jbb_jbbs [cJU_NUMSUBEXPB];<br> } jbb_t, * Pjbb_t;<br>
+ 其中 BITMAPL_t 好像是 4 个字节，而 cJU_NUMSUBEXPB = 8，当然有其他的可以选择。 这和图 16b 
+中描述的是一致的。但是位图分支中可以容纳的 JP 数量也是有限的，不能超过 cJU_BRANCHBMAXJPS（184）。为什么是这个值？<br> 最后一种是未压缩分支：<br> typedef struct J__UDY_BRANCH_UNCOMPRESSED<br> {<br></p><div style="margin-left: 40px;"> jp_t jbu_jp [cJU_BRANCHUNUMJPS]; // JPs for populated exp.<br></div><p> } jbu_t, * Pjbu_t;<br> 一个简单的 JP 数组，最大 cJU_BRANCHUNUMJPS（256 ）个。<br> 最大的技巧在于不同的分支之间的转化规则？在什么情况下该使用什么类型的分支？</p><br><p>Judy Pointer（JP）<br>
+ 前面谈到的分支结构中都提到了 JP。每个 JP 占用 8 个字节。因此数字树的分支总是 8 字节的对象数组。其中有 1 
+个字节是类型（type）字段。参考 JudyL.h 中的 jpL_Type_t 类型。 decode 字段和 population 
+字段是共享的，它们共享 3 个字节，它们之间不同的组合造就了繁多的 JP 类型。细节稍后介绍。其中有一种类型是立即索引（immediate 
+index），对于这种 JP，<b>索引值直接存在于 JP 中</b>，而不像其他的 JP 分支那样，存放的都是 subexpanse。JP 的定义存放在 JudyPrivateBranch.h 中。<br> 下面的程序可以顺着 Judy 数组的根打印出整棵树结构，注意观察 JP 的类型。<br> gcc -o jli jli.c bianli.c -I ../src/JudyL/ -DJUDYL -I ../src/JudyCommon/ -L /usr/local/lib -lJudy</p><div class="wp_syntax"><div class="code"><font face="Courier New"><font color="#339933">#include "JudyL.h"</font><br><font color="#339933">#include "JudyPrivate1L.h"</font><br>&nbsp;<br><font color="#993333">void</font> bianli<font color="#009900">(</font>Pjp_t Pjp<font color="#009900">)</font><br><font color="#009900">{</font><br></font><div style="margin-left: 40px;"><font face="Courier New"><font color="#993333">int</font> i<font color="#339933">,</font> mask<font color="#339933">;</font></font><br><font face="Courier New"> Pjpm_t Pjpm<font color="#339933">;</font> <font color="#666666"><i>// for global accounting.</i></font></font><br><font face="Courier New"> uint8_t Digit<font color="#339933">;</font> <font color="#666666"><i>// byte just decoded from Index.</i></font></font><br><font face="Courier New"> Word_t Pop1<font color="#339933">;</font> <font color="#666666"><i>// leaf population (number of indexes).</i></font></font><br><font face="Courier New"> Pjll_t Pjll<font color="#339933">;</font> <font color="#666666"><i>// pointer to LeafL.</i></font></font><br><font face="Courier New"><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"type = %d addr = %p<font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font> JU_JPTYPE<font color="#009900">(</font>Pjp<font color="#009900">)</font><font color="#339933">,</font> Pjp<font color="#009900">)</font><font color="#339933">;</font></font><br><font face="Courier New"><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"Pjp = %x<font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font>JU_JPDCDPOP0<font color="#009900">(</font>Pjp<font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font></font><br>&nbsp;<br><font face="Courier New"><font color="#b1b100">switch</font> <font color="#009900">(</font>JU_JPTYPE<font color="#009900">(</font>Pjp<font color="#009900">)</font><font color="#009900">)</font></font><font face="Courier New"><font color="#009900">{</font></font><br>&nbsp;<br><font face="Courier New"><font color="#b1b100">case</font> <font color="#0000dd">0</font><font color="#339933">:</font> <font color="#b1b100">goto</font> ReturnCorrupt<font color="#339933">;</font> <font color="#666666"><i>// save a little code.</i></font></font><br><font face="Courier New"><font color="#b1b100">case</font> cJU_JPNULL1<font color="#339933">:</font></font><br><font face="Courier New"><font color="#b1b100">case</font> cJU_JPNULL2<font color="#339933">:</font></font><br><font face="Courier New"><font color="#b1b100">case</font> cJU_JPNULL3<font color="#339933">:</font></font><br></div><div style="margin-left: 40px;"><div style="margin-left: 40px;"><font face="Courier New"><font color="#b1b100">return</font><font color="#339933">;</font></font><br></div></div><div style="margin-left: 40px;"><font face="Courier New"><font color="#b1b100">case</font> cJU_JPBRANCH_L2<font color="#339933">:</font></font><br><font face="Courier New"><font color="#b1b100">case</font> cJU_JPBRANCH_L3<font color="#339933">:</font></font><br><font face="Courier New"><font color="#b1b100">case</font> cJU_JPBRANCH_L<font color="#339933">:</font></font><br><font face="Courier New"><font color="#009900">{</font></font><br><font face="Courier New"> Pjbl_t Pjbl<font color="#339933">;</font></font><br><font face="Courier New"><font color="#993333">int</font> posidx<font color="#339933">;</font></font><br>&nbsp;<br><font face="Courier New"><font color="#666666"><i>// Common code for all BranchLs; come here with Digit set:</i></font></font><br>&nbsp;<br><font face="Courier New"> Pjbl <font color="#339933">=</font> P_JBL<font color="#009900">(</font>Pjp<font color="#339933">-&gt;</font>jp_Addr<font color="#009900">)</font><font color="#339933">;</font></font><br>&nbsp;<br><font face="Courier New"> posidx <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font></font><br>&nbsp;<br><font face="Courier New"><font color="#b1b100">for</font><font color="#009900">(</font><font color="#339933">;</font> posidx <font color="#339933">&lt;</font> Pjbl<font color="#339933">-&gt;</font>jbl_NumJPs<font color="#339933">;</font> posidx<font color="#339933">++</font><font color="#009900">)</font></font><br><font face="Courier New"><font color="#009900">{</font></font><br><font face="Courier New"> Pjp_t Pjp2<font color="#339933">;</font></font><br><font face="Courier New"> Pjp2 <font color="#339933">=</font> Pjbl<font color="#339933">-&gt;</font>jbl_jp <font color="#339933">+</font> posidx<font color="#339933">;</font></font><br></div><div style="margin-left: 40px;"><font face="Courier New"><font color="#b1b100">if</font> <font color="#009900">(</font>Pjp2<font color="#009900">)</font></font><font color="#009900">{</font><br></div><div style="margin-left: 80px;"><font face="Courier New"><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"L posidx = %d Digit = %x %p =&gt; %p<font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font></font><br><font face="Courier New">posidx<font color="#339933">,</font> Pjbl<font color="#339933">-&gt;</font>jbl_Expanse<font color="#009900">[</font>posidx<font color="#009900">]</font><font color="#339933">,</font> Pjp2<font color="#339933">,</font> Pjp<font color="#009900">)</font><font color="#339933">;</font></font><br><font face="Courier New"> bianli<font color="#009900">(</font>Pjp2<font color="#009900">)</font><font color="#339933">;</font></font><br></div><div style="margin-left: 40px;"><font face="Courier New"><font color="#009900">}</font></font><br></div><font face="Courier New"><font color="#009900">}</font><br>&nbsp;<br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br><font color="#009900">}</font><br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPBRANCH_B2<font color="#339933">:</font><br><font color="#b1b100">case</font> cJU_JPBRANCH_B3<font color="#339933">:</font><br><font color="#b1b100">case</font> cJU_JPBRANCH_B<font color="#339933">:</font><br><font color="#009900">{</font><br> Pjbb_t Pjbb<font color="#339933">;</font><br> Word_t subexp<font color="#339933">;</font> <font color="#666666"><i>// in bitmap, 0..7.</i></font><br> BITMAPB_t BitMap<font color="#339933">;</font> <font color="#666666"><i>// for one subexpanse.</i></font><br> BITMAPB_t BitMask<font color="#339933">;</font> <font color="#666666"><i>// bit in BitMap for Indexs Digit.</i></font><br>&nbsp;<br> Pjbb <font color="#339933">=</font> P_JBB<font color="#009900">(</font>Pjp<font color="#339933">-&gt;</font>jp_Addr<font color="#009900">)</font><font color="#339933">;</font><br> Pjp_t Pjp2<font color="#339933">,</font> Pjp3<font color="#339933">;</font><br><font color="#b1b100">for</font><font color="#009900">(</font>i <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font> i <font color="#339933">&lt;</font> <font color="#0000dd">8</font><font color="#339933">;</font> i<font color="#339933">++</font><font color="#009900">)</font><br><font color="#009900">{</font><br> BitMap <font color="#339933">=</font> JU_JBB_BITMAP<font color="#009900">(</font>Pjbb<font color="#339933">,</font> i<font color="#009900">)</font><font color="#339933">;</font><br> Pjp2 <font color="#339933">=</font> P_JP<font color="#009900">(</font>JU_JBB_PJP<font color="#009900">(</font>Pjbb<font color="#339933">,</font> i<font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">for</font><font color="#009900">(</font>mask <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font> mask <font color="#339933">&lt;</font> <font color="#0000dd">32</font><font color="#339933">;</font> mask<font color="#339933">++</font><font color="#009900">)</font><br><font color="#009900">{</font><br> BitMask <font color="#339933">=</font> <font color="#0000dd">1</font> <font color="#339933">&lt;&lt;</font> mask<font color="#339933">;</font><br><font color="#b1b100">if</font> <font color="#009900">(</font><font color="#339933">!</font> <font color="#009900">(</font>BitMap <font color="#339933">&amp;</font> <font color="#009900">(</font>BitMask<font color="#009900">)</font><font color="#009900">)</font><font color="#009900">)</font> <font color="#b1b100">continue</font><font color="#339933">;</font><br>&nbsp;<br><font color="#808080"><i>/* i * 32 + mask */</i></font><br> Pjp3 <font color="#339933">=</font> Pjp2 <font color="#339933">+</font> j__udyCountBitsB<font color="#009900">(</font>BitMap <font color="#339933">&amp;</font> <font color="#009900">(</font>BitMask <font color="#339933">-</font> <font color="#0000dd">1</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"B <font color="#000099"><b>\n</b></font>subexp = %d Digit = %x %p =&gt; %p =&gt; %p<font color="#000099"><b>\n</b></font><font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font><br>i<font color="#339933">,</font> i <font color="#339933">*</font> <font color="#0000dd">32</font> <font color="#339933">+</font> mask<font color="#339933">,</font> Pjp3<font color="#339933">,</font> Pjp2<font color="#339933">,</font> Pjp<font color="#009900">)</font><font color="#339933">;</font><br> bianli<font color="#009900">(</font>Pjp3<font color="#009900">)</font><font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#009900">}</font><br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br>&nbsp;<br><font color="#009900">}</font> <font color="#666666"><i>// case cJU_JPBRANCH_B*</i></font><br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPBRANCH_U3<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"pop = 3, dcd = 0<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> BranchU<font color="#339933">;</font><br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPBRANCH_U2<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"pop = 2, dcd = 1<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> BranchU<font color="#339933">;</font><br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPBRANCH_U<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"DcdPopO bytes not used<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br>BranchU<font color="#339933">:</font><br><font color="#b1b100">for</font><font color="#009900">(</font>i <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font> i <font color="#339933">&lt;</font> cJU_BRANCHUNUMJPS<font color="#339933">;</font> i<font color="#339933">++</font><font color="#009900">)</font><br><font color="#009900">{</font><br> Pjp_t Pjp2<font color="#339933">;</font><br> Pjp2 <font color="#339933">=</font> <font color="#339933">&amp;</font><font color="#009900">(</font><font color="#009900">(</font>P_JBU<font color="#009900">(</font><font color="#009900">(</font>Pjp<font color="#009900">)</font><font color="#339933">-&gt;</font>jp_Addr<font color="#009900">)</font><font color="#009900">)</font><font color="#339933">-&gt;</font>jbu_jp<font color="#009900">[</font>i<font color="#009900">]</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">if</font> <font color="#009900">(</font>Pjp2<font color="#009900">)</font><br><font color="#009900">{</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"U %p =&gt; %p<font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font> Pjp2<font color="#339933">,</font> Pjp<font color="#009900">)</font><font color="#339933">;</font><br> bianli<font color="#009900">(</font>Pjp2<font color="#009900">)</font><font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#009900">}</font><br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br>&nbsp;<br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPLEAF1<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"pop = 1, dcd = 2<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> LF<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPLEAF2<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"pop = 2, dcd = 1<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> LF<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPLEAF3<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"pop = 3, dcd = 0<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br>LF<font color="#339933">:</font><br><font color="#009900">{</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"linear leaf reached<font color="#000099"><b>\n</b></font><font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br><font color="#009900">}</font><br>&nbsp;<br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPLEAF_B1<font color="#339933">:</font><br><font color="#009900">{</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"bitmap leaf reached<font color="#000099"><b>\n</b></font><font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br><font color="#009900">}</font> <font color="#666666"><i>// case cJU_JPLEAF_B1</i></font><br>&nbsp;<br><font color="#b1b100">case</font> cJU_JPIMMED_1_01<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"JPIMMED is = 1 pop = 1<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> JPIMMED<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPIMMED_2_01<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"JPIMMED is = 2 pop = 1<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> JPIMMED<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPIMMED_3_01<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"JPIMMED is = 3 pop = 1<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> JPIMMED<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPIMMED_1_03<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"JPIMMED is = 1 pop = 3<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">goto</font> JPIMMED<font color="#339933">;</font><br><font color="#b1b100">case</font> cJU_JPIMMED_1_02<font color="#339933">:</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"JPIMMED is = 1 pop = 2<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br>JPIMMED<font color="#339933">:</font><br><font color="#009900">{</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"immediate index reached<font color="#000099"><b>\n</b></font><font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#000000"><b>break</b></font><font color="#339933">;</font><br><font color="#009900">}</font><br>&nbsp;<br>ReturnCorrupt<font color="#339933">:</font><br><font color="#b1b100">default</font><font color="#339933">:</font><br>&nbsp;<br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"impossible to reach here<font color="#000099"><b>\n</b></font><font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">return</font><font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#009900">}</font><br>&nbsp;<br>&nbsp;<br><font color="#993333">void</font> bianli2<font color="#009900">(</font>Pcvoid_t PArray<font color="#009900">)</font><br><font color="#009900">{</font><br></font><div style="margin-left: 40px;"><font face="Courier New"> Pjpm_t Pjpm<font color="#339933">;</font></font><br><font face="Courier New"><font color="#b1b100">if</font> <font color="#009900">(</font>JU_LEAFW_POP0<font color="#009900">(</font>PArray<font color="#009900">)</font> <font color="#339933">&lt;</font> cJU_LEAFW_MAXPOP1<font color="#009900">)</font> <font color="#666666"><i>// must be a LEAFW</i></font></font><br><font face="Courier New"><font color="#009900">{</font></font><br></div><div style="margin-left: 40px;"><div style="margin-left: 40px;"><font face="Courier New"><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"leafw, no need to bianli<font color="#000099"><b>\n</b></font>"</font><font color="#009900">)</font><font color="#339933">;</font></font><br><font face="Courier New"><font color="#b1b100">return</font><font color="#339933">;</font></font><br></div></div><div style="margin-left: 40px;"><font face="Courier New"><font color="#009900">}</font></font><br>&nbsp;<br><font face="Courier New"> Pjpm <font color="#339933">=</font> P_JPM<font color="#009900">(</font>PArray<font color="#009900">)</font><font color="#339933">;</font></font><br><font face="Courier New"> Pjp_t Pjp <font color="#339933">=</font> <font color="#339933">&amp;</font><font color="#009900">(</font>Pjpm<font color="#339933">-&gt;</font>jpm_JP<font color="#009900">)</font><font color="#339933">;</font> <font color="#666666"><i>// top branch is below JPM.</i></font></font><br><font face="Courier New"> bianli<font color="#009900">(</font>Pjp<font color="#009900">)</font><font color="#339933">;</font></font><br></div><font face="Courier New"><font color="#009900">}</font></font></div></div><br><p><b>Judy 中的立即索引与叶节点</b><br> 在立即索引中，索引直接存放在 JP 之中，而不像叶节点那样（在叶节点中，索引和值区域在 JP 之外，被一个 JP 指向）。由于 JP 中的字节数是有限的，因此能装入的索引数量也是有限的。<br> 如果索引只有 1 个，那么 JP 中的指向下级 JP 的那个指针将会是索引的值，而不再是一个指针；<br> 如果索引大小是 1 个字节，那么这个 JP 中最多可以存放 3 个（这种索引）；<br> 如果索引大小是 2 个字节或 3 个字节，那么这个 JP 中最多可以存放 1 个（这种索引）；<br> 总之不能超过 3 个字节。<br><br><b>关于叶节点</b><br> Judy 最终的结尾是叶子节点，叶子节点由 JP 指向，同样如果索引的 size 不同，一个 JP 所能承载的索引数量也是有限的，这取决于这个索引此时还有几个字节需要解码。参考 JudyL.h 中的：<br> #define cJL_LEAF1_MAXPOP1<br> ((cJL_LEAF1_MAXWORDS * cJU_BYTESPERWORD)/(1 + cJU_BYTESPERWORD))<br> #define cJL_LEAF2_MAXPOP1 (J_L_MAXB / (2 + cJU_BYTESPERWORD))<br> #define cJL_LEAF3_MAXPOP1 (J_L_MAXB / (3 + cJU_BYTESPERWORD))<br> #define cJL_LEAFW_MAXPOP1<br> ((J_L_MAXB - cJU_BYTESPERWORD) / (2 * cJU_BYTESPERWORD))<br> 这也就是官方文档中表 6 中定义的线性叶子节点中不同索引大小和可容纳问题规模的对应关系。</p><p>对于叶节点中的值区域，和 Root level leaves 类似，同样是按照一定规律排列。参考 JudyLTables.c。<br> JudyLTablesGen.c 会产生定义问题规模和所需 words 之间关系的数组。</p><p><b>分支节点的选择与压缩</b><br> 在 Judy 数组的最开始，是空值。<br> 当元素个数不超过 cJU_LEAFW_MAXPOP1 时，以 Root Level Leaves 存放，JU_LEAFWGROWINPLACE 将决定是否要将元素搬移到新的存储空间（在问题规模变化时，值的存放偏移规律会发生改变）。<br> 一旦元素个数达到 cJU_LEAFW_MAXPOP1 上限，将会出现 JPM。然后调用 j__udyCascadeL 对刚刚的 Root Level Leaves 进行压缩。然后 j__udyInsWalk 执行插入操作。</p><p><b>j__udyCascadeL 的压缩</b><br> 1、首先断言目前 Pjlw 中存放的是 Root Level Leaves 下允许的极大值（assert(Pjlw[0] == (cJU_LEAFW_MAXPOP1 - 1));）；<br>
+ 2、尽管目前的元素个数达到该阶段最大值（cJU_LEAFW_MAXPOP1），但是可能他们的最高位是相同的 
+（JU_DIGITATSTATE(CIndex ^ Pjlw[cJU_LEAFW_MAXPOP1 - 1], cJU_ROOTSTATE) = 
+0），如果相同，说明此时是 1 个段 expanse，可以被压缩为 1 个线性分支 和 3 个字节的线性叶节点。<br> 3、如果他们的最高位不相同，则判断出它们可以被分为几个段 ExpCnt，以及每个段内的元素个数 pop1。如果元素个数为 1，则会被压缩为一个 3 字节的立即索引；如果元素个数大于 1 个，则段内元素被压缩为线性叶节点。<br> 4、最后检查有多少个段，如果段数小于 cJU_BRANCHLMAXJPS，则上面的 JP 节点被线性分支节点所指向。否则以位图节点来指向。</p><p><b>j__udyInsWalk 插入</b><br> 在插入时，根据 JP 的不同类型进行转换。<br> 线性分支可能被转换为未压缩的分支（ConvertBranchLtoU）或者位图分支（j__udyCreateBranchB），位图分支也有可能被 转换为未压缩的分支（j__udyCreateBranchU）。</p><p>如果碰到的是线性叶子节点，JU_LEAFSET 将决定是否可以插入，它包括：<br> JU_LEAFPREP：首先定义 JP 中指向的叶对应的值的起始地址 ValueArea，对应关系定义在 JL_LEAF1VALUEAREA，JL_LEAF2VALUEAREA，JL_LEAF3VALUEAREA 等；<br> JU_LEAFGROW：查找并决定是否可以就地增长，如前面所描述的值区域和问题规模（pop）的对应关系中描述的。如果不能就地增长，需要分配新的空 间并进行搬移操作。<br>
+ 
+JU_LEAFCASCADE：如果不能就地增长，说明叶节点中的索引数量达到了极大值，需要进一步的压缩和转换（CASCADE）。这一批压缩函数依据
+ 叶子节点的类型不同分为几个，包括 j__udyCascade1、j__udyCascade2、j__udyCascade3。<br> j__udyCascade1：将叶节点压缩成位图叶；<br> j__udyCascade2：根据低位第 2 个字节（也就是高位第 3 个字节）分段；<br> 如果只有 1 个 expanse（低位第 2 个字节都相同），则被压缩成位图叶；<br>
+ 如果有多个段，其中少于 3 个元素个数的段被压缩为立即索引（cJU_JPIMMED_1_01 或者 
+cJU_JPIMMED_1_02，cJU_JPIMMED_1_03）；再多则被压缩为 cJU_JPLEAF1 或者 
+cJU_JPLEAF_B1。（由于同一个段内首字节是相同的，压缩是针对右边的那个字节。）然后判断段的数量，决定上面被压缩的是由 
+线性分支或者位图分支来指向。<br> j__udyCascade3：和 j__udyCascade2 类似，根据高位第 2 个字节的不同程度分段之后，依据段中元素个数来决定如何压缩 index 中右边的 2 个字节。</p><p>如果碰到的是位图叶子节点，首先计算出它属于哪一个 subexpanse， 以及在 value subarray 中的 offset，这里面同样存在着是否可以就地增长的问题（j__L_LeafVPopToWords）。</p><p>如果是立即索引，似乎要简单一些，cJU_JPIMMED_1_01 将演变为问题规模（pop）增加 1 的 cJU_JPIMMED_1_02，然后演变为 cJU_JPIMMED_1_03，直到演变为叶节点。<br>
+ cJU_JPIMMED_2_01 将演变为 2 字节叶节点，不可能有 cJU_JPIMMED_2_02 存在的，在索引长度为 2 时，JP 
+中只能存在一个这样的节点，不然长度超过 3 字节（还需要一个字节存放 JP 类型）。同理，cJU_JPIMMED_3_01 将演变为 3 
+字节叶节点。演变时注意确保索引仍然是大小有序的，索引中值的顺序和索引顺序一致（JU_IMMSET_01_COPY_EVEN 和 
+JU_IMMSET_01_COPY_ODD）。</p><p>最后的几个问题：<br></p><div style="margin-left: 40px;"> 1、各种分支的转换临界值；<br> 2、cascade 的原则，为什么需要这么做，是否节省了内存？<br> 3、narrow pointer 是什么？</div><p>应用实例：<br>
+ 考虑类似 Netflow 的统计和分析，一条记录有 7 
+个字段：srcIP、dstIP、protocol、srcPort、dstPort、octets、packets，可能有时候你需要按照一些字段来分
+ 组汇总，比如按照 srcIP 来分组，类似数据库当中的 group by 之后 sum。貌似首先想到的是用 hash 
+来完成，但是当分组的字段增加到多个时，hash 算法的效率下降剧烈。以 flow-tools 工具为例，如果要使用 flow-report 
+工具做报告，比如对 ip-source-address-destination-count 的统计（统计每个 srcIP 下的 
+dstIP），flow-report 在数据量增加时效率下降厉害，但使用 Judy 数组，不但可以统计出每个 srcIP 
+的汇总，还可以看到和每个 dstIP 的明细。</p><p>JudyIns 返回的是一个指针，你可以让它指向任何地方，因此完全可以让他再成为一个
+ Judy 数组的地址。。。。。本例只需要将 dstIP 作为第二级 Judy 数组的索引，如果要分组的字段还更多，完全可以继续建立多级 
+Judy 数组。比如要按照 srcIP、dstIP、srcPort、dstPort 来分组之后汇总，第一级 Judy 数组的 key 可以是 
+srcIP，对应的值是第二级 Judy 数组，以 dstIP 为索引，这一级数组的 key 对应的值是下一级 Judy 数组，以 srcPort
+ 为索引，对应的值是下一级 Judy 数组，以 dstPort 为索引，对应的值是汇总的字节、包数量、流数量等等。</p><p>下面的代码改自 flow-tools 的代码，没有考虑出错情况，统计的是 ip-source-address-destination-count，在大数据量的情况下，效率比 flow-tools 自身的工具要快得多。</p><table class="zeroBorder"><tbody><tr><td class="line_numbers"><font face="Courier New">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24<br>25<br>26<br>27<br>28<br>29<br>30<br>31<br>32<br>33<br>34<br>35<br>36<br>37<br>38<br>39<br>40<br>41<br>42<br>43<br>44<br>45<br>46<br>47<br>48<br>49<br>50<br>51<br>52<br>53<br>54<br>55<br>56<br>57<br>58<br>59<br>60<br>61<br>62<br>63<br>64<br>65<br>66<br>67<br>68<br>69<br>70<br>71<br>72<br>73<br>74<br>75<br>76<br>77<br>78<br>79<br>80<br>81<br>82<br>83<br>84<br>85<br>86<br>87<br>88<br>89<br>90<br>91<br>92<br>93<br>94<br>95<br>96<br>97<br>98<br>99<br>100<br>101<br>102<br>103<br>104<br>105<br>106<br>107<br>108<br>109<br>110<br>111<br>112<br>113<br>114<br>115<br>116<br>117<br>118<br>119<br>120<br>121<br>122<br>123<br>124<br>125<br>126<br>127<br>128<br>129<br>130<br>131<br>132<br>133<br>134<br>135<br>136<br>137<br>138<br>139<br>140<br>141<br>142<br>143<br>144<br>145<br>146<br>147<br>148<br>149<br>150<br>151<br>152<br>153<br>154<br>155<br>156<br>157<br>158<br>159<br>160<br>161<br>162<br>163<br>164<br></font></td><td class="code"><font face="Courier New">&nbsp;<br><font color="#339933">#include "ftconfig.h"</font><br><font color="#339933">#include &lt;ftlib.h&gt;</font><br><font color="#339933">#include &lt;Judy.h&gt;</font><br><font color="#339933">#include &lt;sys/time.h&gt;</font><br><font color="#339933">#include &lt;sys/types.h&gt;</font><br><font color="#339933">#include &lt;sys/uio.h&gt;</font><br><font color="#339933">#include &lt;netinet/in.h&gt;</font><br><font color="#339933">#include &lt;unistd.h&gt;</font><br><font color="#339933">#include &lt;stdio.h&gt;</font><br><font color="#339933">#include &lt;stdlib.h&gt;</font><br><font color="#339933">#include &lt;time.h&gt;</font><br><font color="#339933">#include &lt;fcntl.h&gt;</font><br>&nbsp;<br><font color="#339933">#if HAVE_STRINGS_H</font><br><font color="#339933">#include &lt;strings.h&gt;</font><br><font color="#339933">#endif</font><br>&nbsp;<br><font color="#339933">#if HAVE_STRING_H</font><br><font color="#339933">#include &lt;string.h&gt;</font><br><font color="#339933">#endif</font><br>&nbsp;<br><font color="#339933">#include "ftbuild.h"</font><br>&nbsp;<br>&nbsp;<br><font color="#993333">void</font> usage<font color="#009900">(</font><font color="#993333">void</font><font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br><font color="#993333">typedef</font> <font color="#993333">struct</font> _flow_stat1<br><font color="#009900">{</font><br><font color="#993333">unsigned</font> <font color="#993333">long</font> <font color="#993333">long</font> octets<font color="#339933">;</font><br><font color="#993333">unsigned</font> <font color="#993333">long</font> <font color="#993333">long</font> pkts<font color="#339933">;</font><br><font color="#993333">unsigned</font> <font color="#993333">long</font> <font color="#993333">long</font> flows<font color="#339933">;</font><br><font color="#009900">}</font> flow_stat1<font color="#339933">;</font><br>&nbsp;<br><font color="#993333">int</font> main<font color="#009900">(</font>argc<font color="#339933">,</font> argv<font color="#009900">)</font><br><font color="#993333">int</font> argc<font color="#339933">;</font><br><font color="#993333">char</font> <font color="#339933">**</font>argv<font color="#339933">;</font><br><font color="#009900">{</font><br><font color="#993333">struct</font> ftio ftio<font color="#339933">;</font><br><font color="#993333">struct</font> ftprof ftp<font color="#339933">;</font><br><font color="#993333">int</font> i<font color="#339933">,</font> format_index<font color="#339933">,</font> set_format<font color="#339933">,</font> ret<font color="#339933">;</font><br><font color="#993333">int</font> print_header<font color="#339933">,</font> debug<font color="#339933">;</font><br><font color="#993333">char</font> cc<font color="#339933">;</font> <font color="#808080"><i>/* comment character */</i></font><br>&nbsp;<br><font color="#808080"><i>/* init fterr */</i></font><br> fterr_setid<font color="#009900">(</font>argv<font color="#009900">[</font><font color="#0000dd">0</font><font color="#009900">]</font><font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br> debug <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font><br>&nbsp;<br><font color="#808080"><i>/* profile */</i></font><br> ftprof_start <font color="#009900">(</font><font color="#339933">&amp;</font>ftp<font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br> set_format <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font><br> print_header <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font><br> cc <font color="#339933">=</font> <font color="#ff0000">'#'</font><font color="#339933">;</font><br>&nbsp;<br><font color="#808080"><i>/* read from stdin */</i></font><br><font color="#b1b100">if</font> <font color="#009900">(</font>ftio_init<font color="#009900">(</font><font color="#339933">&amp;</font>ftio<font color="#339933">,</font> <font color="#0000dd">0</font><font color="#339933">,</font> FT_IO_FLAG_READ<font color="#009900">)</font> <font color="#339933">&lt;</font> <font color="#0000dd">0</font><font color="#009900">)</font><br> fterr_errx<font color="#009900">(</font><font color="#0000dd">1</font><font color="#339933">,</font> <font color="#ff0000">"ftio_init(): failed"</font><font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br><font color="#993333">struct</font> fts3rec_all cur<font color="#339933">;</font><br><font color="#993333">struct</font> fts3rec_offsets fo<font color="#339933">;</font><br><font color="#993333">struct</font> ftver ftv<font color="#339933">;</font><br><font color="#993333">char</font> fmt_buf1<font color="#009900">[</font><font color="#0000dd">64</font><font color="#009900">]</font><font color="#339933">,</font> fmt_buf2<font color="#009900">[</font><font color="#0000dd">64</font><font color="#009900">]</font><font color="#339933">;</font><br><font color="#993333">char</font> <font color="#339933">*</font>rec<font color="#339933">;</font><br>&nbsp;<br><font color="#b1b100">if</font> <font color="#009900">(</font>ftio_check_xfield<font color="#009900">(</font><font color="#339933">&amp;</font>ftio<font color="#339933">,</font> FT_XFIELD_DPKTS <font color="#339933">|</font><br> FT_XFIELD_DOCTETS <font color="#339933">|</font> FT_XFIELD_INPUT <font color="#339933">|</font> FT_XFIELD_OUTPUT <font color="#339933">|</font> FT_XFIELD_PROT <font color="#339933">|</font><br> FT_XFIELD_SRCADDR <font color="#339933">|</font> FT_XFIELD_DSTADDR <font color="#339933">|</font> FT_XFIELD_INPUT <font color="#339933">|</font><br> FT_XFIELD_SRCPORT <font color="#339933">|</font> FT_XFIELD_DSTPORT <font color="#339933">|</font> FT_XFIELD_OUTPUT<font color="#009900">)</font><font color="#009900">)</font> <font color="#009900">{</font><br> fterr_warnx<font color="#009900">(</font><font color="#ff0000">"Flow record missing required field for format."</font><font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">return</font> <font color="#339933">-</font><font color="#0000dd">1</font><font color="#339933">;</font><br><font color="#009900">}</font><br>&nbsp;<br> ftio_get_ver<font color="#009900">(</font><font color="#339933">&amp;</font>ftio<font color="#339933">,</font> <font color="#339933">&amp;</font>ftv<font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br> fts3rec_compute_offsets<font color="#009900">(</font><font color="#339933">&amp;</font>fo<font color="#339933">,</font> <font color="#339933">&amp;</font>ftv<font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br> PPvoid_t PValue<font color="#339933">;</font><br> JError_t JError<font color="#339933">;</font><br> JError_t SJError<font color="#339933">,</font> FError<font color="#339933">;</font><br><font color="#993333">void</font> <font color="#339933">*</font>PJArray <font color="#339933">=</font> NULL<font color="#339933">;</font><br> flow_stat1 <font color="#339933">**</font>SValue<font color="#339933">;</font><br> flow_stat1 <font color="#339933">*</font>Stemp<font color="#339933">;</font><br> flow_stat1 <font color="#339933">**</font>FValue<font color="#339933">;</font><br>&nbsp;<br> puts<font color="#009900">(</font><font color="#ff0000">"SrcIPaddress DstIPaddress Pr SrcP DstP Pkts Octets"</font><font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br><font color="#b1b100">while</font> <font color="#009900">(</font><font color="#009900">(</font>rec <font color="#339933">=</font> ftio_read<font color="#009900">(</font><font color="#339933">&amp;</font>ftio<font color="#009900">)</font><font color="#009900">)</font><font color="#009900">)</font> <font color="#009900">{</font><br>&nbsp;<br> cur.<font color="#202020">dOctets</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int32<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">dOctets</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">dPkts</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int32<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">dPkts</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">srcaddr</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int32<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">srcaddr</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">dstaddr</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int32<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">dstaddr</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">input</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int16<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">input</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">output</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int16<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">output</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">srcport</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int16<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">srcport</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">dstport</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int16<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">dstport</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> cur.<font color="#202020">prot</font> <font color="#339933">=</font> <font color="#009900">(</font><font color="#009900">(</font>u_int8<font color="#339933">*</font><font color="#009900">)</font><font color="#009900">(</font>rec<font color="#339933">+</font>fo.<font color="#202020">prot</font><font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br> fmt_ipv4<font color="#009900">(</font>fmt_buf1<font color="#339933">,</font> <font color="#339933">*</font>cur.<font color="#202020">srcaddr</font><font color="#339933">,</font> FMT_PAD_RIGHT<font color="#009900">)</font><font color="#339933">;</font><br> fmt_ipv4<font color="#009900">(</font>fmt_buf2<font color="#339933">,</font> <font color="#339933">*</font>cur.<font color="#202020">dstaddr</font><font color="#339933">,</font> FMT_PAD_RIGHT<font color="#009900">)</font><font color="#339933">;</font><br>&nbsp;<br><font color="#808080"><i>/* printf("%-15.15s %-15.15s %2.2x %-4x %-4x %-10lu %-10lu\n",<br> fmt_buf1, fmt_buf2,<br> (int)*cur.prot, (int)*cur.srcport, (int)*cur.dstport,<br> (u_long)*cur.dPkts, (u_long)*cur.dOctets);*/</i></font><br> PValue <font color="#339933">=</font> JudyLIns<font color="#009900">(</font><font color="#339933">&amp;</font>PJArray<font color="#339933">,</font> <font color="#339933">*</font><font color="#009900">(</font>cur.<font color="#202020">srcaddr</font><font color="#009900">)</font><font color="#339933">,</font> <font color="#339933">&amp;</font>JError<font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">if</font><font color="#009900">(</font><font color="#339933">*</font>PValue <font color="#339933">==</font> NULL<font color="#009900">)</font><br><font color="#009900">{</font><br><font color="#993333">void</font> <font color="#339933">*</font>SJArray <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font><br> SValue <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">**</font><font color="#009900">)</font>JudyLIns<font color="#009900">(</font><font color="#339933">&amp;</font>SJArray<font color="#339933">,</font> <font color="#339933">*</font>cur.<font color="#202020">srcaddr</font><font color="#339933">,</font> <font color="#339933">&amp;</font>SJError<font color="#009900">)</font><font color="#339933">;</font><br> Stemp <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">*</font><font color="#009900">)</font>malloc<font color="#009900">(</font><font color="#993333">sizeof</font><font color="#009900">(</font>flow_stat1<font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>octets <font color="#339933">=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dOctets</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>pkts <font color="#339933">=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dPkts</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>flows <font color="#339933">=</font> <font color="#0000dd">1</font><font color="#339933">;</font><br><font color="#339933">*</font>SValue <font color="#339933">=</font> Stemp<font color="#339933">;</font><br><font color="#339933">*</font>PValue <font color="#339933">=</font> SJArray<font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#b1b100">else</font><br><font color="#009900">{</font><br> SValue <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">**</font><font color="#009900">)</font>JudyLIns<font color="#009900">(</font>PValue<font color="#339933">,</font> <font color="#339933">*</font>cur.<font color="#202020">dstaddr</font><font color="#339933">,</font> <font color="#339933">&amp;</font>SJError<font color="#009900">)</font><font color="#339933">;</font><br><font color="#b1b100">if</font><font color="#009900">(</font><font color="#339933">*</font>SValue <font color="#339933">==</font> <font color="#0000dd">0</font><font color="#009900">)</font><br><font color="#009900">{</font><br> Stemp <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">*</font><font color="#009900">)</font>malloc<font color="#009900">(</font><font color="#993333">sizeof</font><font color="#009900">(</font>flow_stat1<font color="#009900">)</font><font color="#009900">)</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>octets <font color="#339933">=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dOctets</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>pkts <font color="#339933">=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dPkts</font><font color="#339933">;</font><br> Stemp<font color="#339933">-&gt;</font>flows <font color="#339933">=</font> <font color="#0000dd">1</font><font color="#339933">;</font><br><font color="#339933">*</font>SValue <font color="#339933">=</font> Stemp<font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#b1b100">else</font><br><font color="#009900">{</font><br><font color="#009900">(</font><font color="#339933">*</font>SValue<font color="#009900">)</font><font color="#339933">-&gt;</font>octets <font color="#339933">+=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dOctets</font><font color="#339933">;</font><br><font color="#009900">(</font><font color="#339933">*</font>SValue<font color="#009900">)</font><font color="#339933">-&gt;</font>pkts <font color="#339933">+=</font> <font color="#009900">(</font>u_long<font color="#009900">)</font><font color="#339933">*</font>cur.<font color="#202020">dPkts</font><font color="#339933">;</font><br><font color="#009900">(</font><font color="#339933">*</font>SValue<font color="#009900">)</font><font color="#339933">-&gt;</font>flows <font color="#339933">++;</font><br><font color="#009900">}</font><br><font color="#009900">}</font><br><font color="#009900">}</font><br>&nbsp;<br><font color="#993333">unsigned</font> <font color="#993333">int</font> FIndex<font color="#339933">,</font> PIndex<font color="#339933">;</font><br>&nbsp;<br><font color="#b1b100">for</font><font color="#009900">(</font>PIndex <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">,</font> PValue <font color="#339933">=</font> JudyLFirst<font color="#009900">(</font>PJArray<font color="#339933">,</font> <font color="#339933">&amp;</font>PIndex<font color="#339933">,</font> <font color="#339933">&amp;</font>JError<font color="#009900">)</font><font color="#339933">;</font><br> PValue<font color="#339933">;</font><br> PValue <font color="#339933">=</font> JudyLNext<font color="#009900">(</font>PJArray<font color="#339933">,</font> <font color="#339933">&amp;</font>PIndex<font color="#339933">,</font> <font color="#339933">&amp;</font>JError<font color="#009900">)</font><font color="#009900">)</font><br><font color="#009900">{</font><br><font color="#993333">int</font> count <font color="#339933">=</font> <font color="#0000dd">0</font><font color="#339933">;</font><br><font color="#b1b100">for</font> <font color="#009900">(</font>FIndex <font color="#339933">=</font> <font color="#0000dd">0L</font><font color="#339933">,</font><br> FValue <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">**</font><font color="#009900">)</font>JudyLFirst<font color="#009900">(</font><font color="#339933">*</font>PValue<font color="#339933">,</font> <font color="#339933">&amp;</font>FIndex<font color="#339933">,</font> <font color="#339933">&amp;</font>FError<font color="#009900">)</font><font color="#339933">;</font><br> FValue<font color="#339933">;</font><br> FValue <font color="#339933">=</font> <font color="#009900">(</font>flow_stat1<font color="#339933">**</font><font color="#009900">)</font>JudyLNext<font color="#009900">(</font><font color="#339933">*</font>PValue<font color="#339933">,</font> <font color="#339933">&amp;</font>FIndex<font color="#339933">,</font> <font color="#339933">&amp;</font>FError<font color="#009900">)</font><font color="#009900">)</font><br><font color="#009900">{</font><br> count <font color="#339933">++;</font><br> fmt_ipv4<font color="#009900">(</font>fmt_buf1<font color="#339933">,</font> PIndex<font color="#339933">,</font> FMT_PAD_RIGHT<font color="#009900">)</font><font color="#339933">;</font><br> fmt_ipv4<font color="#009900">(</font>fmt_buf2<font color="#339933">,</font> FIndex<font color="#339933">,</font> FMT_PAD_RIGHT<font color="#009900">)</font><font color="#339933">;</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"%s %s %lu %lu %lu <font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font> fmt_buf1<font color="#339933">,</font> fmt_buf2<font color="#339933">,</font><br><font color="#009900">(</font><font color="#339933">*</font>FValue<font color="#009900">)</font><font color="#339933">-&gt;</font>flows<font color="#339933">,</font> <font color="#009900">(</font><font color="#339933">*</font>FValue<font color="#009900">)</font><font color="#339933">-&gt;</font>octets<font color="#339933">,</font> <font color="#009900">(</font><font color="#339933">*</font>FValue<font color="#009900">)</font><font color="#339933">-&gt;</font>pkts<font color="#009900">)</font><font color="#339933">;</font><br><font color="#009900">}</font><br><font color="#000066">printf</font><font color="#009900">(</font><font color="#ff0000">"COUNT OF %s %d<font color="#000099"><b>\n</b></font>"</font><font color="#339933">,</font> fmt_buf1<font color="#339933">,</font> count<font color="#009900">)</font><font color="#339933">;</font><br><font color="#009900">}</font><br>&nbsp;<br>&nbsp;<br><font color="#b1b100">return</font> <font color="#0000dd">0</font><font color="#339933">;</font><br>&nbsp;<br><font color="#009900">}</font> <font color="#808080"><i>/* format0 */</i></font></font></td></tr></tbody></table><br>
+<br clear="all">
+</div>
+<div style="display: none;" id="google-view-footer">
+<div id="maybecanedit" style="float: right;">
+<a class="google-small-link" id="editpermissionlink" href="https://docs.google.com/Doc?tab=edit&amp;dr=true&amp;id=af9bbpcfq8t6_524hbdzn2mk" title="Edit this page">
+Edit this page (if you have permission)</a>
+<span style="color: rgb(103, 103, 103);">|</span>
+<input id="report-abuse-button" value="Report abuse" onclick="reportAbuse();" type="button">
+</div>
+<div style="float: left;">
+<a title="Learn more about Google Docs" class="google-small-link" href="https://docs.google.com/">
+Google Docs -- Web word processing, presentations and spreadsheets.</a>
+</div>
+<p> &nbsp;
+</p></div>
+<script><!--
+    viewOnLoad();
+    if(window.jstiming){window.jstiming.a={};window.jstiming.c=1;var j=function(b,c,e){var a=b.t[c],g=b.t.start;if(a&&(g||e)){a=b.t[c][0];g=e!=undefined?e:g[0];return a-g}},n=function(b,c,e){var a="";if(window.jstiming.pt){a+="&srt="+window.jstiming.pt;delete window.jstiming.pt}try{if(window.external&&window.external.tran)a+="&tran="+window.external.tran;else if(window.gtbExternal&&window.gtbExternal.tran)a+="&tran="+window.gtbExternal.tran();else if(window.chrome&&window.chrome.csi)a+="&tran="+window.chrome.csi().tran}catch(g){}var d=
+window.chrome;if(d)if(d=d.loadTimes){if(d().wasFetchedViaSpdy)a+="&p=s";if(d().wasNpnNegotiated)a+="&npn=1";if(d().wasAlternateProtocolAvailable)a+="&apa=1"}if(b.b)a+="&"+b.b;d=b.t;var m=d.start,k=[],h=[];for(var f in d)if(f!="start")if(f.indexOf("_")!=0){var i=d[f][1];if(i)d[i]&&h.push(f+"."+j(b,f,d[i][0]));else m&&k.push(f+"."+j(b,f))}delete d.start;if(c)for(var l in c)a+="&"+l+"="+c[l];return[e?e:"http://csi.gstatic.com/csi","?v=3","&s="+(window.jstiming.sn||"writely")+"&action=",b.name,h.length?
+"&it="+h.join(","):"","",a,"&rt=",k.join(",")].join("")};window.jstiming.report=function(b,c,e){b=n(b,c,e);c=new Image;var a=window.jstiming.c++;window.jstiming.a[a]=c;c.onload=c.onerror=function(){delete window.jstiming.a[a]};c.src=b;c=null;return b}};
+
+    window.jstiming.load.name = 'published';
+    
+    
+    var urchinPage = "/View";
+
+    
+    function getXHR() {
+      if (typeof XMLHttpRequest != "undefined") {
+        return new XMLHttpRequest();
+      }
+      try { return new ActiveXObject("Msxml2.XMLHTTP.6.0") } catch(e) {}
+      try { return new ActiveXObject("Msxml2.XMLHTTP.3.0") } catch(e) {}
+      try { return new ActiveXObject("Msxml2.XMLHTTP") } catch(e) {}
+      try { return new ActiveXObject("Microsoft.XMLHTTP") } catch(e) {}
+      return null;
+    }
+
+    function reportAbuse() {
+      var req = getXHR();
+      if (req) {
+        
+          var docid = 'af9bbpcfq8t6_524hbdzn2mk';
+          var posttoken = 'aHZSWCsBAAA.zDpYqN2GSF1lzRzm_eOZx23Xs-chNzdv9Gte68a0hhk.lu5Dburm0ETNq9Lqd4c_-w';
+        
+        req.onreadystatechange = function() {
+          try {
+            if (req.readyState == 4 && req.status == 200) {
+              var button = document.getElementById("report-abuse-button");
+              button.value = 'Thank you!';
+              button.disabled = true;
+            }
+          } catch (ex) {
+            
+          }
+        }
+        try {
+          req.open('POST', 'MiscCommands', true);
+          req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+          req.send('command=report_abuse&abuseDoc=' + encodeURIComponent(docid) +
+                   '&POST_TOKEN=' + encodeURIComponent(posttoken));
+        } catch (ex) {
+          
+        }
+      }
+    }
+  --></script>
+<div style="position: absolute; left: 0pt; top: 0pt; z-index: 1000; font-family: arial; font-size: 13px; margin: 5px; background: none repeat scroll 0% 0% yellow; -moz-border-radius: 5px 5px 5px 5px; opacity: 0.9; display: none;" id="dictdiv"></div><div id="dictaudio"></div></body></html>
