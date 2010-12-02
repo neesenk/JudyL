@@ -50,9 +50,9 @@ static int JudyWalk(Pjp_t Pjp, uint32_t prefix, walk_fn_t fn, void *ctx)
 		uint8_t idx = 0;
 		Pjbb_t Pjbb;
 		BITMAPB_t BitMap, BitMask;
+		Pjp_t Pjp2, Pjp3;
 
 		Pjbb = P_JBB(Pjp->jp_Addr);
-		Pjp_t Pjp2, Pjp3;
 		for (i = 0; i < cJL_NUMSUBEXPB; i++) {
 			BitMap = JL_JBB_BITMAP(Pjbb, i);
 			Pjp2 = P_JP(JL_JBB_PJP(Pjbb, i));

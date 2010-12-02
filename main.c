@@ -3,6 +3,7 @@
 #include <time.h>
 #include "Judy.h"
 
+#if 1
 static unsigned cyc_hi = 0;
 static unsigned cyc_lo = 0;
 
@@ -36,6 +37,24 @@ double get_counter(void)
 
 	return result;
 }
+#else
+
+#include <sys/time.h>
+static struct timeval s__test_tv;
+static void start_counter(void)
+{
+	gettimeofday(&s__test_tv, NULL);
+}
+
+static double get_counter(void)
+{
+	double t = 0;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	t = tv.tv_sec * 1000000 + tv.tv_usec - s__test_tv.tv_sec * 1000000 - s__test_tv.tv_usec;
+	return t;
+}
+#endif
 
 #define INSERT		0x100
 #define NEXTITER	0x010
@@ -43,7 +62,7 @@ double get_counter(void)
 #define CALL		0x200
 #define PCALL		0x400
 
-#define SN_ 10000000
+#define SN_ 1000000
 struct object {
 	int nums;
 	unsigned long state;

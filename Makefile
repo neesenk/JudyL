@@ -1,4 +1,4 @@
-CFLAGS = -I. -fPIC -Wall -O0 -pipe -g
+CFLAGS = -I. -fPIC -Wall -O2 -pipe -g
 
 OBJS := JudyLCascade.o 		\
 	JudyLTables.o 		\
@@ -32,7 +32,7 @@ libjudy.so : $(OBJS)
 main.o: $(HEADFILE)
 
 test : $(OBJS) main.o
-	$(CC) -O2 -g -Wall $(OBJS) main.o -o test
+	$(CC) $(CFLAGS) $(OBJS) main.o -o test
 
 $(OBJS) : $(HEADFILE)
 

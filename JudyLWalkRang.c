@@ -109,11 +109,11 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 	JPBRANCH_B: {
 		Pjbb_t Pjbb;
 		BITMAPB_t BitMap, BitMask;
+		Pjp_t Pjp2, Pjp3;
 		b = JL_GETINDEX(beg, state);
 		e = JL_GETINDEX(end, state);
 
 		Pjbb = P_JBB(Pjp->jp_Addr);
-		Pjp_t Pjp2, Pjp3;
 
 		i = b / cJL_BITSPERSUBEXPB;
 		mask = b % cJL_BITSPERSUBEXPB;
