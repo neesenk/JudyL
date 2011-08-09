@@ -8,26 +8,7 @@
 #define JL_GETINDEX(INDEX, State)			\
 	(((INDEX) >> (((State) - 1) * cJL_BITSPERBYTE)) & 0xff)
 
-void check_print(char *d)
-{
-	int i = 0;
-	#define D(idx) { idx, #idx }
-	static const struct { int idx; char *desc;} idx[] = 
-	{ 
-		D(cJL_JPNULL1),		D(cJL_JPNULL2),		D(cJL_JPNULL3),
-		D(cJL_JPBRANCH_L2),	D(cJL_JPBRANCH_L3),	D(cJL_JPBRANCH_L),
-		D(cJL_JPBRANCH_B2),	D(cJL_JPBRANCH_B3),	D(cJL_JPBRANCH_B),
-		D(cJL_JPBRANCH_U),	D(cJL_JPBRANCH_U3),	D(cJL_JPBRANCH_U2),
-		D(cJL_JPLEAF1),		D(cJL_JPLEAF2),		D(cJL_JPLEAF3), 
-		D(cJL_JPLEAF_B1),	D(cJL_JPIMMED_1_01),	D(cJL_JPIMMED_2_01), 
-		D(cJL_JPIMMED_3_01),	D(cJL_JPIMMED_1_03),	D(cJL_JPIMMED_1_02)
-	};
-
-	for (i = 0; i < sizeof(idx)/sizeof(idx[0]); i++)
-		printf("%s: %d\n", idx[i].desc, d[idx[i].idx]);
-}
-
-static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg, 
+static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			uint32_t end, walk_fn_t fn, void *ctx)
 {
 	int i, mask, ret = 0, state = 0;
@@ -174,7 +155,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 		b = JL_GETINDEX(beg, state);
 		e = JL_GETINDEX(end, state);
 
-		if (!(Pjbu->jbu_jp[b].jp_Type >= cJL_JPNULL1 && 
+		if (!(Pjbu->jbu_jp[b].jp_Type >= cJL_JPNULL1 &&
 		      Pjbu->jbu_jp[b].jp_Type <= cJL_JPNULLMAX)) {
 			Index = JL_SETINDEX(prefix, state, b);
 			if (b == e)
@@ -191,7 +172,7 @@ static int JudyWalkRang(Pjp_t Pjp, uint32_t prefix, uint32_t beg,
 			J_WR(Pjbu->jbu_jp + i, Index, 0, ~0);
 		}
 
-		if (!(Pjbu->jbu_jp[e].jp_Type >= cJL_JPNULL1 && 
+		if (!(Pjbu->jbu_jp[e].jp_Type >= cJL_JPNULL1 &&
 		      Pjbu->jbu_jp[e].jp_Type <= cJL_JPNULLMAX)) {
 			Index = JL_SETINDEX(prefix, state, e);
 			return JudyWalkRang(Pjbu->jbu_jp + e, Index, 0, end, fn, ctx);

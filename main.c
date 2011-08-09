@@ -548,15 +548,67 @@ void line_test(void)
 	do_test(0);
 }
 
-int main(void)
+
+int prefix(void *ctx, const uint8_t *key, size_t len, void *value)
+{
+	printf("%.*s %u, %p\n", len, key, len, value);
+	return 0;
+}
+
+int main(int argc, char *argv[])
 {
 	// int i = 0;
 	// for (i = 16; i < SN_; i *= 2) {
 	//	N_ = i;
-		line_test();
-		random_test();
-		loop_test();
-		insert_array();
+	//	line_test();
+	//	random_test();
+	//	loop_test();
+	//	insert_array();
 	//}
+	int i = 0;
+	void *ptr = NULL;
+	FILE *fp = fopen(argv[1], "r");
+	char buff[1024];
+	size_t len = 0;
+	void *p = 0;
+	const char *k;
+	size_t l;
+	int num = 0;
+	int s_len = 0;
+do {
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		buff[strlen(buff) -1] = 0;
+		p = JudySLIns(&ptr, buff);
+		assert(*p == NULL);
+		*p = &i + i;
+		i++;
+	}
+	printf("insert end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+
+	rewind(fp);
+do {
+	i = 0;
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		buff[strlen(buff) -1] = 0;
+		p = JudySLGet(ptr, buff);
+		assert(*p == &i + i);
+		i++;
+	}
+	i = 0;
+	printf("search end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+	printf("%p\n", JudySLGet(ptr, (uint8_t *)""));
+	strcpy((char *)buff, "aaaaaaaaaaaaaaa");
+	printf("sub search\"%s\"\n", (char *)buff);
+	JudySLSub(ptr,buff, prefix, NULL);
+	printf("prefix search\n");
+	strcpy((char *)buff, "aaaaa");
+	JudySLPrefixGet(ptr, buff, prefix, NULL);
+	sleep(1000);
 	return 0;
 }

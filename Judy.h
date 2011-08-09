@@ -56,10 +56,11 @@ extern int      JudyLNextEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLLastEmpty(const void *PArray, uint32_t *PIndex);
 extern int      JudyLPrevEmpty(const void *PArray, uint32_t *PIndex);
 
+
 /* if return not 0, then walk stop */
 typedef int	(*walk_fn_t)(void *ctx, uint32_t Index, void **Value);
 extern int	JudyLWalk(void *PArray, walk_fn_t fn, void *ctx);
-extern int	JudyLWalkRang(void *PArray, uint32_t Begin, 
+extern int	JudyLWalkRang(void *PArray, uint32_t Begin,
 			      uint32_t End, walk_fn_t fn, void *ctx);
 
 extern void **	JudySLGet(const void *, const uint8_t *Index);
@@ -76,6 +77,9 @@ extern void **	JudyHSIns(void **PPArray, void *Index, size_t len);
 extern int      JudyHSDel(void **PPArray, void *Index, size_t len, void **Value);
 extern void	JudyHSFreeArray(void **PPArray);
 
+typedef int (*WalkFN)(void *ctx, const uint8_t *key, size_t len, void *value);
+extern size_t JudySLPrefixGet(const void *PArray, uint8_t *Prefix, WalkFN fn, void *ctx);
+extern size_t JudySLSub(const void *PArray, const uint8_t *Str, WalkFN fn, void *ctx);
 #ifdef __cplusplus
 }
 #endif

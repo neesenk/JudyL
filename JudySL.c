@@ -67,26 +67,121 @@ static void JudySLModifyErrno(const void *PArray, const void *PArrayOrig)
 	JL_SET_ERRNO(PArray == PArrayOrig ? JLE_NOTJUDYSL : JLE_CORRUPT);
 }
 
-void **JudySLGet(const void *PArray, const uint8_t *Index)
+void **JudySLGet(const void *PArray, const uint8_t *Key)
 {
-	const uint8_t *pos = Index;
-	uint32_t indexword;
+	uint32_t idx;
 	void **PPValue;
 
-	if (Index == NULL) {
-		JL_SET_ERRNO(JLE_NULLPINDEX);
-		return PPJERR;
-	}
-
+	if (Key == NULL)
+		return NULL;
 	do {
 		if (IS_PSCL(PArray))
-			return (PPSCLVALUE_EQ(pos, PArray));
+			return (PPSCLVALUE_EQ(Key, PArray));
 
-		COPYSTRINGtoWORD(indexword, pos);
-		PPValue = JudyLGet(PArray, indexword);
-		if ((PPValue == NULL) || LASTWORD_BY_VALUE(indexword))
+		COPYSTRINGtoWORD(idx, Key);
+		PPValue = JudyLGet(PArray, idx);
+		if ((PPValue == NULL) || LASTWORD_BY_VALUE(idx))
 			return PPValue;
-		pos += WORDSIZE;
+		Key += WORDSIZE;
+		PArray = *PPValue;
+	} while (1);
+}
+
+size_t JudySLPrefixGet(const void *PArray, uint8_t *Prefix, WalkFN fn, void *ctx)
+{
+	uint8_t *pos = Prefix;
+	uint32_t idx, len, calln = 0;
+	void **PPValue, **Next;
+
+	if (Prefix == NULL)
+		return 0;
+#define _strlen(s) strlen((char *)s)
+	for (len = _strlen(Prefix); len >= WORDSIZE && !IS_PSCL(PArray);
+	     len -= WORDSIZE, pos += WORDSIZE) {
+		COPYSTRINGtoWORD(idx, pos);
+		if ((PPValue = JudyLGet(PArray, idx)) == NULL)
+			return 0;
+		PArray = *PPValue;
+	}
+
+	if (len >= WORDSIZE)
+		return 0;
+
+	if (IS_PSCL(PArray)) {
+		uint8_t *pstr = PSCLINDEX(PArray);
+		if (len > _strlen(pstr) || (len > 0 && memcmp(pos, pstr, len)))
+			return 0;
+		strcpy((char *)pos, (char *)pstr);
+		fn(ctx, Prefix, _strlen(Prefix), PSCLVALUE(PArray));
+		return 1;
+	}
+
+	if (*pos == 0) {
+		for (Next = JudySLFirst(*PPValue, pos); Next != NULL && Next != PPJERR;
+		     Next = JudySLNext(*PPValue, pos)) {
+			calln++;
+			fn(ctx, Prefix, _strlen(Prefix), *Next);
+		}
+		return calln;
+	}
+
+	COPYSTRINGtoWORD(idx, pos);
+	len = idx | ((1UL<< (8 * (WORDSIZE - len)))-1);
+	for (PPValue = JudyLFirst(PArray, &idx); PPValue != NULL && idx <= len;
+	     PPValue = JudyLNext(PArray, &idx)) {
+		COPYWORDtoSTRING(pos, idx);
+		if (LASTWORD_BY_VALUE(idx)) {
+			calln++;
+			fn(ctx, Prefix, _strlen(Prefix), *PPValue);
+			continue;
+		}
+
+		pos[WORDSIZE] = 0;
+		for (Next = JudySLFirst(*PPValue, pos + WORDSIZE);
+		     Next != NULL && Next != PPJERR;
+		     Next = JudySLNext(*PPValue, pos + WORDSIZE)) {
+			calln++;
+			fn(ctx, Prefix, _strlen(Prefix), *Next);
+		}
+	}
+
+	return calln;
+}
+
+size_t JudySLSub(const void *PArray, const uint8_t *Str, WalkFN fn, void *ctx)
+{
+	const uint8_t *pos = Str;
+	uint32_t idx, i, calln = 0;
+	void **PPValue;
+
+	if (Str == NULL)
+		return 0;
+	do {
+		if (IS_PSCL(PArray)) {
+			i = STRLEN(PSCLINDEX(PArray));
+			if (i <= STRLEN(pos) && !memcmp(pos, PSCLINDEX(PArray), i)) {
+				calln++;
+				fn(NULL, Str, (pos + i) - Str, PSCLVALUE(PArray));
+			}
+			return calln;
+		}
+
+		if ((PPValue = JudyLGet(PArray, 0)) != NULL) {
+			calln++;
+			fn(ctx, Str, pos - Str, *PPValue);
+		}
+		for (idx = 0, i = 0; i < WORDSIZE - 1 && *pos; i++) {
+			idx += ((uint32_t)(*pos++)) << (8 * (WORDSIZE - 1 - i));
+			if ((PPValue = JudyLGet(PArray, idx)) == NULL) {
+				calln++;
+				fn(ctx, Str, pos - Str, *PPValue);
+			}
+		}
+		if (!(*pos))
+			return calln;
+		idx += *pos++;
+		if ((PPValue = JudyLGet(PArray, idx)) == NULL)
+			return calln;
 		PArray = *PPValue;
 	} while (1);
 }
@@ -127,17 +222,14 @@ void **JudySLIns(void **PPArray, const uint8_t *Index)
 		COPYSTRINGtoWORD(indexword, pos);
 		if (Pscl != NULL) {
 			COPYSTRINGtoWORD(indexword2, pos2);
-
 			if (indexword != indexword2) {
 				assert(*PPArray == NULL);
-
 				if ((PPValue2 = JudyLIns(PPArray, indexword2)) == PPJERR) {
 					JudySLModifyErrno(*PPArray, *PPArrayOrig);
 					return PPJERR;
 				}
 
 				assert(PPValue2 != NULL);
-
 				if (len2 <= WORDSIZE) {
 					*PPValue2 = Pscl->scl_Pvalue;
 				} else {
@@ -285,10 +377,10 @@ static void **JudySLPrevSub(const void *PArray, uint8_t * Index, int orig, size_
 	COPYWORDtoSTRING(Index, indexword);
 	if (LASTWORD_BY_VALUE(indexword))
 		return PPValue;
-	return (JudySLPrevSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE));
+	return JudySLPrevSub(*PPValue, Index + WORDSIZE, 0, len - WORDSIZE);
 }
 
-void **JudySLPrev(const void *PArray, uint8_t * Index)
+void **JudySLPrev(const void *PArray, uint8_t *Index)
 {
 
 	if (Index == NULL) {
