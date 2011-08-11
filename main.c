@@ -554,7 +554,7 @@ int prefix(void *ctx, const uint8_t *key, size_t len, void *value)
 	printf("%.*s %u, %p\n", len, key, len, value);
 	return 0;
 }
-
+#include "../../hash/jhash.h"
 int main(int argc, char *argv[])
 {
 	// int i = 0;
@@ -568,6 +568,7 @@ int main(int argc, char *argv[])
 	int i = 0;
 	void *ptr = NULL;
 	FILE *fp = fopen(argv[1], "r");
+	FILE *op = fopen(argv[2], "r");
 	char buff[1024];
 	size_t len = 0;
 	void *p = 0;
@@ -575,6 +576,70 @@ int main(int argc, char *argv[])
 	size_t l;
 	int num = 0;
 	int s_len = 0;
+
+#if 0
+do {
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		len = strlen(buff);
+		buff[len -1] = 0;
+		p = JudyHSIns(&ptr, buff, len - 1);
+		assert(*p == NULL);
+		*p = &i + i;
+		i++;
+	}
+	printf("insert end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+
+	rewind(fp);
+do {
+	i = 0;
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		len = strlen(buff);
+		buff[len -1] = 0;
+		p = JudyHSGet(ptr, buff, len - 1);
+		assert(*p == &i + i);
+		i++;
+	}
+	i = 0;
+	printf("search end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+#endif
+#if 0
+do {
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		len = strlen(buff);
+		buff[len -1] = 0;
+		p = JudyHtbIns(&ptr, buff, len - 1);
+		assert(*p == NULL);
+		*p = &i + i;
+		i++;
+	}
+	printf("insert end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+
+	rewind(fp);
+do {
+	i = 0;
+	clock_t beg = clock();
+	while (fgets(buff, 1024, fp)) {
+		void **p = NULL;
+		len = strlen(buff);
+		buff[len -1] = 0;
+		p = JudyHtbGet(ptr, buff, len - 1);
+		assert(*p == &i + i);
+		i++;
+	}
+	i = 0;
+	printf("search end %lu\n", (unsigned long)(clock() - beg));
+} while (0);
+#endif
+#if 1
 do {
 	clock_t beg = clock();
 	while (fgets(buff, 1024, fp)) {
@@ -592,11 +657,11 @@ do {
 do {
 	i = 0;
 	clock_t beg = clock();
-	while (fgets(buff, 1024, fp)) {
+	while (fgets(buff, 1024, op)) {
 		void **p = NULL;
 		buff[strlen(buff) -1] = 0;
 		p = JudySLGet(ptr, buff);
-		assert(*p == &i + i);
+		// assert(*p == &i + i);
 		i++;
 	}
 	i = 0;
@@ -609,6 +674,7 @@ do {
 	printf("prefix search\n");
 	strcpy((char *)buff, "aaaaa");
 	JudySLPrefixGet(ptr, buff, prefix, NULL);
+#endif
 	sleep(1000);
 	return 0;
 }

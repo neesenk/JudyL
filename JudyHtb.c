@@ -11,7 +11,7 @@ typedef struct L_EAFSTRING {
 #define JUDY_FOREACH(j, i, p)	\
 	for ((i)=0,(p)=JudyLFirst(j,&(i));(p)!=NULL&&(p)!=PPJERR;(p)=JudyLNext(j,&(i)))
 
-static inline uint32_t string_to_word(uint8_t *str, size_t len)
+static inline uint32_t str2int(uint8_t *str, size_t len)
 {
 	uint32_t ret = 0;
 	switch (len) {
@@ -23,7 +23,20 @@ static inline uint32_t string_to_word(uint8_t *str, size_t len)
 	return ret;
 }
 
-static Pls_t pls_new(void *key, size_t len)
+/* from http://www.isthe.com/chongo/tech/comp/fnv/index.html */
+static inline uint32_t fnv(const void *buf, size_t len, uint32_t seed)
+{
+	const uint8_t *bp, *be;
+	uint32_t h = seed ^ len;
+	for (bp = (const uint8_t *)buf, be = bp + len; bp < be; bp++) {
+		h ^= (uint32_t)(*bp);
+		/* h *= 0x01000193 */
+		h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+	}
+	return h;
+}
+
+static inline Pls_t pls_new(void *key, size_t len)
 {
 	Pls_t ret = malloc(len + sizeof(*ret));
 	if (ret) {
@@ -33,7 +46,7 @@ static Pls_t pls_new(void *key, size_t len)
 	return ret;
 }
 
-void **JudyHtbGet(const void *PArray, void *Str, size_t Len, uint32_t Index)
+void **JudyHtbGet(const void *PArray, void *Str, size_t Len)
 {
 	void **PPValue, *judy;
 	Pls_t list = NULL;
@@ -44,8 +57,8 @@ void **JudyHtbGet(const void *PArray, void *Str, size_t Len, uint32_t Index)
 	if ((PPValue = JudyLGet(PArray, Len)) == NULL)
 		return NULL;
 	if (Len <= WORDSIZE)
-		return JudyLGet(*PPValue, string_to_word(Str, Len));
-	if ((PPValue = JudyLGet(*PPValue, Index)) == NULL)
+		return JudyLGet(*PPValue, str2int(Str, Len));
+	if ((PPValue = JudyLGet(*PPValue, fnv(Str, Len, 0))) == NULL)
 		return NULL;
 	list = *PPValue;
 	if (!IS_LINK(list))
@@ -60,7 +73,7 @@ void **JudyHtbGet(const void *PArray, void *Str, size_t Len, uint32_t Index)
 	return NULL;
 }
 
-void **JudyHtbIns(void **PPArray, void *Str, size_t Len, uint32_t Index)
+void **JudyHtbIns(void **PPArray, void *Str, size_t Len)
 {
 	void **PPValue, *judy = NULL, **ptr;
 	Pls_t list = NULL;
@@ -71,11 +84,13 @@ void **JudyHtbIns(void **PPArray, void *Str, size_t Len, uint32_t Index)
 		return PPJERR;
 	}
 
-	if ((PPValue = JudyLIns(PPArray, Len)) == PPJERR)
-		return PPJERR;
+	if ((PPValue = JudyLGet(*PPArray, Len)) == NULL) {
+		if ((PPValue = JudyLIns(PPArray, Len)) == PPJERR)
+			return PPJERR;
+	}
 	if (Len <= WORDSIZE)
-		return JudyLIns(PPValue, string_to_word(Str, Len));
-	if ((PPValue = JudyLIns(PPValue, Index)) == PPJERR)
+		return JudyLIns(PPValue, str2int(Str, Len));
+	if ((PPValue = JudyLIns(PPValue, fnv(Str, Len, 0))) == PPJERR)
 		return PPJERR;
 	if (*PPValue == NULL) {
 		if ((list = pls_new(Str, Len)) == NULL)
@@ -110,8 +125,9 @@ void **JudyHtbIns(void **PPArray, void *Str, size_t Len, uint32_t Index)
 	return &list->value;
 }
 
-int JudyHtbDel(void **PPArray, void *Str, size_t Len, void **PPValue, uint32_t Index)
+int JudyHtbDel(void **PPArray, void *Str, size_t Len, void **PPValue)
 {
+	uint32_t Index = 0;
 	void **PPBucket, **PPHtble;
 	Pls_t list = NULL;
 
@@ -120,12 +136,13 @@ int JudyHtbDel(void **PPArray, void *Str, size_t Len, void **PPValue, uint32_t I
 	if ((PPHtble = JudyLGet(*PPArray, Len)) == NULL)
 		return 0;
 	if (Len <= WORDSIZE) {
-		int r = JudyLDel(PPHtble, string_to_word(Str, Len), PPValue);
+		int r = JudyLDel(PPHtble, str2int(Str, Len), PPValue);
 		if (*PPHtble == NULL)
 			JudyLDel(PPArray, Len, NULL);
 		return r;
 	}
 
+	Index = fnv(Str, Len, 0);
 	if ((PPBucket = JudyLGet(*PPHtble, Index)) == NULL)
 		return 0;
 	if (!IS_LINK(*PPBucket)) {

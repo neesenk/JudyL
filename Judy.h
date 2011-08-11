@@ -71,15 +71,20 @@ extern void **	JudySLFirst(const void *, uint8_t *Index);
 extern void **	JudySLNext(const void *, uint8_t *Index);
 extern void **	JudySLLast(const void *, uint8_t *Index);
 extern void **	JudySLPrev(const void *, uint8_t *Index);
+typedef int (*WalkFN)(void *ctx, const uint8_t *key, size_t len, void *value);
+extern size_t JudySLPrefixGet(const void *PArray, uint8_t *Prefix, WalkFN fn, void *ctx);
+extern size_t JudySLSub(const void *PArray, const uint8_t *Str, WalkFN fn, void *ctx);
 
 extern void **	JudyHSGet(const void *PArray, void *Index, size_t len);
 extern void **	JudyHSIns(void **PPArray, void *Index, size_t len);
 extern int      JudyHSDel(void **PPArray, void *Index, size_t len, void **Value);
 extern void	JudyHSFreeArray(void **PPArray);
 
-typedef int (*WalkFN)(void *ctx, const uint8_t *key, size_t len, void *value);
-extern size_t JudySLPrefixGet(const void *PArray, uint8_t *Prefix, WalkFN fn, void *ctx);
-extern size_t JudySLSub(const void *PArray, const uint8_t *Str, WalkFN fn, void *ctx);
+extern void **	JudyHtbGet(const void *PArray, void *Str, size_t Len);
+extern void **	JudyHtbIns(void **PPArray, void *Str, size_t Len);
+extern int	JudyHtbDel(void **PPArray, void *Str, size_t Len, void **PPValue);
+extern void	JudyHtbFreeArray(void **PPArray);
+
 #ifdef __cplusplus
 }
 #endif

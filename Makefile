@@ -1,4 +1,4 @@
-CFLAGS = -I. -fPIC -Wall -O0 -pipe -g
+CFLAGS = -I. -fPIC -Wall -O2 -pipe -g
 
 OBJS := JudyLCascade.o 		\
 	JudyLTables.o 		\
@@ -19,8 +19,7 @@ OBJS := JudyLCascade.o 		\
 	JudyLWalk.o		\
 	JudyLWalkRang.o		\
 	JudySL.o		\
-	JudyHtb.o		\
-	JudyHS.o
+	JudyHtb.o
 
 HEADFILE := Judy.h JudyL.h
 

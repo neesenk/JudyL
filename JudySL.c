@@ -117,8 +117,8 @@ size_t JudySLPrefixGet(const void *PArray, uint8_t *Prefix, WalkFN fn, void *ctx
 	}
 
 	if (*pos == 0) {
-		for (Next = JudySLFirst(*PPValue, pos); Next != NULL && Next != PPJERR;
-		     Next = JudySLNext(*PPValue, pos)) {
+		for (Next = JudySLFirst(PArray, pos); Next != NULL && Next != PPJERR;
+		     Next = JudySLNext(PArray, pos)) {
 			calln++;
 			fn(ctx, Prefix, _strlen(Prefix), *Next);
 		}
@@ -172,15 +172,14 @@ size_t JudySLSub(const void *PArray, const uint8_t *Str, WalkFN fn, void *ctx)
 		}
 		for (idx = 0, i = 0; i < WORDSIZE - 1 && *pos; i++) {
 			idx += ((uint32_t)(*pos++)) << (8 * (WORDSIZE - 1 - i));
-			if ((PPValue = JudyLGet(PArray, idx)) == NULL) {
+			if ((PPValue = JudyLGet(PArray, idx)) != NULL) {
 				calln++;
 				fn(ctx, Str, pos - Str, *PPValue);
 			}
 		}
 		if (!(*pos))
 			return calln;
-		idx += *pos++;
-		if ((PPValue = JudyLGet(PArray, idx)) == NULL)
+		if ((PPValue = JudyLGet(PArray, idx + *pos++)) == NULL)
 			return calln;
 		PArray = *PPValue;
 	} while (1);
